@@ -10,7 +10,8 @@
 ## Goal
 
 Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](brief.md#scope) để thiết kế toàn hệ thống trước khi
-code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung cùng M1 tới M5.
+code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung cùng M1 tới M5. Bản phát hành đầu tiên là MVP,
+gồm các story có ✅ ở cột MVP trong [stories](stories.md#summary).
 
 ## Actors
 

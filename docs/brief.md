@@ -58,8 +58,12 @@ cáo nhân sự và chi phí lương. Hệ thống tự tính số ngày phép, 
 ## Scope
 
 - **In:**
-  - Phân tích và thiết kế chi tiết cho cả năm milestone dưới đây trước khi code. Phân rã chức năng nằm ở
+  - Phân tích chi tiết cả năm milestone dưới đây trước khi code. Phân rã chức năng nằm ở
     [research](research.md#decomposition).
+  - Thiết kế kiến trúc và dữ liệu cho cả năm milestone; thiết kế API và giao diện chi tiết cho MVP.
+  - MVP, bản phát hành đầu tiên: M1, M2 và các báo cáo của M5 không cần dữ liệu chấm công hay lương. Danh sách story ở cột
+    MVP của [stories](stories.md#summary). Chủ dự án chọn ngày 2026-10-30, để công ty dùng thử sớm phần giải chỗ đau xin
+    nghỉ trước hai milestone có nhiều rủi ro về luật là M3 và M4.
   - M1: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức.
   - M2: nghỉ phép.
   - M3: chấm công.

@@ -12,81 +12,85 @@
 - **Priority:** `Must` khi thiếu story đó thì bản phát hành vô nghĩa; `Should`, `Could` cho phần còn lại.
 - **Feature:** Issue Feature trên tracker chứa story; điền khi tạo Issue ở Phase 4.
 - Bản hiện tại có đủ story của M1 tới M5. US-071 và US-072 thuộc M1 nhưng được thêm ở lần review cuối của Phase 2.
+- **MVP:** bản phát hành đầu tiên gồm 32 story có ✅ ở cột MVP, theo lựa chọn của chủ dự án ngày 2026-10-30. Story `Must`
+  ngoài MVP vẫn là `Must` của milestone đó, làm ở bản phát hành sau. Trong MVP:
+  - Chưa có quản lý ca (US-036, US-037): mọi nhân viên dùng `default_shift` để xác định ngày làm việc (BR-038, BR-070).
+  - Trang tổng quan (US-064) chưa có các con số về bảng công và bảng lương; các con số đó thêm khi có M3 và M4.
 
-| ID | Story | Priority | Milestone | Feature |
-|---|---|---|---|---|
-| US-001 | Đăng nhập và đổi mật khẩu | Must | M1 | |
-| US-002 | HR quản lý tài khoản người dùng | Must | M1 | |
-| US-003 | HR gán và thu hồi vai trò HR | Must | M1 | |
-| US-004 | HR xem nhật ký thao tác | Should | M1 | |
-| US-005 | HR quản lý danh mục chức danh | Must | M1 | |
-| US-006 | HR tạo và sửa phòng ban | Must | M1 | |
-| US-007 | HR giải thể phòng ban | Should | M1 | |
-| US-008 | HR bổ nhiệm và thôi bổ nhiệm trưởng phòng ban | Must | M1 | |
-| US-009 | Xem sơ đồ tổ chức hiện tại | Must | M1 | |
-| US-010 | HR xem cơ cấu tổ chức tại một ngày trong quá khứ | Should | M1 | |
-| US-011 | HR tiếp nhận nhân viên mới | Must | M1 | |
-| US-012 | HR sửa hồ sơ nhân viên | Must | M1 | |
-| US-013 | HR ghi nhận thay đổi công tác | Must | M1 | |
-| US-014 | HR ghi nhận nghỉ việc | Must | M1 | |
-| US-015 | HR quản lý hợp đồng lao động | Must | M1 | |
-| US-016 | HR xem hợp đồng sắp hết hạn | Should | M1 | |
-| US-017 | Nhân viên xem và cập nhật hồ sơ của mình | Must | M1 | |
-| US-018 | Quản lý xem hồ sơ nhân viên trong phạm vi | Must | M1 | |
-| US-019 | Tra cứu danh bạ nhân viên | Should | M1 | |
-| US-020 | HR tìm và lọc danh sách nhân viên | Must | M1 | |
-| US-021 | HR nhập danh sách nhân viên từ bảng tính | Could | M1 | |
-| US-022 | Nhân viên xem số dư phép năm | Must | M2 | |
-| US-023 | Nhân viên gửi đơn nghỉ | Must | M2 | |
-| US-024 | Nhân viên hủy đơn nghỉ | Must | M2 | |
-| US-025 | Quản lý duyệt hoặc từ chối đơn nghỉ | Must | M2 | |
-| US-026 | HR duyệt thay đơn nghỉ | Should | M2 | |
-| US-027 | Quản lý xem lịch nghỉ của nhóm | Should | M2 | |
-| US-028 | HR quản lý loại nghỉ | Must | M2 | |
-| US-029 | HR quản lý lịch làm việc | Must | M2 | |
-| US-030 | Cộng phép năm hằng tháng | Must | M2 | |
-| US-031 | Chuyển phép tồn sang năm sau | Must | M2 | |
-| US-032 | HR điều chỉnh số dư phép | Must | M2 | |
-| US-033 | HR ghi đơn nghỉ thay nhân viên | Should | M2 | |
-| US-034 | Thông báo về đơn nghỉ | Should | M2 | |
-| US-035 | HR xem số phép chưa nghỉ khi nhân viên nghỉ việc | Should | M2 | |
-| US-036 | HR quản lý ca làm việc | Must | M3 | |
-| US-037 | HR gán ca cho nhân viên | Must | M3 | |
-| US-038 | HR khai báo mã chấm công của nhân viên | Must | M3 | |
-| US-039 | HR nhập file chấm công | Must | M3 | |
-| US-040 | Tính công từng ngày | Must | M3 | |
-| US-041 | Nhân viên xem bảng công của mình | Must | M3 | |
-| US-042 | Nhân viên gửi giải trình chấm công | Must | M3 | |
-| US-043 | Quản lý duyệt giải trình chấm công | Must | M3 | |
-| US-044 | Nhân viên đăng ký làm thêm giờ | Must | M3 | |
-| US-045 | Quản lý duyệt đơn làm thêm giờ | Must | M3 | |
-| US-046 | Quản lý xem bảng công của nhóm | Should | M3 | |
-| US-047 | HR xử lý ngày thiếu chấm công | Must | M3 | |
-| US-048 | HR chốt và mở lại bảng công tháng | Must | M3 | |
-| US-049 | HR xuất bảng công ra bảng tính | Should | M3 | |
-| US-050 | HR quản lý loại phụ cấp | Must | M4 | |
-| US-051 | HR ghi lương và phụ cấp của nhân viên theo ngày hiệu lực | Must | M4 | |
-| US-052 | HR ghi thông tin thuế và bảo hiểm của nhân viên | Must | M4 | |
-| US-053 | HR quản lý người phụ thuộc | Must | M4 | |
-| US-054 | HR quản lý tham số lương theo ngày hiệu lực | Must | M4 | |
-| US-055 | HR tính bảng lương tháng | Must | M4 | |
-| US-056 | Tính tiền làm thêm giờ và làm ban đêm | Must | M4 | |
-| US-057 | Tính bảo hiểm bắt buộc | Must | M4 | |
-| US-058 | Tính thuế TNCN | Must | M4 | |
-| US-059 | HR thêm khoản điều chỉnh vào phiếu lương | Must | M4 | |
-| US-060 | HR chốt bảng lương | Must | M4 | |
-| US-061 | Nhân viên xem phiếu lương | Must | M4 | |
-| US-062 | Trả tiền phép chưa nghỉ khi nghỉ việc | Should | M4 | |
-| US-063 | HR xuất bảng lương và danh sách chuyển khoản | Should | M4 | |
-| US-064 | Xem trang tổng quan nhân sự | Must | M5 | |
-| US-065 | Xem báo cáo biến động nhân sự | Must | M5 | |
-| US-066 | Xem báo cáo cơ cấu nhân sự | Should | M5 | |
-| US-067 | Xem báo cáo nghỉ phép | Must | M5 | |
-| US-068 | Xem báo cáo chấm công | Must | M5 | |
-| US-069 | Xem báo cáo chi phí lương | Must | M5 | |
-| US-070 | Xuất báo cáo ra bảng tính | Should | M5 | |
-| US-071 | HR tuyển lại nhân viên đã nghỉ việc | Should | M1 | |
-| US-072 | HR xóa và ẩn danh dữ liệu hết hạn lưu | Should | M1 | |
+| ID | Story | Priority | Milestone | MVP | Feature |
+|---|---|---|---|---|---|
+| US-001 | Đăng nhập và đổi mật khẩu | Must | M1 | ✅ | |
+| US-002 | HR quản lý tài khoản người dùng | Must | M1 | ✅ | |
+| US-003 | HR gán và thu hồi vai trò HR | Must | M1 | ✅ | |
+| US-004 | HR xem nhật ký thao tác | Should | M1 | — | |
+| US-005 | HR quản lý danh mục chức danh | Must | M1 | ✅ | |
+| US-006 | HR tạo và sửa phòng ban | Must | M1 | ✅ | |
+| US-007 | HR giải thể phòng ban | Should | M1 | — | |
+| US-008 | HR bổ nhiệm và thôi bổ nhiệm trưởng phòng ban | Must | M1 | ✅ | |
+| US-009 | Xem sơ đồ tổ chức hiện tại | Must | M1 | ✅ | |
+| US-010 | HR xem cơ cấu tổ chức tại một ngày trong quá khứ | Should | M1 | — | |
+| US-011 | HR tiếp nhận nhân viên mới | Must | M1 | ✅ | |
+| US-012 | HR sửa hồ sơ nhân viên | Must | M1 | ✅ | |
+| US-013 | HR ghi nhận thay đổi công tác | Must | M1 | ✅ | |
+| US-014 | HR ghi nhận nghỉ việc | Must | M1 | ✅ | |
+| US-015 | HR quản lý hợp đồng lao động | Must | M1 | ✅ | |
+| US-016 | HR xem hợp đồng sắp hết hạn | Should | M1 | ✅ | |
+| US-017 | Nhân viên xem và cập nhật hồ sơ của mình | Must | M1 | ✅ | |
+| US-018 | Quản lý xem hồ sơ nhân viên trong phạm vi | Must | M1 | ✅ | |
+| US-019 | Tra cứu danh bạ nhân viên | Should | M1 | — | |
+| US-020 | HR tìm và lọc danh sách nhân viên | Must | M1 | ✅ | |
+| US-021 | HR nhập danh sách nhân viên từ bảng tính | Could | M1 | — | |
+| US-022 | Nhân viên xem số dư phép năm | Must | M2 | ✅ | |
+| US-023 | Nhân viên gửi đơn nghỉ | Must | M2 | ✅ | |
+| US-024 | Nhân viên hủy đơn nghỉ | Must | M2 | ✅ | |
+| US-025 | Quản lý duyệt hoặc từ chối đơn nghỉ | Must | M2 | ✅ | |
+| US-026 | HR duyệt thay đơn nghỉ | Should | M2 | ✅ | |
+| US-027 | Quản lý xem lịch nghỉ của nhóm | Should | M2 | ✅ | |
+| US-028 | HR quản lý loại nghỉ | Must | M2 | ✅ | |
+| US-029 | HR quản lý lịch làm việc | Must | M2 | ✅ | |
+| US-030 | Cộng phép năm hằng tháng | Must | M2 | ✅ | |
+| US-031 | Chuyển phép tồn sang năm sau | Must | M2 | ✅ | |
+| US-032 | HR điều chỉnh số dư phép | Must | M2 | ✅ | |
+| US-033 | HR ghi đơn nghỉ thay nhân viên | Should | M2 | — | |
+| US-034 | Thông báo về đơn nghỉ | Should | M2 | ✅ | |
+| US-035 | HR xem số phép chưa nghỉ khi nhân viên nghỉ việc | Should | M2 | — | |
+| US-036 | HR quản lý ca làm việc | Must | M3 | — | |
+| US-037 | HR gán ca cho nhân viên | Must | M3 | — | |
+| US-038 | HR khai báo mã chấm công của nhân viên | Must | M3 | — | |
+| US-039 | HR nhập file chấm công | Must | M3 | — | |
+| US-040 | Tính công từng ngày | Must | M3 | — | |
+| US-041 | Nhân viên xem bảng công của mình | Must | M3 | — | |
+| US-042 | Nhân viên gửi giải trình chấm công | Must | M3 | — | |
+| US-043 | Quản lý duyệt giải trình chấm công | Must | M3 | — | |
+| US-044 | Nhân viên đăng ký làm thêm giờ | Must | M3 | — | |
+| US-045 | Quản lý duyệt đơn làm thêm giờ | Must | M3 | — | |
+| US-046 | Quản lý xem bảng công của nhóm | Should | M3 | — | |
+| US-047 | HR xử lý ngày thiếu chấm công | Must | M3 | — | |
+| US-048 | HR chốt và mở lại bảng công tháng | Must | M3 | — | |
+| US-049 | HR xuất bảng công ra bảng tính | Should | M3 | — | |
+| US-050 | HR quản lý loại phụ cấp | Must | M4 | — | |
+| US-051 | HR ghi lương và phụ cấp của nhân viên theo ngày hiệu lực | Must | M4 | — | |
+| US-052 | HR ghi thông tin thuế và bảo hiểm của nhân viên | Must | M4 | — | |
+| US-053 | HR quản lý người phụ thuộc | Must | M4 | — | |
+| US-054 | HR quản lý tham số lương theo ngày hiệu lực | Must | M4 | — | |
+| US-055 | HR tính bảng lương tháng | Must | M4 | — | |
+| US-056 | Tính tiền làm thêm giờ và làm ban đêm | Must | M4 | — | |
+| US-057 | Tính bảo hiểm bắt buộc | Must | M4 | — | |
+| US-058 | Tính thuế TNCN | Must | M4 | — | |
+| US-059 | HR thêm khoản điều chỉnh vào phiếu lương | Must | M4 | — | |
+| US-060 | HR chốt bảng lương | Must | M4 | — | |
+| US-061 | Nhân viên xem phiếu lương | Must | M4 | — | |
+| US-062 | Trả tiền phép chưa nghỉ khi nghỉ việc | Should | M4 | — | |
+| US-063 | HR xuất bảng lương và danh sách chuyển khoản | Should | M4 | — | |
+| US-064 | Xem trang tổng quan nhân sự | Must | M5 | ✅ | |
+| US-065 | Xem báo cáo biến động nhân sự | Must | M5 | ✅ | |
+| US-066 | Xem báo cáo cơ cấu nhân sự | Should | M5 | — | |
+| US-067 | Xem báo cáo nghỉ phép | Must | M5 | ✅ | |
+| US-068 | Xem báo cáo chấm công | Must | M5 | — | |
+| US-069 | Xem báo cáo chi phí lương | Must | M5 | — | |
+| US-070 | Xuất báo cáo ra bảng tính | Should | M5 | ✅ | |
+| US-071 | HR tuyển lại nhân viên đã nghỉ việc | Should | M1 | — | |
+| US-072 | HR xóa và ẩn danh dữ liệu hết hạn lưu | Should | M1 | — | |
 
 ## Details
 
