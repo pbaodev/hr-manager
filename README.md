@@ -8,8 +8,7 @@ Hệ thống quản lý nhân sự chạy trên web cho doanh nghiệp nhỏ và
 ## Project Overview
 
 HR Manager gom hồ sơ nhân viên, cơ cấu tổ chức, nghỉ phép, chấm công, lương và báo cáo vào một hệ thống, thay cho tin
-nhắn Zalo và các bảng tính rời rạc. Dự án do một người làm cùng AI agent, theo quy trình sáu phase: phân tích và thiết
-kế xong mới code.
+nhắn Zalo và các bảng tính rời rạc.
 
 ### Problem
 
