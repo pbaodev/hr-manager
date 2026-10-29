@@ -1,8 +1,9 @@
 # UI flow: hr-manager
 
-- **Status:** Draft
+- **Status:** Accepted
 - **Updated:** 2026-10-30
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
+  người ngoài review
 - **Related:** [requirements](requirements.md) · [stories](stories.md) · [domain](domain.md) · [UI design](design/ui.md)
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
@@ -35,6 +36,7 @@ flowchart TD
   ADM --> SHA["Gán ca<br/>SCR-026"]
   ADM --> ALW["Loại phụ cấp<br/>SCR-033"]
   ADM --> PPAR["Tham số lương<br/>SCR-034"]
+  ADM --> RET["Dữ liệu hết hạn lưu<br/>SCR-046"]
   HOME --> APR["Đơn chờ duyệt<br/>SCR-021"]
   HOME --> LV["Nghỉ phép"]
   LV --> LVME["Nghỉ phép của tôi<br/>SCR-019"]
@@ -71,7 +73,7 @@ flowchart TD
 | Chấm công | ✅ chỉ bảng công của mình | ✅ thêm bảng công của nhóm | ✅ thêm nhập file và chốt bảng công | SCR-027 tới SCR-032 |
 | Lương | ✅ chỉ phiếu lương của mình | ✅ chỉ phiếu lương của mình | ✅ thêm bảng lương | SCR-037 tới SCR-039 |
 | Báo cáo | ❌ | ✅ chỉ phạm vi; chi phí lương chỉ số tổng hợp | ✅ | SCR-040 tới SCR-045 |
-| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034 |
+| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034, SCR-046 |
 
 Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem không có quyền thì không hiện.
 
@@ -249,10 +251,11 @@ flowchart LR
 
 ### SCR-009: Tiếp nhận nhân viên mới
 
-- **Purpose:** tạo hồ sơ cho người mới · **Stories:** US-011 · **Use case:** UC-001
+- **Purpose:** tạo hồ sơ cho người mới hoặc tuyển lại người cũ · **Stories:** US-011, US-071 · **Use case:** UC-001
 - **Content and actions:** bốn bước có thanh tiến độ. Bước 1: thông tin cá nhân. Bước 2: ngày vào làm, phòng ban, chức
   danh. Bước 3: hợp đồng đầu tiên, có nút bỏ qua. Bước 4: tóm tắt, ô chọn tạo tài khoản, nút Xác nhận. Tạo tài khoản
-  xong thì hiện mật khẩu tạm đúng một lần.
+  xong thì hiện mật khẩu tạm đúng một lần. Ở chế độ Tuyển lại, mở từ SCR-008 của nhân viên
+  Đã nghỉ việc: bước 1 điền sẵn thông tin cũ, mã nhân viên giữ nguyên (BR-139).
 - **Inputs:**
 
   | Field | Required | Rule | Message when invalid |
@@ -639,3 +642,12 @@ tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đ�
 - **States:**
   - Nhóm nhỏ được gộp: dòng phòng ban cha có ghi chú "Gồm số liệu của [tên phòng ban] vì có dưới [ngưỡng] người." (BR-129)
   - Phạm vi dưới ngưỡng: "Phạm vi của bạn có dưới [ngưỡng] người nên báo cáo không hiện số liệu." (BR-129)
+
+### SCR-046: Dữ liệu hết hạn lưu
+
+- **Purpose:** xóa thông tin liên hệ và ẩn danh hồ sơ đã hết hạn lưu · **Stories:** US-072
+- **Content and actions:** hai tab. Tab Thông tin liên hệ: nhân viên nghỉ việc quá `contact_retention_months` tháng
+  (BR-140). Tab Ẩn danh: nhân viên nghỉ việc quá `retention_years` năm (BR-141). Mỗi dòng có họ tên, mã, ngày làm việc
+  cuối cùng và các trường sẽ bị xóa; HR chọn nhiều dòng rồi bấm Xác nhận. Hộp thoại xác nhận ghi rõ thao tác không hoàn
+  tác được.
+- **States:** danh sách trống: "Không có dữ liệu nào hết hạn lưu."

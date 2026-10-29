@@ -1,8 +1,9 @@
 # Requirements: hr-manager
 
-- **Status:** Draft
+- **Status:** Accepted
 - **Updated:** 2026-10-30
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
+  người ngoài review
 - **Related:** [brief](brief.md) · [stories](stories.md) · [domain](domain.md) · [ui-flow](ui-flow.md) · [SPEC](SPEC.md) ·
   [analysis guide](playbook/analysis.md)
 
@@ -27,6 +28,7 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 ### Permission matrix
 
 "Phạm vi" là nhân viên trong phạm vi của Quản lý theo BR-013. Quyền được kiểm ở backend, kể cả khi giao diện đã ẩn nút.
+Các story do Thời gian thực hiện (US-030, US-031, US-040) không có dòng riêng: không người dùng nào gọi trực tiếp.
 
 | Operation | Nhân viên | Quản lý | HR |
 |---|---|---|---|
@@ -45,12 +47,16 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Xem cơ cấu tổ chức tại một ngày khác hôm nay (US-010) | ❌ | ❌ | ✅ |
 | Quản lý tài khoản; gán và thu hồi vai trò HR (US-002, US-003) | ❌ | ❌ | ✅ |
 | Xem nhật ký thao tác (US-004) | ❌ | ❌ | ✅ |
+| Tuyển lại nhân viên đã nghỉ việc (US-071) | ❌ | ❌ | ✅ |
+| Xóa và ẩn danh dữ liệu hết hạn lưu (US-072) | ❌ | ❌ | ✅ |
 | Xem số dư phép và biến động phép của mình (US-022) | ✅ | ✅ | ✅ |
+| Nhận thông báo về đơn của mình và đơn mình là người duyệt (US-034) | ✅ | ✅ | ✅ |
 | Gửi đơn nghỉ, hủy đơn nghỉ của mình (US-023, US-024) | ✅ | ✅ | ✅ |
 | Duyệt, từ chối đơn nghỉ (US-025, US-026) | ❌ | ✅ chỉ đơn mình là người duyệt | ✅ mọi đơn, duyệt thay |
 | Xem đơn, số dư phép và lịch nghỉ của người khác (US-027) | ❌ | ✅ phạm vi; lý do nghỉ chỉ khi là người duyệt | ✅ mọi người |
 | Quản lý loại nghỉ và lịch làm việc (US-028, US-029) | ❌ | ❌ | ✅ |
 | Điều chỉnh số dư phép; ghi đơn nghỉ thay nhân viên (US-032, US-033) | ❌ | ❌ | ✅ |
+| Xem số phép chưa nghỉ của nhân viên nghỉ việc (US-035) | ❌ | ❌ | ✅ |
 | Xem bảng công của mình; gửi giải trình chấm công; đăng ký và hủy đơn làm thêm giờ của mình (US-041, US-042, US-044) | ✅ | ✅ | ✅ |
 | Duyệt, từ chối giải trình chấm công và đơn làm thêm giờ (US-043, US-045) | ❌ | ✅ chỉ đơn mình là người duyệt | ✅ mọi đơn, duyệt thay |
 | Xem bảng công của người khác (US-046) | ❌ | ✅ phạm vi | ✅ mọi người |
@@ -118,8 +124,9 @@ flowchart LR
   - `3a`. Chưa ký hợp đồng: HR bỏ qua bước 3; hồ sơ được lưu kèm cảnh báo chưa có hợp đồng (EC-017).
   - `6a`. HR chưa muốn tạo tài khoản: bỏ qua bước 6; tạo sau ở màn hình tài khoản.
 - **Exceptions:**
-  - `4a`. Hợp đồng vi phạm giới hạn của luật: hệ thống từ chối và chỉ ra trường sai; HR sửa ở bước 3.
-  - `5a`. Số CCCD trùng với một hồ sơ đã có: hệ thống từ chối và dẫn tới hồ sơ đó (BR-022, EC-018).
+  - `4a`. Hợp đồng vi phạm giới hạn của luật: hệ thống từ chối và chỉ ra trường sai; HR sửa ở bước 3 (BR-024, BR-028).
+  - `5a`. Số CCCD trùng với một hồ sơ đã có: hệ thống từ chối và dẫn tới hồ sơ đó (BR-022, EC-018). Hồ sơ đó ở trạng
+    thái Đã nghỉ việc thì hệ thống dẫn tới thao tác Tuyển lại (BR-139, EC-008).
 - **Postconditions:** Thành công thì có hồ sơ, một quá trình công tác bắt đầu từ ngày vào làm, hợp đồng nếu đã nhập và
   tài khoản nếu đã tạo; nhật ký ghi lại thao tác. Thất bại ở bước 5 thì không có dữ liệu nào được lưu.
 
@@ -162,7 +169,7 @@ flowchart LR
   - `3a`. HR hủy ghi nhận khi ngày làm việc cuối cùng chưa qua: mọi tác động bị bỏ (BR-020).
 - **Exceptions:**
   - `1a`. Còn thay đổi công tác có hiệu lực sau ngày làm việc cuối cùng: từ chối và liệt kê thay đổi cần hủy (EC-009).
-  - `1b`. Ngày làm việc cuối cùng trước ngày vào làm: từ chối.
+  - `1b`. Ngày làm việc cuối cùng trước ngày vào làm: từ chối (EC-087).
   - `3b`. Nhân viên là HR đang hoạt động cuối cùng: từ chối (BR-004).
 - **Postconditions:** Hồ sơ được giữ, không bị xóa. Từ ngày hôm sau, nhân viên không còn trong danh bạ. Nhật ký ghi lại
   thao tác.
@@ -246,7 +253,7 @@ flowchart LR
 - **Alternative flows:**
   - `3a`. HR hủy sau khi xem kết quả: không lượt chấm nào được lưu.
 - **Exceptions:**
-  - `2a`. File sai định dạng: từ chối cả file và chỉ ra cột thiếu.
+  - `2a`. File sai định dạng: từ chối cả file và chỉ ra cột thiếu (EC-088).
   - `2b`. Dòng thuộc tháng đã chốt: bỏ qua và liệt kê (BR-090).
 - **Postconditions:** Nhập lại cùng một file không tạo lượt chấm trùng (EC-041). Nhật ký ghi người nhập, file và số dòng.
 
@@ -270,7 +277,7 @@ flowchart LR
   - `1a`. Gửi sau giờ bắt đầu: từ chối (EC-051).
   - `2a`. Vượt giới hạn giờ làm thêm: từ chối và hiện số giờ còn được làm (BR-084, EC-050).
   - `5a`. Không có chấm công trong khoảng đã duyệt: giờ làm thêm thực tế bằng 0; nhân viên gửi giải trình nếu quên chấm
-    (BR-081).
+    (BR-081, BR-085).
 - **Postconditions:** Chỉ giờ làm thêm đã duyệt và có mặt mới vào bảng công. Nhật ký ghi mọi bước.
 
 ### UC-009: Chốt bảng công tháng
@@ -334,7 +341,7 @@ flowchart LR
     khoản truy lĩnh hoặc truy thu ở kỳ chưa chốt (BR-098, EC-063).
 - **Exceptions:**
   - `3d`. Lương cơ bản hoặc lương đóng bảo hiểm dưới lương tối thiểu vùng: từ chối (BR-094, BR-096).
-  - `2a`. Đã có bản ghi lương khác cùng ngày hiệu lực: từ chối; HR sửa bản ghi đó.
+  - `2a`. Đã có bản ghi lương khác cùng ngày hiệu lực: từ chối; HR sửa bản ghi đó (EC-089).
 - **Postconditions:** Các bản ghi lương của nhân viên không chồng, không hở (BR-093); nhật ký ghi giá trị trước và sau.
 
 ### UC-012: Xem báo cáo chi phí lương
@@ -360,7 +367,19 @@ flowchart LR
 
 ## Quality attributes
 
-Thêm ở lần cập nhật cuối của Phase 2, sau khi đủ M1–M5.
+Mỗi dòng là một scenario có số đo. Importance và Difficulty xếp theo `H`, `M`, `L`; các dòng `H/H` và `H/M` là
+architecture driver trong [ARCHITECTURE.md](../ARCHITECTURE.md). Số đo phỏng đoán thì ghi `(assumption)`. Quy mô thiết kế
+là công ty tới 300 nhân viên (A-011).
+
+Cột Verify by ghi cách đo dự kiến. Test hay lần đo cụ thể ghi ở Traceability trong [SPEC](SPEC.md).
+
+| ID | Attribute | Scenario | Measure | Verify by | Importance / Difficulty |
+|---|---|---|---|---|---|
+| QA-001 | Data integrity | Hai người duyệt hai đơn phép năm của cùng một nhân viên trong cùng một giây, tổng số ngày vượt số dư (EC-024); tương tự với giới hạn giờ làm thêm (BR-084) và với hai thao tác chốt bảng lương (EC-072) | Đúng một thao tác thành công; số dư phép không âm; không vượt giới hạn | Integration test gửi hai request song song, lặp 100 lần | H / H |
+| QA-002 | Correctness | Tính bảng lương trên bộ phiếu mẫu phủ EC-059 tới EC-077 và các ví dụ số trong US-055 tới US-062 | 100% phiếu khớp kết quả tính tay tới từng đồng | Test với bộ dữ liệu mẫu từ 30 phiếu trở lên, chạy ở mọi PR | H / M |
+| QA-003 | Security | Người dùng gọi trực tiếp một thao tác ngoài quyền, kể cả xem dữ liệu ngoài phạm vi hay lương của người khác | 100% bị từ chối ở backend và ghi log; thông báo lỗi không lộ dữ liệu | Test tự động cho mọi dòng của ma trận phân quyền với cả ba vai trò | H / M |
+| QA-004 | Performance | Công ty 300 nhân viên, dữ liệu 12 tháng, 30 người dùng cùng lúc | Mở danh sách, bảng công, báo cáo: p95 dưới 1 giây. Tính bảng lương 300 phiếu dưới 30 giây. Nhập file chấm công một tháng, khoảng 20.000 lượt chấm, dưới 60 giây (assumption) | Load test trên staging với dữ liệu giả | M / M |
+| QA-005 | Recoverability | Cơ sở dữ liệu hỏng hoặc bị xóa nhầm | Mất tối đa 24 giờ dữ liệu; hệ thống chạy lại trong 4 giờ | Diễn tập khôi phục từ bản sao lưu mỗi quý, ghi thời gian vào runbook | H / L |
 
 ## Non-goals
 
