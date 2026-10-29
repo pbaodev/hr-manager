@@ -1,333 +1,2751 @@
-# Contract HTTP API, nguồn chính cho client và server (contract-first).
-# Quy ước chung và bản đồ story → operation nằm ở docs/design/api.md.
-# VÍ DỤ: các operation dưới dùng chung ví dụ đặt phòng họp của template. Thay bằng operation thật ở Phase 3;
-# bỏ cả thư mục contracts/ khi hệ thống không có API qua mạng. Endpoint vận hành như health check ghi ở runbook.
+# Contract HTTP API của hr-manager, nguồn chính cho client và server (contract-first).
+# Quy ước chung, bảng mã lỗi và bản đồ story tới operation nằm ở docs/design/api.md.
 # CI (job "contract") lint file này bằng Redocly, cấu hình ở redocly.yaml.
-openapi: 3.0.3
+openapi: "3.0.3"
 info:
-  title: "[tên dự án] API"
-  version: 0.1.0
-  description: |
-    Lỗi trả về theo RFC 9457 (Problem Details), thêm field `code` theo nghĩa nghiệp vụ.
-    Mỗi `code` dẫn tới một luật trong docs/domain.md, xem bảng Errors trong docs/design/api.md.
+  title: "hr-manager API"
+  version: "0.1.0"
+  description: "Contract cho MVP: các story có ✅ ở cột MVP trong docs/stories.md. Quy ước, bảng mã lỗi và bản đồ story tới operation nằm ở docs/design/api.md.\n\nLỗi trả về theo RFC 9457 (Problem Details), thêm `code` ổn định và `rule` là mã luật trong docs/domain.md."
   license:
-    name: "[license]"
+    name: "Proprietary"
 servers:
-  - url: http://localhost:8080/api/v1
-    description: Local
+  - url: "http://localhost:8000/api/v1"
+    description: "Local"
 security:
-  - bearerAuth: []
+  - cookieAuth: []
 tags:
-  - name: Rooms
-    description: "VÍ DỤ: phòng họp"
-  - name: Bookings
-    description: "VÍ DỤ: lịch đặt phòng"
-
+  - name: "Auth"
+    description: "Đăng nhập, phiên và mật khẩu (ADR-0004)"
+  - name: "Accounts"
+    description: "Tài khoản và vai trò HR"
+  - name: "Organization"
+    description: "Phòng ban, trưởng phòng ban, chức danh"
+  - name: "Employees"
+    description: "Hồ sơ, quá trình công tác, hợp đồng"
+  - name: "Leave"
+    description: "Loại nghỉ, lịch làm việc, số dư phép, đơn nghỉ"
+  - name: "Notifications"
+    description: "Thông báo trong hệ thống"
+  - name: "Reports"
+    description: "Báo cáo của MVP"
 paths:
-  /rooms:
-    get:
-      tags: [Rooms]
-      summary: Danh sách phòng, có phân trang
-      operationId: listRooms
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
-      responses:
-        '200':
-          description: Một trang phòng
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoomPage'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
-  /rooms/{roomId}/bookings:
-    get:
-      tags: [Bookings]
-      summary: Lịch đặt của một phòng trong một khoảng thời gian (US-002)
-      operationId: listRoomBookings
-      parameters:
-        - $ref: '#/components/parameters/RoomId'
-        - name: from
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date-time
-        - name: to
-          in: query
-          required: true
-          description: Tối đa 7 ngày sau `from`
-          schema:
-            type: string
-            format: date-time
-      responses:
-        '200':
-          description: Lịch đặt trong khoảng thời gian, sắp theo giờ bắt đầu
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [items]
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Booking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-
-  /bookings:
+  /auth/login:
     post:
-      tags: [Bookings]
-      summary: Đặt phòng theo khung giờ (US-001)
-      operationId: createBooking
-      parameters:
-        - $ref: '#/components/parameters/IdempotencyKey'
+      tags: ["Auth"]
+      summary: "Đăng nhập bằng mã nhân viên (US-001)"
+      operationId: "login"
+      description: "**Quyền:** không cần đăng nhập. **Mã lỗi:** `invalid_credentials`, `account_throttled`. Quá `login_rate_limit_per_ip` lần mỗi phút từ một IP thì trả 429 `rate_limited`."
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BookingCreate'
+              type: "object"
+              properties:
+                code:
+                  type: "string"
+                  maxLength: 20
+                password:
+                  type: "string"
+                  maxLength: 128
+              required: ["code", "password"]
       responses:
-        '201':
-          description: Lịch đã tạo
-          headers:
-            Location:
-              description: URL của lịch vừa tạo
-              schema:
-                type: string
+        "200":
+          description: "Đăng nhập thành công; đặt cookie `access_token` và `refresh_token`"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-
-  /bookings/{bookingId}:
-    delete:
-      tags: [Bookings]
-      summary: Hủy lịch đặt (US-003)
-      operationId: cancelBooking
-      description: Người đặt hoặc quản trị; chỉ trước giờ bắt đầu (BR-004).
+                $ref: "#/components/schemas/Me"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "423":
+          $ref: "#/components/responses/Locked"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /auth/refresh:
+    post:
+      tags: ["Auth"]
+      summary: "Đổi refresh token lấy cặp token mới (ADR-0004)"
+      operationId: "refreshSession"
+      description: "**Quyền:** người có cookie `refresh_token` hợp lệ. **Mã lỗi:** `unauthenticated`."
+      security: []
+      responses:
+        "204":
+          description: "Đã đặt cookie mới"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /auth/logout:
+    post:
+      tags: ["Auth"]
+      summary: "Đăng xuất, thu hồi refresh token hiện tại"
+      operationId: "logout"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      responses:
+        "204":
+          description: "Đã xóa cookie"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /me:
+    get:
+      tags: ["Auth"]
+      summary: "Thông tin người đang đăng nhập, vai trò và cờ phải đổi mật khẩu"
+      operationId: "getMe"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      responses:
+        "200":
+          description: "Người dùng hiện tại"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /me/password:
+    post:
+      tags: ["Auth"]
+      summary: "Đổi mật khẩu của mình (US-001)"
+      operationId: "changeMyPassword"
+      description: "**Quyền:** mọi người đã đăng nhập. **Mã lỗi:** `invalid_credentials`, `password_too_short`, `password_reused`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                currentPassword:
+                  type: "string"
+                  maxLength: 128
+                newPassword:
+                  type: "string"
+                  maxLength: 128
+                  minLength: 8
+              required: ["currentPassword", "newPassword"]
+      responses:
+        "204":
+          description: "Đã đổi; mọi phiên khác bị thu hồi"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /accounts:
+    get:
+      tags: ["Accounts"]
+      summary: "Danh sách tài khoản (US-002)"
+      operationId: "listAccounts"
+      description: "**Quyền:** HR."
       parameters:
-        - name: bookingId
-          in: path
+        - name: "search"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+          description: "Tìm theo mã hoặc tên, không phân biệt dấu"
+        - name: "status"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            enum: ["active", "throttled", "locked"]
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: "Một trang tài khoản"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: ["Accounts"]
+      summary: "Tạo tài khoản cho một nhân viên (US-002)"
+      operationId: "createAccount"
+      description: "**Quyền:** HR. **Mã lỗi:** `account_exists`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                employeeId:
+                  type: "string"
+                  format: "uuid"
+              required: ["employeeId"]
+      responses:
+        "201":
+          description: "Đã tạo; mật khẩu tạm chỉ trả về một lần (BR-002)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountWithTemporaryPassword"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /accounts/{accountId}/password-reset:
+    post:
+      tags: ["Accounts"]
+      summary: "Đặt lại mật khẩu, trả mật khẩu tạm (US-002)"
+      operationId: "resetAccountPassword"
+      description: "**Quyền:** HR."
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: "Mật khẩu tạm, chỉ trả về một lần"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountWithTemporaryPassword"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /accounts/{accountId}/lock:
+    post:
+      tags: ["Accounts"]
+      summary: "Khóa tài khoản (US-002)"
+      operationId: "lockAccount"
+      description: "**Quyền:** HR. **Mã lỗi:** `last_hr_account`."
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: "Tài khoản sau khi khóa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /accounts/{accountId}/unlock:
+    post:
+      tags: ["Accounts"]
+      summary: "Mở khóa tài khoản (US-002)"
+      operationId: "unlockAccount"
+      description: "**Quyền:** HR. **Mã lỗi:** `employee_terminated`."
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: "Tài khoản sau khi mở khóa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /accounts/{accountId}/hr-role:
+    put:
+      tags: ["Accounts"]
+      summary: "Gán vai trò HR (US-003)"
+      operationId: "grantHrRole"
+      description: "**Quyền:** HR."
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "204":
+          description: "Đã gán"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: ["Accounts"]
+      summary: "Thu hồi vai trò HR (US-003)"
+      operationId: "revokeHrRole"
+      description: "**Quyền:** HR. **Mã lỗi:** `last_hr_account`."
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "204":
+          description: "Đã thu hồi"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /positions:
+    get:
+      tags: ["Organization"]
+      summary: "Danh mục chức danh (US-005)"
+      operationId: "listPositions"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      responses:
+        "200":
+          description: "Mọi chức danh"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  items:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Position"
+                required: ["items"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: ["Organization"]
+      summary: "Thêm chức danh (US-005)"
+      operationId: "createPosition"
+      description: "**Quyền:** HR. **Mã lỗi:** `name_taken`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PositionInput"
+      responses:
+        "201":
+          description: "Chức danh mới"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /positions/{positionId}:
+    patch:
+      tags: ["Organization"]
+      summary: "Đổi tên hoặc ngừng dùng chức danh (US-005)"
+      operationId: "updatePosition"
+      description: "**Quyền:** HR. **Mã lỗi:** `name_taken`."
+      parameters:
+        - $ref: "#/components/parameters/PositionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PositionInput"
+      responses:
+        "200":
+          description: "Chức danh sau khi sửa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /org-units/tree:
+    get:
+      tags: ["Organization"]
+      summary: "Cây tổ chức tại một ngày (US-009)"
+      operationId: "getOrgTree"
+      description: "**Quyền:** mọi người đã đăng nhập; chỉ HR chọn được ngày khác hôm nay (US-010)."
+      parameters:
+        - name: "date"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "date"
+          description: "Mặc định là hôm nay"
+      responses:
+        "200":
+          description: "Cây phòng ban kèm trưởng và số nhân viên"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgUnitNode"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /org-units:
+    post:
+      tags: ["Organization"]
+      summary: "Tạo phòng ban (US-006)"
+      operationId: "createOrgUnit"
+      description: "**Quyền:** HR. **Mã lỗi:** `org_unit_inactive`, `org_root_rule`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrgUnitCreate"
+      responses:
+        "201":
+          description: "Phòng ban mới"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgUnit"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /org-units/{orgUnitId}/changes:
+    post:
+      tags: ["Organization"]
+      summary: "Đổi tên hoặc chuyển phòng ban cha từ một ngày hiệu lực (US-006)"
+      operationId: "changeOrgUnit"
+      description: "**Quyền:** HR. **Mã lỗi:** `org_cycle`, `org_root_rule`, `org_unit_inactive`."
+      parameters:
+        - $ref: "#/components/parameters/OrgUnitId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrgUnitChange"
+      responses:
+        "200":
+          description: "Phòng ban sau thay đổi"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgUnit"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /org-units/{orgUnitId}/heads:
+    get:
+      tags: ["Organization"]
+      summary: "Lịch sử trưởng phòng ban (US-008)"
+      operationId: "listOrgUnitHeads"
+      description: "**Quyền:** HR."
+      parameters:
+        - $ref: "#/components/parameters/OrgUnitId"
+      responses:
+        "200":
+          description: "Các lần bổ nhiệm"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  items:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/HeadAssignment"
+                required: ["items"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: ["Organization"]
+      summary: "Bổ nhiệm trưởng phòng ban (US-008)"
+      operationId: "appointHead"
+      description: "**Quyền:** HR. **Mã lỗi:** `head_overlap`, `head_not_employed`."
+      parameters:
+        - $ref: "#/components/parameters/OrgUnitId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                employeeId:
+                  type: "string"
+                  format: "uuid"
+                from:
+                  type: "string"
+                  format: "date"
+                to:
+                  type: "string"
+                  format: "date"
+              required: ["employeeId", "from"]
+      responses:
+        "201":
+          description: "Bổ nhiệm mới"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HeadAssignment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /head-assignments/{headAssignmentId}:
+    patch:
+      tags: ["Organization"]
+      summary: "Thôi bổ nhiệm trưởng từ một ngày (US-008)"
+      operationId: "endHeadAssignment"
+      description: "**Quyền:** HR."
+      parameters:
+        - $ref: "#/components/parameters/HeadAssignmentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                to:
+                  type: "string"
+                  format: "date"
+              required: ["to"]
+      responses:
+        "200":
+          description: "Bổ nhiệm sau khi sửa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HeadAssignment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /employees:
+    get:
+      tags: ["Employees"]
+      summary: "Tìm và lọc nhân viên (US-018, US-020)"
+      operationId: "listEmployees"
+      description: "**Quyền:** HR thấy mọi người; Quản lý chỉ thấy phạm vi của mình (BR-013)."
+      parameters:
+        - name: "search"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+          description: "Tên hoặc mã, không phân biệt dấu và hoa thường (EC-019)"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "includeSubunits"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+        - name: "positionId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "status"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            enum: ["upcoming", "active", "terminated"]
+        - name: "contractType"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            enum: ["probation", "fixed_term", "indefinite", "none"]
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: "Một trang nhân viên"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeePage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: ["Employees"]
+      summary: "Tiếp nhận nhân viên mới cùng quá trình công tác và hợp đồng đầu tiên (US-011, UC-001)"
+      operationId: "onboardEmployee"
+      description: "**Quyền:** HR. **Mã lỗi:** `national_id_taken`, `org_unit_inactive`, `contract_term_invalid`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeCreate"
+      responses:
+        "201":
+          description: "Hồ sơ mới"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /employees/{employeeId}:
+    get:
+      tags: ["Employees"]
+      summary: "Chi tiết nhân viên (US-012, US-018)"
+      operationId: "getEmployee"
+      description: "**Quyền:** HR; Quản lý với nhân viên trong phạm vi, chỉ phần công việc (BR-033)."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      responses:
+        "200":
+          description: "Hồ sơ; phần `personal` chỉ có khi người xem là HR"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: ["Employees"]
+      summary: "Sửa thông tin cá nhân và liên hệ (US-012)"
+      operationId: "updateEmployee"
+      description: "**Quyền:** HR. **Mã lỗi:** `version_conflict`, `national_id_taken`."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeUpdate"
+      responses:
+        "200":
+          description: "Hồ sơ sau khi sửa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /employees/{employeeId}/assignments:
+    get:
+      tags: ["Employees"]
+      summary: "Quá trình công tác (US-013, US-018)"
+      operationId: "listAssignments"
+      description: "**Quyền:** HR; Quản lý với nhân viên trong phạm vi."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      responses:
+        "200":
+          description: "Các quá trình công tác theo thời gian"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  items:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Assignment"
+                required: ["items"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: ["Employees"]
+      summary: "Ghi nhận thay đổi công tác có ngày hiệu lực (US-013, UC-002)"
+      operationId: "recordAssignmentChange"
+      description: "**Quyền:** HR. **Mã lỗi:** `effective_date_outside_employment`, `assignment_same_date`, `org_unit_inactive`, `reason_required`."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignmentChange"
+      responses:
+        "201":
+          description: "Quá trình công tác mới"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /employees/{employeeId}/termination:
+    put:
+      tags: ["Employees"]
+      summary: "Ghi nhận nghỉ việc (US-014, UC-003)"
+      operationId: "recordTermination"
+      description: "**Quyền:** HR. **Mã lỗi:** `termination_before_hire`, `assignment_after_termination`, `last_hr_account`."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TerminationInput"
+      responses:
+        "200":
+          description: "Hồ sơ sau khi ghi nhận"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: ["Employees"]
+      summary: "Hủy ghi nhận nghỉ việc khi ngày làm việc cuối cùng chưa qua (BR-020)"
+      operationId: "cancelTermination"
+      description: "**Quyền:** HR. **Mã lỗi:** `termination_already_effective`."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      responses:
+        "204":
+          description: "Đã hủy"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /employees/{employeeId}/contracts:
+    get:
+      tags: ["Employees"]
+      summary: "Hợp đồng của nhân viên (US-015)"
+      operationId: "listContracts"
+      description: "**Quyền:** HR."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      responses:
+        "200":
+          description: "Các hợp đồng"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  items:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Contract"
+                required: ["items"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: ["Employees"]
+      summary: "Thêm hợp đồng (US-015)"
+      operationId: "addContract"
+      description: "**Quyền:** HR. **Mã lỗi:** `contract_overlap`, `contract_term_invalid`, `contract_number_taken`."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractInput"
+      responses:
+        "201":
+          description: "Hợp đồng mới; `warnings` có cảnh báo của BR-026 nếu có"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /contracts/{contractId}:
+    patch:
+      tags: ["Employees"]
+      summary: "Sửa hợp đồng (US-015)"
+      operationId: "updateContract"
+      description: "**Quyền:** HR. **Mã lỗi:** `contract_overlap`, `contract_term_invalid`, `version_conflict`."
+      parameters:
+        - $ref: "#/components/parameters/ContractId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractInput"
+      responses:
+        "200":
+          description: "Hợp đồng sau khi sửa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /contracts/expiring:
+    get:
+      tags: ["Employees"]
+      summary: "Hợp đồng sắp hết hạn (US-016, BR-029)"
+      operationId: "listExpiringContracts"
+      description: "**Quyền:** HR."
+      responses:
+        "200":
+          description: "Hợp đồng hết hạn trong `contract_expiry_warning_days` ngày tới"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  items:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/ExpiringContract"
+                required: ["items"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /me/profile:
+    get:
+      tags: ["Employees"]
+      summary: "Hồ sơ, quá trình công tác và hợp đồng của mình (US-017)"
+      operationId: "getMyProfile"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      responses:
+        "200":
+          description: "Hồ sơ của mình"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    patch:
+      tags: ["Employees"]
+      summary: "Sửa thông tin liên hệ của mình (US-017, BR-021)"
+      operationId: "updateMyProfile"
+      description: "**Quyền:** mọi người đã đăng nhập. **Mã lỗi:** `version_conflict`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelfProfileUpdate"
+      responses:
+        "200":
+          description: "Hồ sơ sau khi sửa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /leave-types:
+    get:
+      tags: ["Leave"]
+      summary: "Danh mục loại nghỉ (US-028)"
+      operationId: "listLeaveTypes"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      parameters:
+        - name: "includeInactive"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+          description: "Chỉ HR"
+      responses:
+        "200":
+          description: "Loại nghỉ; người không phải HR chỉ thấy loại đang dùng"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  items:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/LeaveType"
+                required: ["items"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: ["Leave"]
+      summary: "Thêm loại nghỉ (US-028)"
+      operationId: "createLeaveType"
+      description: "**Quyền:** HR. **Mã lỗi:** `name_taken`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveTypeInput"
+      responses:
+        "201":
+          description: "Loại nghỉ mới"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveType"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /leave-types/{leaveTypeId}:
+    patch:
+      tags: ["Leave"]
+      summary: "Sửa hoặc ngừng dùng loại nghỉ (US-028)"
+      operationId: "updateLeaveType"
+      description: "**Quyền:** HR. **Mã lỗi:** `name_taken`, `leave_type_annual_locked`."
+      parameters:
+        - $ref: "#/components/parameters/LeaveTypeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveTypeInput"
+      responses:
+        "200":
+          description: "Loại nghỉ sau khi sửa"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveType"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /calendar-days:
+    get:
+      tags: ["Leave"]
+      summary: "Ngày nghỉ lễ và ngày làm bù của một năm (US-029)"
+      operationId: "listCalendarDays"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      parameters:
+        - name: "year"
+          in: "query"
           required: true
           schema:
-            type: string
-            format: uuid
+            type: "integer"
       responses:
-        '204':
-          description: Đã hủy
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-
+        "200":
+          description: "Các ngày đặc biệt"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  items:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/CalendarDay"
+                required: ["items"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: ["Leave"]
+      summary: "Khai báo ngày nghỉ lễ hoặc ngày làm bù (US-029)"
+      operationId: "addCalendarDay"
+      description: "**Quyền:** HR. **Mã lỗi:** `calendar_day_conflict`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarDay"
+      responses:
+        "201":
+          description: "Ngày mới; `affectedRequests` là các đơn được tính lại (BR-064)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarDayResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /calendar-days/{day}:
+    delete:
+      tags: ["Leave"]
+      summary: "Bỏ một ngày nghỉ lễ hoặc ngày làm bù (US-029)"
+      operationId: "removeCalendarDay"
+      description: "**Quyền:** HR."
+      parameters:
+        - name: "day"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "date"
+      responses:
+        "200":
+          description: "Các đơn được tính lại (BR-064)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarDayResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /me/leave/balance:
+    get:
+      tags: ["Leave"]
+      summary: "Số dư và biến động phép của mình (US-022)"
+      operationId: "getMyLeaveBalance"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      parameters:
+        - name: "year"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+          description: "Mặc định là năm nay"
+      responses:
+        "200":
+          description: "Số dư phép"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveBalance"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /employees/{employeeId}/leave/balance:
+    get:
+      tags: ["Leave"]
+      summary: "Số dư phép của một nhân viên (US-027)"
+      operationId: "getEmployeeLeaveBalance"
+      description: "**Quyền:** HR; Quản lý với nhân viên trong phạm vi."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+        - name: "year"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "Số dư phép"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveBalance"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /employees/{employeeId}/leave/adjustments:
+    post:
+      tags: ["Leave"]
+      summary: "Điều chỉnh số dư phép kèm lý do (US-032)"
+      operationId: "adjustLeaveBalance"
+      description: "**Quyền:** HR. **Mã lỗi:** `leave_insufficient_balance`, `reason_required`."
+      parameters:
+        - $ref: "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                days:
+                  type: "number"
+                  multipleOf: 0.5
+                isCarryover:
+                  type: "boolean"
+                reason:
+                  type: "string"
+                  maxLength: 500
+                  minLength: 1
+              required: ["days", "reason"]
+      responses:
+        "201":
+          description: "Biến động phép mới"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LedgerEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /leave-requests/preview:
+    post:
+      tags: ["Leave"]
+      summary: "Tính trước số ngày nghỉ và số phép còn lại, không lưu (UC-005 bước 2)"
+      operationId: "previewLeaveRequest"
+      description: "**Quyền:** mọi người đã đăng nhập. **Mã lỗi:** `leave_no_working_days`, `leave_overlap`, `leave_insufficient_balance`, `leave_exceeds_type_max`, `leave_outside_employment`, `leave_backdate_exceeded`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveRequestCreate"
+      responses:
+        "200":
+          description: "Kết quả tính"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeavePreview"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /leave-requests:
+    get:
+      tags: ["Leave"]
+      summary: "Đơn nghỉ: của mình, đang chờ mình duyệt, hoặc của nhóm trong một khoảng ngày (US-024, US-025, US-027)"
+      operationId: "listLeaveRequests"
+      description: "**Quyền:** mọi người với `scope=mine`; người duyệt với `scope=to-approve`; Quản lý và HR với `scope=team`."
+      parameters:
+        - name: "scope"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            enum: ["mine", "to-approve", "team"]
+        - name: "status"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            enum: ["pending", "approved", "rejected", "cancelled"]
+        - name: "from"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "date"
+        - name: "to"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "date"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: "Một trang đơn nghỉ"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequestPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: ["Leave"]
+      summary: "Gửi đơn nghỉ (US-023, UC-005)"
+      operationId: "submitLeaveRequest"
+      description: "**Quyền:** mọi người đã đăng nhập. **Mã lỗi:** `leave_no_working_days`, `leave_overlap`, `leave_insufficient_balance`, `leave_exceeds_type_max`, `leave_outside_employment`, `leave_backdate_exceeded`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveRequestCreate"
+      responses:
+        "201":
+          description: "Đơn ở trạng thái Chờ duyệt"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /leave-requests/{leaveRequestId}:
+    get:
+      tags: ["Leave"]
+      summary: "Chi tiết đơn nghỉ"
+      operationId: "getLeaveRequest"
+      description: "**Quyền:** người gửi, người duyệt, HR; Quản lý trong phạm vi thấy đơn nhưng không thấy lý do (BR-067)."
+      parameters:
+        - $ref: "#/components/parameters/LeaveRequestId"
+      responses:
+        "200":
+          description: "Đơn nghỉ"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /leave-requests/{leaveRequestId}/approve:
+    post:
+      tags: ["Leave"]
+      summary: "Duyệt đơn nghỉ (US-025, US-026)"
+      operationId: "approveLeaveRequest"
+      description: "**Quyền:** người duyệt của đơn; HR duyệt thay (BR-058). **Mã lỗi:** `invalid_state`, `self_approval`, `leave_insufficient_balance`."
+      parameters:
+        - $ref: "#/components/parameters/LeaveRequestId"
+      responses:
+        "200":
+          description: "Đơn ở trạng thái Đã duyệt"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /leave-requests/{leaveRequestId}/reject:
+    post:
+      tags: ["Leave"]
+      summary: "Từ chối đơn nghỉ kèm lý do (US-025, US-026)"
+      operationId: "rejectLeaveRequest"
+      description: "**Quyền:** người duyệt của đơn; HR. **Mã lỗi:** `invalid_state`, `reason_required`."
+      parameters:
+        - $ref: "#/components/parameters/LeaveRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReasonInput"
+      responses:
+        "200":
+          description: "Đơn ở trạng thái Bị từ chối"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /leave-requests/{leaveRequestId}/cancel:
+    post:
+      tags: ["Leave"]
+      summary: "Hủy đơn nghỉ (US-024)"
+      operationId: "cancelLeaveRequest"
+      description: "**Quyền:** người gửi trước ngày bắt đầu; HR mọi lúc, kèm lý do (BR-061). **Mã lỗi:** `invalid_state`, `leave_not_cancellable`, `reason_required`."
+      parameters:
+        - $ref: "#/components/parameters/LeaveRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OptionalReasonInput"
+      responses:
+        "200":
+          description: "Đơn ở trạng thái Đã hủy; phép năm được hoàn nếu có"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /notifications:
+    get:
+      tags: ["Notifications"]
+      summary: "Thông báo của mình (US-034)"
+      operationId: "listNotifications"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      parameters:
+        - name: "unreadOnly"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: "Một trang thông báo, mới nhất trước"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /notifications/{notificationId}/read:
+    post:
+      tags: ["Notifications"]
+      summary: "Đánh dấu đã đọc"
+      operationId: "markNotificationRead"
+      description: "**Quyền:** người nhận."
+      parameters:
+        - $ref: "#/components/parameters/NotificationId"
+      responses:
+        "204":
+          description: "Đã đánh dấu"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /notifications/read-all:
+    post:
+      tags: ["Notifications"]
+      summary: "Đánh dấu đã đọc tất cả"
+      operationId: "markAllNotificationsRead"
+      description: "**Quyền:** mọi người đã đăng nhập."
+      responses:
+        "204":
+          description: "Đã đánh dấu"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /reports/overview:
+    get:
+      tags: ["Reports"]
+      summary: "Trang tổng quan (US-064)"
+      operationId: "getOverview"
+      description: "**Quyền:** HR; Quản lý với số liệu trong phạm vi (BR-127)."
+      responses:
+        "200":
+          description: "Các con số theo phạm vi người xem"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Overview"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /reports/headcount-movement:
+    get:
+      tags: ["Reports"]
+      summary: "Biến động nhân sự theo tháng (US-065, BR-132)"
+      operationId: "getHeadcountMovementReport"
+      description: "**Quyền:** HR; Quản lý với số liệu trong phạm vi (BR-127)."
+      parameters:
+        - name: "fromMonth"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            pattern: "^\\d{4}-\\d{2}$"
+            example: "2026-05"
+        - name: "toMonth"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            pattern: "^\\d{4}-\\d{2}$"
+            example: "2026-05"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Số liệu báo cáo"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HeadcountMovementReport"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /reports/headcount-movement/export:
+    get:
+      tags: ["Reports"]
+      summary: "Xuất báo cáo ra bảng tính (US-070, BR-136)"
+      operationId: "exportHeadcountMovementReport"
+      description: "**Quyền:** HR; Quản lý với số liệu trong phạm vi (BR-127)."
+      parameters:
+        - name: "fromMonth"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            pattern: "^\\d{4}-\\d{2}$"
+            example: "2026-05"
+        - name: "toMonth"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            pattern: "^\\d{4}-\\d{2}$"
+            example: "2026-05"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "File XLSX với cùng bộ lọc"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: "string"
+                format: "binary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /reports/leave-usage:
+    get:
+      tags: ["Reports"]
+      summary: "Số ngày nghỉ theo loại, phòng ban, nhân viên (US-067, BR-135)"
+      operationId: "getLeaveUsageReport"
+      description: "**Quyền:** HR; Quản lý với số liệu trong phạm vi (BR-127)."
+      parameters:
+        - name: "from"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "date"
+        - name: "to"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "date"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Số liệu báo cáo"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveUsageReport"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /reports/leave-usage/export:
+    get:
+      tags: ["Reports"]
+      summary: "Xuất báo cáo ra bảng tính (US-070, BR-136)"
+      operationId: "exportLeaveUsageReport"
+      description: "**Quyền:** HR; Quản lý với số liệu trong phạm vi (BR-127)."
+      parameters:
+        - name: "from"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "date"
+        - name: "to"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "date"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "File XLSX với cùng bộ lọc"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: "string"
+                format: "binary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /reports/leave-balances:
+    get:
+      tags: ["Reports"]
+      summary: "Số dư phép và phép tồn tại một ngày (US-067)"
+      operationId: "getLeaveBalancesReport"
+      description: "**Quyền:** HR; Quản lý với số liệu trong phạm vi (BR-127)."
+      parameters:
+        - name: "date"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "date"
+          description: "Mặc định là hôm nay"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "carryoverExpiringOnly"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+      responses:
+        "200":
+          description: "Số liệu báo cáo"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveBalancesReport"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /reports/leave-balances/export:
+    get:
+      tags: ["Reports"]
+      summary: "Xuất báo cáo ra bảng tính (US-070, BR-136)"
+      operationId: "exportLeaveBalancesReport"
+      description: "**Quyền:** HR; Quản lý với số liệu trong phạm vi (BR-127)."
+      parameters:
+        - name: "date"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "date"
+          description: "Mặc định là hôm nay"
+        - name: "orgUnitId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "carryoverExpiringOnly"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+      responses:
+        "200":
+          description: "File XLSX với cùng bộ lọc"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: "string"
+                format: "binary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-
+    cookieAuth:
+      type: "apiKey"
+      in: "cookie"
+      name: "access_token"
+      description: "JWT 15 phút trong cookie HttpOnly (ADR-0004)"
   parameters:
     Page:
-      name: page
-      in: query
+      name: "page"
+      in: "query"
       required: false
       schema:
-        type: integer
+        type: "integer"
         minimum: 1
         default: 1
     PageSize:
-      name: pageSize
-      in: query
+      name: "pageSize"
+      in: "query"
       required: false
       schema:
-        type: integer
+        type: "integer"
         minimum: 1
         maximum: 100
-        default: 20
-    RoomId:
-      name: roomId
-      in: path
+        default: 50
+    AccountId:
+      name: "accountId"
+      in: "path"
       required: true
       schema:
-        type: string
-        format: uuid
-    IdempotencyKey:
-      name: Idempotency-Key
-      in: header
-      required: false
-      description: Gửi lại cùng key thì nhận lại kết quả lần đầu, không tạo lịch thứ hai
+        type: "string"
+        format: "uuid"
+    PositionId:
+      name: "positionId"
+      in: "path"
+      required: true
       schema:
-        type: string
-        maxLength: 64
-
+        type: "string"
+        format: "uuid"
+    OrgUnitId:
+      name: "orgUnitId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        format: "uuid"
+    HeadAssignmentId:
+      name: "headAssignmentId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        format: "uuid"
+    EmployeeId:
+      name: "employeeId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        format: "uuid"
+    ContractId:
+      name: "contractId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        format: "uuid"
+    LeaveTypeId:
+      name: "leaveTypeId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        format: "uuid"
+    LeaveRequestId:
+      name: "leaveRequestId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        format: "uuid"
+    NotificationId:
+      name: "notificationId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        format: "uuid"
   schemas:
     Problem:
-      description: RFC 9457 Problem Details, thêm `code` theo nghĩa nghiệp vụ.
-      type: object
-      required: [type, title, status, code]
+      description: "RFC 9457 Problem Details, thêm `code` theo nghĩa nghiệp vụ."
+      type: "object"
       properties:
         type:
-          type: string
-          example: about:blank
+          type: "string"
+          example: "about:blank"
         title:
-          type: string
-          example: Booking conflict
+          type: "string"
+          example: "Không đủ phép năm"
         status:
-          type: integer
+          type: "integer"
           example: 409
         detail:
-          type: string
+          type: "string"
+          description: "Thông báo tiếng Việt hiển thị được cho người dùng"
         code:
-          type: string
-          description: Mã lỗi ổn định cho client, liệt kê ở bảng Errors trong docs/design/api.md
-          example: booking_conflict
+          type: "string"
+          description: "Mã lỗi ổn định, liệt kê ở bảng Errors trong docs/design/api.md"
+          example: "leave_insufficient_balance"
+        rule:
+          type: "string"
+          description: "Mã luật trong docs/domain.md, nếu có"
+          example: "BR-053"
         errors:
-          description: Lỗi theo từng field khi `code` là `validation_failed`
-          type: object
+          description: "Lỗi theo từng field khi `code` là `validation_failed`"
+          type: "object"
           additionalProperties:
-            type: array
+            type: "array"
             items:
-              type: string
+              type: "string"
         traceId:
-          type: string
-
+          type: "string"
+      required: ["type", "title", "status", "code"]
     PageMeta:
-      type: object
-      required: [page, pageSize, totalItems, totalPages]
+      type: "object"
       properties:
         page:
-          type: integer
+          type: "integer"
         pageSize:
-          type: integer
+          type: "integer"
         totalItems:
-          type: integer
+          type: "integer"
         totalPages:
-          type: integer
-
-    Room:
-      type: object
-      required: [id, name, capacity]
+          type: "integer"
+      required: ["page", "pageSize", "totalItems", "totalPages"]
+    Me:
+      type: "object"
+      properties:
+        accountId:
+          type: "string"
+          format: "uuid"
+        employeeId:
+          type: "string"
+          format: "uuid"
+        code:
+          type: "string"
+        fullName:
+          type: "string"
+        roles:
+          type: "array"
+          items:
+            type: "string"
+            enum: ["employee", "manager", "hr"]
+        mustChangePassword:
+          type: "boolean"
+          description: "Đúng thì client chỉ cho đổi mật khẩu (BR-002)"
+      required: ["accountId", "employeeId", "code", "fullName", "roles", "mustChangePassword"]
+    Account:
+      type: "object"
       properties:
         id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        capacity:
-          type: integer
-          minimum: 1
-        equipment:
-          type: array
-          items:
-            type: string
-
-    RoomPage:
-      type: object
-      required: [items, meta]
+          type: "string"
+          format: "uuid"
+        employeeId:
+          type: "string"
+          format: "uuid"
+        employeeCode:
+          type: "string"
+        fullName:
+          type: "string"
+        status:
+          type: "string"
+          enum: ["active", "throttled", "locked"]
+        isHr:
+          type: "boolean"
+      required: ["id", "employeeId", "employeeCode", "fullName", "status", "isHr"]
+    AccountPage:
+      type: "object"
       properties:
         items:
-          type: array
+          type: "array"
           items:
-            $ref: '#/components/schemas/Room'
+            $ref: "#/components/schemas/Account"
         meta:
-          $ref: '#/components/schemas/PageMeta'
-
-    Booking:
-      type: object
-      required: [id, roomId, memberId, start, end, status]
+          $ref: "#/components/schemas/PageMeta"
+      required: ["items", "meta"]
+    AccountWithTemporaryPassword:
+      type: "object"
+      properties:
+        account:
+          $ref: "#/components/schemas/Account"
+        temporaryPassword:
+          type: "string"
+      required: ["account", "temporaryPassword"]
+    Position:
+      type: "object"
       properties:
         id:
-          type: string
-          format: uuid
-        roomId:
-          type: string
-          format: uuid
-        memberId:
-          type: string
-          format: uuid
-        start:
-          type: string
-          format: date-time
-        end:
-          type: string
-          format: date-time
-        attendees:
-          type: integer
-          minimum: 1
-        purpose:
-          type: string
-        status:
-          type: string
-          enum: [confirmed, cancelled, completed]
-
-    BookingCreate:
-      type: object
-      required: [roomId, start, end]
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        active:
+          type: "boolean"
+      required: ["id", "name", "active"]
+    PositionInput:
+      type: "object"
       properties:
-        roomId:
-          type: string
-          format: uuid
-        start:
-          type: string
-          format: date-time
-        end:
-          type: string
-          format: date-time
-          description: Sau `start`, dài tối đa `max_booking_hours` (BR-002)
-        attendees:
-          type: integer
-          minimum: 1
-        purpose:
-          type: string
-          maxLength: 200
-
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+        active:
+          type: "boolean"
+      required: ["name"]
+    OrgUnit:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        parentId:
+          type: "string"
+          format: "uuid"
+          nullable: true
+        validFrom:
+          type: "string"
+          format: "date"
+        validTo:
+          type: "string"
+          format: "date"
+          nullable: true
+      required: ["id", "name", "validFrom"]
+    OrgUnitNode:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        head:
+          $ref: "#/components/schemas/EmployeeRef"
+          nullable: true
+        employeeCount:
+          type: "integer"
+        children:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrgUnitNode"
+      required: ["id", "name", "employeeCount", "children"]
+    OrgUnitCreate:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+        parentId:
+          type: "string"
+          format: "uuid"
+        effectiveDate:
+          type: "string"
+          format: "date"
+      required: ["name", "parentId", "effectiveDate"]
+    OrgUnitChange:
+      type: "object"
+      properties:
+        effectiveDate:
+          type: "string"
+          format: "date"
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+        parentId:
+          type: "string"
+          format: "uuid"
+      required: ["effectiveDate"]
+    HeadAssignment:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        orgUnitId:
+          type: "string"
+          format: "uuid"
+        employee:
+          $ref: "#/components/schemas/EmployeeRef"
+        from:
+          type: "string"
+          format: "date"
+        to:
+          type: "string"
+          format: "date"
+          nullable: true
+      required: ["id", "orgUnitId", "employee", "from"]
+    EmployeeRef:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        code:
+          type: "string"
+        fullName:
+          type: "string"
+      required: ["id", "code", "fullName"]
+    EmployeeSummary:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        code:
+          type: "string"
+        fullName:
+          type: "string"
+        status:
+          type: "string"
+          enum: ["upcoming", "active", "terminated"]
+        orgUnit:
+          $ref: "#/components/schemas/NamedRef"
+        position:
+          $ref: "#/components/schemas/NamedRef"
+        workEmail:
+          type: "string"
+        workPhone:
+          type: "string"
+      required: ["id", "code", "fullName", "status"]
+    NamedRef:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+      required: ["id", "name"]
+    EmployeePage:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/EmployeeSummary"
+        meta:
+          $ref: "#/components/schemas/PageMeta"
+      required: ["items", "meta"]
+    PersonalInfo:
+      type: "object"
+      properties:
+        dateOfBirth:
+          type: "string"
+          format: "date"
+        gender:
+          type: "string"
+          enum: ["male", "female", "other"]
+        nationalId:
+          type: "string"
+          maxLength: 12
+          minLength: 12
+        permanentAddress:
+          type: "string"
+        currentAddress:
+          type: "string"
+        personalPhone:
+          type: "string"
+        personalEmail:
+          type: "string"
+        bankAccount:
+          $ref: "#/components/schemas/BankAccount"
+        emergencyContact:
+          $ref: "#/components/schemas/EmergencyContact"
+      required: ["dateOfBirth", "gender", "nationalId"]
+    BankAccount:
+      type: "object"
+      properties:
+        bankName:
+          type: "string"
+        accountNumber:
+          type: "string"
+      required: ["bankName", "accountNumber"]
+    EmergencyContact:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        relationship:
+          type: "string"
+        phone:
+          type: "string"
+      required: ["name", "phone"]
+    EmployeeDetail:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        code:
+          type: "string"
+        fullName:
+          type: "string"
+        status:
+          type: "string"
+          enum: ["upcoming", "active", "terminated"]
+        version:
+          type: "integer"
+        workEmail:
+          type: "string"
+        workPhone:
+          type: "string"
+        employment:
+          type: "object"
+          properties:
+            hireDate:
+              type: "string"
+              format: "date"
+            lastWorkingDate:
+              type: "string"
+              format: "date"
+              nullable: true
+            orgUnit:
+              $ref: "#/components/schemas/NamedRef"
+            position:
+              $ref: "#/components/schemas/NamedRef"
+            lineManager:
+              $ref: "#/components/schemas/EmployeeRef"
+              nullable: true
+          required: ["hireDate"]
+        personal:
+          $ref: "#/components/schemas/PersonalInfo"
+          description: "Chỉ có khi người xem là HR hoặc chính nhân viên (BR-033)"
+        warnings:
+          type: "array"
+          items:
+            type: "string"
+            description: "Ví dụ `no_contract` (EC-017)"
+      required: ["id", "code", "fullName", "status", "version", "employment"]
+    EmployeeCreate:
+      type: "object"
+      properties:
+        fullName:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+        personal:
+          $ref: "#/components/schemas/PersonalInfo"
+        workEmail:
+          type: "string"
+        workPhone:
+          type: "string"
+        hireDate:
+          type: "string"
+          format: "date"
+        orgUnitId:
+          type: "string"
+          format: "uuid"
+        positionId:
+          type: "string"
+          format: "uuid"
+        firstContract:
+          $ref: "#/components/schemas/ContractInput"
+      required: ["fullName", "personal", "hireDate", "orgUnitId", "positionId"]
+    EmployeeUpdate:
+      type: "object"
+      properties:
+        version:
+          type: "integer"
+          description: "Giá trị đã đọc; khác thì trả `version_conflict` (EC-016)"
+        fullName:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+        workEmail:
+          type: "string"
+        workPhone:
+          type: "string"
+        personal:
+          $ref: "#/components/schemas/PersonalInfo"
+      required: ["version"]
+    SelfProfileUpdate:
+      type: "object"
+      properties:
+        version:
+          type: "integer"
+        personalPhone:
+          type: "string"
+        personalEmail:
+          type: "string"
+        currentAddress:
+          type: "string"
+        emergencyContact:
+          $ref: "#/components/schemas/EmergencyContact"
+      required: ["version"]
+    Assignment:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        orgUnit:
+          $ref: "#/components/schemas/NamedRef"
+        position:
+          $ref: "#/components/schemas/NamedRef"
+        from:
+          type: "string"
+          format: "date"
+        to:
+          type: "string"
+          format: "date"
+          nullable: true
+        reason:
+          type: "string"
+      required: ["id", "orgUnit", "position", "from"]
+    AssignmentChange:
+      type: "object"
+      properties:
+        effectiveDate:
+          type: "string"
+          format: "date"
+        orgUnitId:
+          type: "string"
+          format: "uuid"
+        positionId:
+          type: "string"
+          format: "uuid"
+        reason:
+          type: "string"
+          maxLength: 500
+          description: "Bắt buộc khi ngày hiệu lực trước hôm nay (BR-018)"
+      required: ["effectiveDate"]
+    TerminationInput:
+      type: "object"
+      properties:
+        lastWorkingDate:
+          type: "string"
+          format: "date"
+        reason:
+          type: "string"
+          maxLength: 500
+          minLength: 1
+      required: ["lastWorkingDate", "reason"]
+    ContractInput:
+      type: "object"
+      properties:
+        number:
+          type: "string"
+          maxLength: 50
+          minLength: 1
+        type:
+          type: "string"
+          enum: ["probation", "fixed_term", "indefinite"]
+        probationGroup:
+          type: "string"
+          enum: ["management", "college", "vocational", "other"]
+          description: "Bắt buộc khi `type` là `probation` (BR-028)"
+        signedOn:
+          type: "string"
+          format: "date"
+        startDate:
+          type: "string"
+          format: "date"
+        endDate:
+          type: "string"
+          format: "date"
+        version:
+          type: "integer"
+          description: "Bắt buộc khi sửa"
+        acknowledgeWarnings:
+          type: "boolean"
+          description: "Xác nhận cảnh báo của BR-026"
+      required: ["number", "type", "signedOn", "startDate"]
+    Contract:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        number:
+          type: "string"
+        type:
+          type: "string"
+          enum: ["probation", "fixed_term", "indefinite"]
+        probationGroup:
+          type: "string"
+        signedOn:
+          type: "string"
+          format: "date"
+        startDate:
+          type: "string"
+          format: "date"
+        endDate:
+          type: "string"
+          format: "date"
+          nullable: true
+        status:
+          type: "string"
+          enum: ["upcoming", "active", "expired", "terminated"]
+        version:
+          type: "integer"
+        warnings:
+          type: "array"
+          items:
+            type: "string"
+      required: ["id", "number", "type", "signedOn", "startDate", "status", "version"]
+    ExpiringContract:
+      type: "object"
+      properties:
+        employee:
+          $ref: "#/components/schemas/EmployeeRef"
+        contract:
+          $ref: "#/components/schemas/Contract"
+        daysLeft:
+          type: "integer"
+      required: ["employee", "contract", "daysLeft"]
+    LeaveType:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        payMode:
+          type: "string"
+          enum: ["company_paid", "social_insurance", "unpaid"]
+        deductsAnnual:
+          type: "boolean"
+        maxDaysPerRequest:
+          type: "number"
+          multipleOf: 0.5
+          nullable: true
+        active:
+          type: "boolean"
+        isAnnual:
+          type: "boolean"
+          description: "Loại Phép năm, không xóa hay ngừng được (BR-041)"
+      required: ["id", "name", "payMode", "deductsAnnual", "active", "isAnnual"]
+    LeaveTypeInput:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+        payMode:
+          type: "string"
+          enum: ["company_paid", "social_insurance", "unpaid"]
+        deductsAnnual:
+          type: "boolean"
+        maxDaysPerRequest:
+          type: "number"
+          multipleOf: 0.5
+        active:
+          type: "boolean"
+      required: ["name", "payMode", "deductsAnnual"]
+    CalendarDay:
+      type: "object"
+      properties:
+        day:
+          type: "string"
+          format: "date"
+        kind:
+          type: "string"
+          enum: ["holiday", "makeup_workday"]
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+      required: ["day", "kind", "name"]
+    CalendarDayResult:
+      type: "object"
+      properties:
+        day:
+          $ref: "#/components/schemas/CalendarDay"
+        affectedRequests:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LeaveRequest"
+        warnings:
+          type: "array"
+          items:
+            type: "string"
+            description: "Ví dụ số phép tạm âm (EC-032)"
+      required: ["affectedRequests"]
+    LedgerEntry:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        date:
+          type: "string"
+          format: "date"
+        kind:
+          type: "string"
+          enum: ["accrual", "carryover_in", "carryover_expired", "carryover_capped", "taken", "refund", "adjustment"]
+        days:
+          type: "number"
+          multipleOf: 0.5
+          description: "Có dấu: dương là cộng, âm là trừ"
+        leaveYear:
+          type: "integer"
+        isCarryover:
+          type: "boolean"
+        expiresOn:
+          type: "string"
+          format: "date"
+          nullable: true
+        leaveRequestId:
+          type: "string"
+          format: "uuid"
+          nullable: true
+        reason:
+          type: "string"
+      required: ["id", "date", "kind", "days", "leaveYear", "isCarryover"]
+    LeaveBalance:
+      type: "object"
+      properties:
+        employeeId:
+          type: "string"
+          format: "uuid"
+        year:
+          type: "integer"
+        annualEntitlement:
+          type: "number"
+          multipleOf: 0.5
+        balance:
+          type: "number"
+          multipleOf: 0.5
+          description: "Tổng các biến động (BR-054)"
+        carryover:
+          type: "object"
+          properties:
+            days:
+              type: "number"
+              multipleOf: 0.5
+            expiresOn:
+              type: "string"
+              format: "date"
+              nullable: true
+          required: ["days"]
+        pendingDays:
+          type: "number"
+          multipleOf: 0.5
+          description: "Đơn phép năm đang chờ, chưa trừ"
+        entries:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LedgerEntry"
+      required: ["employeeId", "year", "balance", "carryover", "pendingDays", "entries"]
+    LeaveRequestCreate:
+      type: "object"
+      properties:
+        leaveTypeId:
+          type: "string"
+          format: "uuid"
+        startDate:
+          type: "string"
+          format: "date"
+        startHalf:
+          type: "string"
+          enum: ["morning", "afternoon"]
+        endDate:
+          type: "string"
+          format: "date"
+        endHalf:
+          type: "string"
+          enum: ["morning", "afternoon"]
+        reason:
+          type: "string"
+          maxLength: 500
+      required: ["leaveTypeId", "startDate", "startHalf", "endDate", "endHalf"]
+    LeavePreview:
+      type: "object"
+      properties:
+        days:
+          type: "number"
+          multipleOf: 0.5
+        balanceAfter:
+          type: "number"
+          multipleOf: 0.5
+          nullable: true
+        approver:
+          $ref: "#/components/schemas/EmployeeRef"
+          nullable: true
+      required: ["days"]
+    LeaveRequest:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        employee:
+          $ref: "#/components/schemas/EmployeeRef"
+        leaveType:
+          $ref: "#/components/schemas/NamedRef"
+        startDate:
+          type: "string"
+          format: "date"
+        startHalf:
+          type: "string"
+          enum: ["morning", "afternoon"]
+        endDate:
+          type: "string"
+          format: "date"
+        endHalf:
+          type: "string"
+          enum: ["morning", "afternoon"]
+        days:
+          type: "number"
+          multipleOf: 0.5
+        status:
+          type: "string"
+          enum: ["pending", "approved", "rejected", "cancelled"]
+        reason:
+          type: "string"
+          nullable: true
+          description: "Trống với Quản lý không phải người duyệt (BR-067)"
+        approver:
+          $ref: "#/components/schemas/EmployeeRef"
+          nullable: true
+        decisionReason:
+          type: "string"
+          nullable: true
+        overdue:
+          type: "boolean"
+          description: "Đang chờ mà đã qua ngày bắt đầu (EC-029)"
+        createdAt:
+          type: "string"
+          format: "date-time"
+      required: ["id", "employee", "leaveType", "startDate", "startHalf", "endDate", "endHalf", "days", "status"]
+    LeaveRequestPage:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LeaveRequest"
+        meta:
+          $ref: "#/components/schemas/PageMeta"
+      required: ["items", "meta"]
+    ReasonInput:
+      type: "object"
+      properties:
+        reason:
+          type: "string"
+          maxLength: 500
+          minLength: 1
+      required: ["reason"]
+    OptionalReasonInput:
+      type: "object"
+      properties:
+        reason:
+          type: "string"
+          maxLength: 500
+          description: "Bắt buộc khi HR hủy (BR-061)"
+    Notification:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        kind:
+          type: "string"
+          enum: ["leave_submitted", "leave_approved", "leave_rejected", "leave_cancelled", "leave_reassigned"]
+        leaveRequestId:
+          type: "string"
+          format: "uuid"
+        message:
+          type: "string"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        read:
+          type: "boolean"
+      required: ["id", "kind", "createdAt", "read"]
+    NotificationPage:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Notification"
+        meta:
+          $ref: "#/components/schemas/PageMeta"
+        unreadCount:
+          type: "integer"
+      required: ["items", "meta", "unreadCount"]
+    Overview:
+      type: "object"
+      properties:
+        activeEmployees:
+          type: "integer"
+        hiredThisMonth:
+          type: "integer"
+        terminatedThisMonth:
+          type: "integer"
+        onLeaveToday:
+          type: "integer"
+        pendingApprovals:
+          type: "integer"
+        expiringContracts:
+          type: "integer"
+          description: "Chỉ HR"
+      required: ["activeEmployees", "hiredThisMonth", "terminatedThisMonth", "onLeaveToday", "pendingApprovals"]
+    HeadcountMovementRow:
+      type: "object"
+      properties:
+        month:
+          type: "string"
+          pattern: "^\\d{4}-\\d{2}$"
+          example: "2026-05"
+        orgUnit:
+          $ref: "#/components/schemas/NamedRef"
+        opening:
+          type: "integer"
+        hired:
+          type: "integer"
+        terminated:
+          type: "integer"
+        transferredIn:
+          type: "integer"
+        transferredOut:
+          type: "integer"
+        closing:
+          type: "integer"
+        turnoverRate:
+          type: "number"
+          description: "BR-132, từ 0 tới 1"
+      required: ["month", "orgUnit", "opening", "hired", "terminated", "transferredIn", "transferredOut", "closing", "turnoverRate"]
+    HeadcountMovementReport:
+      type: "object"
+      properties:
+        rows:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/HeadcountMovementRow"
+      required: ["rows"]
+    LeaveUsageRow:
+      type: "object"
+      properties:
+        employee:
+          $ref: "#/components/schemas/EmployeeRef"
+        orgUnit:
+          $ref: "#/components/schemas/NamedRef"
+        byType:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              leaveType:
+                $ref: "#/components/schemas/NamedRef"
+              days:
+                type: "number"
+                multipleOf: 0.5
+            required: ["leaveType", "days"]
+      required: ["employee", "orgUnit", "byType"]
+    LeaveUsageReport:
+      type: "object"
+      properties:
+        rows:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LeaveUsageRow"
+      required: ["rows"]
+    LeaveBalancesRow:
+      type: "object"
+      properties:
+        employee:
+          $ref: "#/components/schemas/EmployeeRef"
+        orgUnit:
+          $ref: "#/components/schemas/NamedRef"
+        balance:
+          type: "number"
+          multipleOf: 0.5
+        carryoverDays:
+          type: "number"
+          multipleOf: 0.5
+        carryoverExpiresOn:
+          type: "string"
+          format: "date"
+          nullable: true
+      required: ["employee", "orgUnit", "balance", "carryoverDays"]
+    LeaveBalancesReport:
+      type: "object"
+      properties:
+        date:
+          type: "string"
+          format: "date"
+        rows:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LeaveBalancesRow"
+      required: ["date", "rows"]
   responses:
     ValidationError:
-      description: "Đầu vào không hợp lệ: `validation_failed`, hoặc vi phạm luật như `slot_too_long` (BR-002)"
+      description: "Đầu vào không hợp lệ (`validation_failed`) hoặc vi phạm luật về giá trị"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: "#/components/schemas/Problem"
     Unauthorized:
-      description: Chưa đăng nhập hoặc phiên đã hết hạn
+      description: "Chưa đăng nhập, phiên hết hạn, hoặc sai mã nhân viên hay mật khẩu"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: "#/components/schemas/Problem"
     Forbidden:
-      description: Đã đăng nhập nhưng không có quyền
+      description: "Đã đăng nhập nhưng không đủ vai trò, hoặc phải đổi mật khẩu trước (`password_change_required`)"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: "#/components/schemas/Problem"
     NotFound:
-      description: Không tìm thấy tài nguyên, hoặc người gọi không được xem tài nguyên đó
+      description: "Không có tài nguyên, hoặc người gọi không được biết tài nguyên đó tồn tại"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: "#/components/schemas/Problem"
     Conflict:
-      description: "Xung đột với trạng thái hiện tại: `booking_conflict` (BR-001), `booking_started` (BR-004)"
+      description: "Xung đột với dữ liệu hiện tại: trùng, chồng khoảng, sai trạng thái, hết phép"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: "#/components/schemas/Problem"
+    TooManyRequests:
+      description: "Quá nhiều lần đăng nhập từ một IP (`rate_limited`)"
+      content:
+        "application/problem+json":
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Locked:
+      description: "Tài khoản đang bị khóa tạm do nhập sai nhiều lần (`account_throttled`, BR-003)"
+      content:
+        "application/problem+json":
+          schema:
+            $ref: "#/components/schemas/Problem"
