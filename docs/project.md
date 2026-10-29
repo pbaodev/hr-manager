@@ -1,49 +1,58 @@
-# Project: [tên dự án]
+# Project: hr-manager
 
-- **Status:** [Draft | Accepted]
-- **Updated:** [YYYY-MM-DD]
+- **Status:** Accepted
+- **Updated:** 2026-10-29
 
 > Điền ở Phase 0. Default nằm ở [working-agreement.md](playbook/working-agreement.md), [hats.md](playbook/hats.md) và
 > [phases.md](playbook/phases.md); file này chỉ ghi mục tiêu, nhịp làm việc, công cụ và những chỗ làm khác default.
-> Sửa qua PR, ghi lý do và ngày. Dòng in nghiêng là ví dụ, xóa khi điền.
+> Sửa qua PR, ghi lý do và ngày.
 
 ## Goals
 
-- **Product goal:** [sản phẩm giúp ai làm được gì, một câu]
-- **Project type:** [Experiment | Personal tool | Product | Client delivery], theo bảng Project types trong
-  [playbook](playbook/README.md)
-- **Receiving party:** [chỉ cho Client delivery: bên nhận, người xác nhận phạm vi và nghiệm thu]
-- **Learning goals:** [kỹ năng muốn luyện qua dự án này; xem lại ở mỗi retro]
-  - *Thiết kế data model có luật nhất quán khi nhiều người cùng ghi*
-  - *Viết ADR so sánh ít nhất hai phương án thật*
+- **Product goal:** Giúp HR và quản lý ở doanh nghiệp nhỏ và vừa tại Việt Nam quản lý nhân viên, cơ cấu tổ chức, chấm
+  công, nghỉ phép và lương trên một hệ thống, để nhân viên tự xem thông tin và gửi yêu cầu thay vì hỏi HR qua tin nhắn
+  hay bảng tính.
+- **Project type:** Product, theo bảng Project types trong [playbook](playbook/README.md)
+- **Learning goals:**
+  - Phân tích một domain có luật nghiệp vụ thật: phép năm, chấm công và lương, đối chiếu với Bộ luật Lao động; lập ma
+    trận phân quyền cho nhiều vai trò.
+  - Thiết kế data model giữ được luật nhất quán và dữ liệu theo thời gian: số dư phép không âm khi hai đơn được duyệt
+    cùng lúc; chuyển phòng ban hay tăng lương có ngày hiệu lực, và xem lại được cơ cấu tổ chức tại một ngày bất kỳ.
+  - Viết ADR so sánh ít nhất hai phương án thật cho mỗi quyết định khó đảo ngược.
+  - Sau baseline: thiết kế tính năng AI như một component bình thường, có eval-lite.
 
 ## Cadence
 
-- **Time budget:** [số giờ mỗi tuần]
-- **Weekly review:** [thứ, giờ]
-- **Target release:** [YYYY-MM-DD, hoặc "không có hạn"]
+- **Time budget:** khoảng 6 giờ mỗi ngày
+- **Weekly review:** Chủ nhật hằng tuần
+- **Target release:** 2026-11-12
 
 | Milestone | Target date | Scope |
 |---|---|---|
-| *M1* | *[YYYY-MM-DD]* | *Walking skeleton: đặt một phòng, chạy trên staging* |
+| M1 | — | Walking skeleton: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; chạy trên staging |
+| M2 | — | Nghỉ phép |
+| M3 | — | Chấm công |
+| M4 | — | Lương và phúc lợi |
+| M5 | — | Báo cáo và phân tích |
+| M6 | — | Tính năng AI, theo Feature loop |
 
 ## Tools
 
 | Purpose | Choice |
 |---|---|
-| Code and review | [GitHub] |
-| Tracker and board | [GitHub Issues + GitHub Projects; link tới board]; label và Issue baseline tạo bằng `scripts/bootstrap-github.sh` |
-| Agent access to tracker | [`gh` CLI / GitHub MCP] |
-| AI agent | [Claude Code / Codex / Cursor / …] |
+| Code and review | GitHub |
+| Tracker and board | GitHub Issues + GitHub Projects ([board](https://github.com/users/pbaodev/projects/6)); label và Issue baseline tạo bằng `scripts/bootstrap-github.sh` |
+| Agent access to tracker | `gh` CLI |
+| AI agent | Claude Code, Codex |
 | Diagrams | Mermaid trong Markdown |
-| Hosting | [chọn ở Phase 3, dẫn ADR] |
-| Secrets | [password manager] |
+| Hosting | Chọn ở Phase 3, dẫn ADR |
+| Secrets | `.env` ở local; nơi lưu cho môi trường deploy chọn ở Phase 3 |
 
 ## Deviations from default
 
 | Topic | Default | My choice | Reason | Effective |
 |---|---|---|---|---|
-| *Review nguội* | *Ít nhất một đêm* | *Ít nhất 4 giờ* | *Chỉ làm vào cuối tuần, chờ qua đêm làm chậm cả tuần* | *[YYYY-MM-DD]* |
+| Agent đọc secret | Agent không đọc, không sửa secret ([hats.md](playbook/hats.md)) | Agent được đọc `.env` ở local; vẫn không sửa secret và không chép giá trị secret vào code, test, log, prompt hay PR | Secret hiện chỉ là giá trị dev ở local; xem lại khi có production | 2026-10-29 |
 
 ## Retro log
 
@@ -51,4 +60,3 @@ Ghi sau mỗi milestone. Cột cuối giúp nhìn lại những gì đã học �
 
 | Milestone | Keep | Drop | Try | Learned about design | Date |
 |---|---|---|---|---|---|
-| *M1* | *Vẽ sequence diagram trước khi viết API* | *Vẽ component cho container mỏng* | *Đo QA-001 ngay từ M2* | *Exclusion constraint thay được việc khóa ở tầng app* | *[YYYY-MM-DD]* |
