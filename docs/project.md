@@ -1,7 +1,7 @@
 # Project: hr-manager
 
 - **Status:** Accepted
-- **Updated:** 2026-10-29
+- **Updated:** 2026-10-30
 
 > Điền ở Phase 0. Default nằm ở [working-agreement.md](playbook/working-agreement.md), [hats.md](playbook/hats.md) và
 > [phases.md](playbook/phases.md); file này chỉ ghi mục tiêu, nhịp làm việc, công cụ và những chỗ làm khác default.
@@ -29,12 +29,13 @@
 
 | Milestone | Target date | Scope |
 |---|---|---|
-| Baseline | 2026-11-12 | Phase 1–3: phân tích và thiết kế chi tiết cho M1–M5 |
+| Baseline | 2026-11-12 | Phase 1–3: phân tích chi tiết M1–M5; thiết kế kiến trúc và dữ liệu cho M1–M5, API và giao diện chi tiết cho MVP |
+| MVP | — | Bản phát hành đầu tiên: 32 story có ✅ ở cột MVP trong [stories](stories.md#summary), gồm M1, M2 và phần báo cáo của M5 |
 | M1 | — | Walking skeleton: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; chạy trên staging |
 | M2 | — | Nghỉ phép |
 | M3 | — | Chấm công |
 | M4 | — | Lương và phúc lợi |
-| M5 | — | Báo cáo và phân tích |
+| M5 | — | Báo cáo và phân tích; phần không cần M3, M4 thuộc MVP |
 | M6 | — | Tính năng AI, theo Feature loop |
 
 ## Tools
@@ -53,7 +54,7 @@
 
 | Topic | Default | My choice | Reason | Effective |
 |---|---|---|---|---|
-| Phạm vi baseline | Baseline chỉ phân tích đủ cho các milestone đầu; module sau phân tích ở Feature loop ([phases.md](playbook/phases.md)) | Baseline phân tích và thiết kế chi tiết cho M1–M5 | Muốn luyện phân tích và thiết kế toàn hệ thống trước khi code; code có thể chậm hơn | 2026-10-29 |
+| Phạm vi baseline | Baseline chỉ phân tích đủ cho các milestone đầu; module sau phân tích ở Feature loop ([phases.md](playbook/phases.md)) | Baseline phân tích chi tiết M1–M5. Thiết kế kiến trúc và dữ liệu cho M1–M5; API và giao diện chi tiết chỉ cho MVP | Muốn luyện phân tích và thiết kế toàn hệ thống trước khi code. Ngày 2026-10-30 thu hẹp phần thiết kế chi tiết về MVP, vì phạm vi đủ M1–M5 quá lớn cho mốc 2026-11-12 và cho bản phát hành đầu tiên | 2026-10-29; đổi 2026-10-30 |
 | Agent đọc secret | Agent không đọc, không sửa secret ([hats.md](playbook/hats.md)) | Agent được đọc `.env` ở local; vẫn không sửa secret và không chép giá trị secret vào code, test, log, prompt hay PR | Secret hiện chỉ là giá trị dev ở local; xem lại khi có production | 2026-10-29 |
 
 ## Retro log
