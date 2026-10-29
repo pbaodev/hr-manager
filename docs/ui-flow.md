@@ -7,12 +7,11 @@
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
 được kiểm ở backend theo Permission matrix trong [requirements](requirements.md#permission-matrix). Bản hiện tại có
-information architecture cho cả baseline và các màn hình của M1 tới M4.
+information architecture và các màn hình của M1 tới M5.
 
 ## Information architecture
 
-Menu chính chỉ hiện mục người dùng có quyền. Mục của M2–M5 là dự kiến và được chi tiết hóa ở lần phân tích của milestone
-đó.
+Menu chính chỉ hiện mục người dùng có quyền.
 
 ```mermaid
 flowchart TD
@@ -52,7 +51,12 @@ flowchart TD
   PY --> PYME["Phiếu lương của tôi<br/>SCR-039"]
   PY --> PYRUN["Bảng lương<br/>SCR-037"]
   PYRUN --> PYSLIP["Chi tiết phiếu lương<br/>SCR-038"]
-  HOME --> RP["Báo cáo · M5"]
+  HOME --> RP["Báo cáo<br/>SCR-040"]
+  RP --> RPHC["Biến động nhân sự<br/>SCR-041"]
+  RP --> RPST["Cơ cấu nhân sự<br/>SCR-042"]
+  RP --> RPLV["Nghỉ phép<br/>SCR-043"]
+  RP --> RPAT["Chấm công<br/>SCR-044"]
+  RP --> RPPY["Chi phí lương<br/>SCR-045"]
 ```
 
 | Menu | Nhân viên | Quản lý | HR | Screens |
@@ -66,6 +70,7 @@ flowchart TD
 | Nghỉ phép | ✅ chỉ nghỉ phép của mình | ✅ thêm lịch nghỉ của nhóm | ✅ thêm lịch nghỉ của nhóm | SCR-019, SCR-020, SCR-022 |
 | Chấm công | ✅ chỉ bảng công của mình | ✅ thêm bảng công của nhóm | ✅ thêm nhập file và chốt bảng công | SCR-027 tới SCR-032 |
 | Lương | ✅ chỉ phiếu lương của mình | ✅ chỉ phiếu lương của mình | ✅ thêm bảng lương | SCR-037 tới SCR-039 |
+| Báo cáo | ❌ | ✅ chỉ phạm vi; chi phí lương chỉ số tổng hợp | ✅ | SCR-040 tới SCR-045 |
 | Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034 |
 
 Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem không có quyền thì không hiện.
@@ -585,3 +590,52 @@ flowchart LR
 - **Purpose:** nhân viên xem phiếu lương · **Stories:** US-061
 - **Content and actions:** danh sách các tháng có bảng lương đã chốt; chọn một tháng để xem phiếu với các nhóm dòng như
   SCR-038, không có phần công ty đóng và không có thao tác sửa. Tháng chưa chốt không hiện (BR-122).
+
+### Report screens
+
+Các màn hình SCR-041 tới SCR-045 dùng chung một bố cục: thanh lọc gồm kỳ báo cáo và phòng ban trong phạm vi (BR-127); một
+biểu đồ tóm tắt; bảng số liệu theo phòng ban, bấm một dòng để xem phòng ban con; nút Xuất bảng tính (BR-136). Số liệu tạm
+tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đây chỉ ghi phần khác.
+
+### SCR-040: Tổng quan báo cáo
+
+- **Purpose:** xem nhanh tình hình nhân sự và mở các báo cáo · **Stories:** US-064, US-070
+- **Content and actions:** các thẻ số theo phạm vi: nhân viên đang làm, vào mới và nghỉ việc trong tháng, người đang nghỉ
+  hôm nay, đơn chờ mình duyệt. HR thấy thêm hợp đồng sắp hết hạn, ngày chưa xử lý của tháng đang mở, trạng thái bảng công
+  và bảng lương tháng trước. Bấm một thẻ để mở danh sách chi tiết (BR-137). Bên dưới là danh sách năm báo cáo.
+
+### SCR-041: Biến động nhân sự
+
+- **Purpose:** theo dõi người vào, ra · **Stories:** US-065
+- **Content and actions:** kỳ báo cáo là khoảng tháng. Biểu đồ cột vào mới và nghỉ việc theo tháng, kèm đường tỷ lệ nghỉ
+  việc. Bảng mỗi phòng ban một dòng với các cột theo BR-132. HR bấm vào số vào mới hoặc nghỉ việc để xem danh sách người.
+
+### SCR-042: Cơ cấu nhân sự
+
+- **Purpose:** xem cơ cấu tại một ngày · **Stories:** US-066
+- **Content and actions:** ô chọn ngày, chỉ HR đổi được (BR-133). Ô chọn chiều: phòng ban, chức danh, thâm niên; HR có
+  thêm loại hợp đồng, giới tính, độ tuổi. Biểu đồ cột ngang theo chiều đã chọn, bảng số lượng và tỷ lệ.
+
+### SCR-043: Báo cáo nghỉ phép
+
+- **Purpose:** xem ngày nghỉ và số phép còn lại · **Stories:** US-067
+- **Content and actions:** kỳ báo cáo là khoảng ngày. Tab Ngày nghỉ: số ngày theo loại nghỉ, theo phòng ban và theo
+  nhân viên (BR-135). Tab Số dư phép: mỗi nhân viên một dòng với phép năm còn lại, phép tồn và hạn dùng; lọc được người có
+  phép tồn sắp hết hạn. Quản lý không thấy lý do nghỉ (BR-067).
+
+### SCR-044: Báo cáo chấm công
+
+- **Purpose:** xem tổng hợp công và làm thêm · **Stories:** US-068
+- **Content and actions:** kỳ báo cáo là một tháng hoặc một năm. Bảng theo phòng ban với số công, ngày vắng không lý do,
+  số lần và phút đi muộn, về sớm, giờ làm thêm theo loại (BR-092). Danh sách xếp hạng theo đi muộn và vắng không lý do.
+  Danh sách người đã dùng từ 80% giới hạn giờ làm thêm năm trở lên (BR-084).
+
+### SCR-045: Chi phí lương
+
+- **Purpose:** kiểm soát chi phí nhân sự · **Stories:** US-069 · **Use case:** UC-012
+- **Content and actions:** kỳ báo cáo là khoảng tháng. Biểu đồ cột chồng chi phí theo tháng, tách tổng thu nhập và phần
+  công ty đóng. Bảng mỗi phòng ban một dòng: số người, tổng thu nhập, phần công ty đóng, tổng chi phí, chênh lệch với tháng
+  trước (BR-131). HR bấm một phòng ban để xem từng nhân viên; Quản lý chỉ xem tới phòng ban con.
+- **States:**
+  - Nhóm nhỏ được gộp: dòng phòng ban cha có ghi chú "Gồm số liệu của [tên phòng ban] vì có dưới [ngưỡng] người." (BR-129)
+  - Phạm vi dưới ngưỡng: "Phạm vi của bạn có dưới [ngưỡng] người nên báo cáo không hiện số liệu." (BR-129)

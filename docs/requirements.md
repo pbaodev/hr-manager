@@ -9,7 +9,7 @@
 ## Goal
 
 Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](brief.md#scope) để thiết kế toàn hệ thống trước khi
-code. Tài liệu được điền theo từng milestone; bản hiện tại có phần dùng chung và M1 tới M4.
+code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung cùng M1 tới M5.
 
 ## Actors
 
@@ -19,7 +19,7 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Actor | Type | Goals | Permissions |
 |---|---|---|---|
 | Nhân viên | Người | Xem và cập nhật thông tin của mình; tra cứu đồng nghiệp | Mọi người có tài khoản đang hoạt động đều có vai trò này (BR-006) |
-| Quản lý | Người | Nắm thông tin nhân sự trong phạm vi mình phụ trách; từ M2, duyệt yêu cầu của nhân viên trong phạm vi | Tự có khi đang là trưởng của ít nhất một phòng ban, không gán tay (BR-006). Phạm vi gồm phòng ban mình làm trưởng và mọi phòng ban con (BR-013) |
+| Quản lý | Người | Nắm thông tin nhân sự trong phạm vi mình phụ trách; từ M2, duyệt yêu cầu của nhân viên trong phạm vi; từ M5, xem báo cáo của phạm vi | Tự có khi đang là trưởng của ít nhất một phòng ban, không gán tay (BR-006). Phạm vi gồm phòng ban mình làm trưởng và mọi phòng ban con (BR-013) |
 | HR | Người | Giữ hồ sơ, hợp đồng và cơ cấu tổ chức đúng; quản lý tài khoản và cấu hình; từ M4, tính và chốt lương | Được gán tay (BR-006). HR kiêm quản trị hệ thống và tính lương; hệ thống không có vai trò Kế toán |
 | Thời gian | Lịch | Làm cho thay đổi có ngày hiệu lực tự có tác dụng khi tới ngày | Chỉ thực hiện các chuyển trạng thái do thời gian trong mục Lifecycles của [domain](domain.md#lifecycles) |
 | Máy chấm công | Hệ thống ngoài | Cung cấp lượt chấm công của nhân viên qua file do HR xuất ra và tải lên | Hệ thống không kết nối trực tiếp với máy |
@@ -62,6 +62,8 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Ghi lương, thông tin thuế, bảo hiểm và người phụ thuộc (US-051 tới US-053) | ❌ | ❌ | ✅ |
 | Quản lý loại phụ cấp và tham số lương (US-050, US-054) | ❌ | ❌ | ✅ |
 | Tính, điều chỉnh, chốt và xuất bảng lương (US-055 tới US-060, US-062, US-063) | ❌ | ❌ | ✅ |
+| Xem trang tổng quan và báo cáo nhân sự, nghỉ phép, chấm công; xuất báo cáo (US-064 tới US-068, US-070) | ❌ | ✅ phạm vi (BR-127) | ✅ mọi người |
+| Xem báo cáo chi phí lương (US-069) | ❌ | ✅ phạm vi, chỉ số tổng hợp từ bảng lương đã chốt (BR-128, BR-129) | ✅ mọi người, kể cả bảng lương Nháp |
 
 ## User stories
 
@@ -70,7 +72,7 @@ Story và acceptance criteria nằm ở [stories.md](stories.md).
 ## Use cases
 
 Sơ đồ tổng thể của baseline. Quản lý và HR cũng là Nhân viên nên dùng được mọi use case của Nhân viên; sơ đồ không vẽ
-lại các đường đó. Use case của M2–M5 là dự kiến và được chi tiết hóa ở lần phân tích của milestone đó.
+lại các đường đó.
 
 ```mermaid
 flowchart LR
@@ -335,6 +337,27 @@ flowchart LR
   - `2a`. Đã có bản ghi lương khác cùng ngày hiệu lực: từ chối; HR sửa bản ghi đó.
 - **Postconditions:** Các bản ghi lương của nhân viên không chồng, không hở (BR-093); nhật ký ghi giá trị trước và sau.
 
+### UC-012: Xem báo cáo chi phí lương
+
+- **Actor:** Quản lý, HR · **Stories:** US-069, US-070
+- **Trigger:** Ban giám đốc hoặc trưởng phòng ban cần biết chi phí nhân sự của một hoặc nhiều tháng.
+- **Preconditions:** Có ít nhất một bảng lương đã chốt; với HR, đã có bảng lương Nháp.
+- **Main flow:**
+  1. Người xem mở báo cáo chi phí lương và chọn khoảng tháng.
+  2. Hệ thống lấy các phiếu lương của bảng lương đã chốt, xếp mỗi nhân viên vào phòng ban tại ngày cuối tháng mà người đó
+     còn làm (BR-127, BR-131).
+  3. Hệ thống tổng hợp theo phòng ban trong phạm vi: số người, tổng thu nhập, phần công ty đóng, tổng chi phí, kèm so
+     sánh với tháng trước.
+  4. Người xem chọn một phòng ban để xem theo phòng ban con, hoặc xuất ra bảng tính (BR-136).
+- **Alternative flows:**
+  - `2a`. Người xem là HR: thêm tháng có bảng lương Nháp, đánh dấu tạm tính (BR-130), và xem được tới từng nhân viên.
+  - `3a`. Người xem là Quản lý và một phòng ban có dưới `report_min_group_size` người: số liệu được gộp vào phòng ban cha
+    (BR-129, EC-078).
+- **Exceptions:**
+  - `3b`. Cả phạm vi của Quản lý có dưới `report_min_group_size` người: không hiện số liệu và ghi lý do (BR-129, EC-079).
+  - `4a`. Mở báo cáo của phòng ban ngoài phạm vi bằng đường dẫn trực tiếp: từ chối (BR-127, EC-086).
+- **Postconditions:** Quản lý không suy ra được lương của từng người. Mỗi lần xuất được ghi nhật ký (BR-136).
+
 ## Quality attributes
 
 Thêm ở lần cập nhật cuối của Phase 2, sau khi đủ M1–M5.
@@ -371,3 +394,10 @@ Riêng M4 không làm:
 - Quản lý chương trình phúc lợi riêng như bảo hiểm sức khỏe hay quà lễ: HR ghi bằng phụ cấp hoặc khoản điều chỉnh.
 - Lương theo sản phẩm, doanh số, hoa hồng; nhiều kỳ trả lương trong tháng: tạm ứng giữa tháng ghi bằng khoản trừ.
 - Nhân viên không cư trú về thuế và trả lương bằng ngoại tệ.
+
+Riêng M5 không làm:
+
+- Người dùng tự tạo báo cáo, tự chọn cột hay kéo thả biểu đồ: hệ thống có bộ báo cáo cố định.
+- Gửi báo cáo định kỳ qua email.
+- Dự báo, phân tích xu hướng hay gợi ý bằng AI: để ở M6.
+- Báo cáo nộp cơ quan nhà nước như báo cáo tình hình sử dụng lao động: HR tự lập từ file xuất.
