@@ -25,10 +25,11 @@
 
 - **Time budget:** khoảng 6 giờ mỗi ngày
 - **Weekly review:** Chủ nhật hằng tuần
-- **Target release:** 2026-11-12
+- **Target release:** chưa đặt; đặt sau khi baseline xong
 
 | Milestone | Target date | Scope |
 |---|---|---|
+| Baseline | 2026-11-12 | Phase 1–3: phân tích và thiết kế chi tiết cho M1–M5 |
 | M1 | — | Walking skeleton: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; chạy trên staging |
 | M2 | — | Nghỉ phép |
 | M3 | — | Chấm công |
@@ -52,6 +53,7 @@
 
 | Topic | Default | My choice | Reason | Effective |
 |---|---|---|---|---|
+| Phạm vi baseline | Baseline chỉ phân tích đủ cho các milestone đầu; module sau phân tích ở Feature loop ([phases.md](playbook/phases.md)) | Baseline phân tích và thiết kế chi tiết cho M1–M5 | Muốn luyện phân tích và thiết kế toàn hệ thống trước khi code; code có thể chậm hơn | 2026-10-29 |
 | Agent đọc secret | Agent không đọc, không sửa secret ([hats.md](playbook/hats.md)) | Agent được đọc `.env` ở local; vẫn không sửa secret và không chép giá trị secret vào code, test, log, prompt hay PR | Secret hiện chỉ là giá trị dev ở local; xem lại khi có production | 2026-10-29 |
 
 ## Retro log
