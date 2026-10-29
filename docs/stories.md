@@ -10,7 +10,7 @@
 
 - **Priority:** `Must` khi thiếu story đó thì bản phát hành vô nghĩa; `Should`, `Could` cho phần còn lại.
 - **Feature:** Issue Feature trên tracker chứa story; điền khi tạo Issue ở Phase 4.
-- Bản hiện tại có story của M1. Story của M2–M5 được thêm ở lần phân tích của milestone đó.
+- Bản hiện tại có story của M1 và M2. Story của M3–M5 được thêm ở lần phân tích của milestone đó.
 
 | ID | Story | Priority | Milestone | Feature |
 |---|---|---|---|---|
@@ -35,6 +35,20 @@
 | US-019 | Tra cứu danh bạ nhân viên | Should | M1 | |
 | US-020 | HR tìm và lọc danh sách nhân viên | Must | M1 | |
 | US-021 | HR nhập danh sách nhân viên từ bảng tính | Could | M1 | |
+| US-022 | Nhân viên xem số dư phép năm | Must | M2 | |
+| US-023 | Nhân viên gửi đơn nghỉ | Must | M2 | |
+| US-024 | Nhân viên hủy đơn nghỉ | Must | M2 | |
+| US-025 | Quản lý duyệt hoặc từ chối đơn nghỉ | Must | M2 | |
+| US-026 | HR duyệt thay đơn nghỉ | Should | M2 | |
+| US-027 | Quản lý xem lịch nghỉ của nhóm | Should | M2 | |
+| US-028 | HR quản lý loại nghỉ | Must | M2 | |
+| US-029 | HR quản lý lịch làm việc | Must | M2 | |
+| US-030 | Cộng phép năm hằng tháng | Must | M2 | |
+| US-031 | Chuyển phép tồn sang năm sau | Must | M2 | |
+| US-032 | HR điều chỉnh số dư phép | Must | M2 | |
+| US-033 | HR ghi đơn nghỉ thay nhân viên | Should | M2 | |
+| US-034 | Thông báo về đơn nghỉ | Should | M2 | |
+| US-035 | HR xem số phép chưa nghỉ khi nhân viên nghỉ việc | Should | M2 | |
 
 ## Details
 
@@ -355,3 +369,202 @@ công ty bắt đầu dùng hệ thống.
   dấu lỗi (BR-015, BR-022).
 - AC4: Given file hợp lệ, when HR xác nhận, then mỗi dòng thành một hồ sơ giữ nguyên mã nhân viên trong file, kèm một quá
   trình công tác bắt đầu từ ngày vào làm.
+
+### US-022: Nhân viên xem số dư phép năm
+
+**Story:** Là nhân viên, tôi muốn xem số dư phép năm và các biến động phép, để biết mình còn được nghỉ bao nhiêu ngày.
+
+**Links:** BR-048, BR-051, BR-054 · SCR-019
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên mở trang nghỉ phép, then thấy số dư hiện tại, trong đó phép tồn hiện riêng kèm hạn dùng.
+- AC2: Given danh sách biến động phép, then mỗi dòng có ngày, loại biến động, số ngày và lý do; tổng các dòng bằng số dư
+  (BR-054).
+- AC3: Given có đơn phép năm đang chờ duyệt, then số ngày của các đơn đó hiện riêng và chưa bị trừ vào số dư.
+
+### US-023: Nhân viên gửi đơn nghỉ
+
+**Story:** Là nhân viên, tôi muốn gửi đơn nghỉ trên hệ thống, để quản lý duyệt nhanh và số ngày nghỉ được ghi lại chính
+xác.
+
+**Links:** UC-005 · BR-043 tới BR-047, BR-053, BR-056, BR-062 · EC-023, EC-025, EC-026 · SCR-020
+
+**Acceptance criteria**
+
+- AC1: Given đủ phép, when gửi đơn phép năm cho thứ Năm và thứ Sáu, then đơn ở trạng thái Chờ duyệt, số ngày là 2, và
+  người duyệt là quản lý trực tiếp (BR-056).
+- AC2: Given khoảng nghỉ có một ngày lễ, then ngày lễ không được tính vào số ngày (EC-026).
+- AC3: Given đơn từ chiều thứ Sáu tới hết sáng thứ Hai, then số ngày là 1 (BR-043, BR-044).
+- AC4: Given đơn phép năm vượt số phép có thể dùng tại ngày nghỉ, when gửi, then bị từ chối và hiện số ngày còn thiếu
+  (BR-053).
+- AC5: Given đơn chồng buổi với một đơn khác đang chờ duyệt hoặc đã duyệt, when gửi, then bị từ chối (BR-045).
+- AC6: Given ngày bắt đầu sớm hơn hôm nay quá `leave_backdate_days` ngày, when gửi, then bị từ chối (BR-062).
+
+### US-024: Nhân viên hủy đơn nghỉ
+
+**Story:** Là nhân viên, tôi muốn hủy đơn nghỉ khi đổi kế hoạch, để phép năm được hoàn lại.
+
+**Links:** BR-061 · EC-036 · SCR-019
+
+**Acceptance criteria**
+
+- AC1: Given đơn đang chờ duyệt, when hủy, then đơn ở trạng thái Đã hủy và không còn trong danh sách chờ của người duyệt.
+- AC2: Given đơn phép năm đã duyệt và chưa tới ngày bắt đầu, when hủy, then số ngày được hoàn vào số dư và người duyệt
+  được thông báo.
+- AC3: Given đơn đã tới ngày bắt đầu, then nhân viên không hủy được; màn hình hướng dẫn liên hệ HR (BR-061).
+
+### US-025: Quản lý duyệt hoặc từ chối đơn nghỉ
+
+**Story:** Là quản lý, tôi muốn duyệt hoặc từ chối đơn nghỉ của nhân viên mình, kèm số dư phép và lịch nghỉ của nhóm,
+để quyết định nhanh mà không để nhóm thiếu người.
+
+**Links:** UC-005 · BR-053, BR-056, BR-057, BR-059, BR-060 · EC-024, EC-027, EC-029, EC-030 · SCR-021
+
+**Acceptance criteria**
+
+- AC1: Given đơn đang chờ mình duyệt, when duyệt, then đơn ở trạng thái Đã duyệt, phép năm bị trừ và người gửi được
+  thông báo.
+- AC2: Given chọn từ chối mà để trống lý do, then không từ chối được (BR-059).
+- AC3: Given số phép của người gửi không còn đủ tại lúc duyệt, when duyệt, then thao tác bị từ chối kèm thông báo thiếu
+  phép (EC-030).
+- AC4: Given đơn mà mình không phải người duyệt, when duyệt bằng đường dẫn trực tiếp, then bị từ chối.
+- AC5: Given màn hình duyệt, then thấy các đơn đã duyệt khác của nhóm trong cùng khoảng ngày.
+
+### US-026: HR duyệt thay đơn nghỉ
+
+**Story:** Là HR, tôi muốn duyệt thay khi người duyệt vắng mặt, để đơn của nhân viên không bị treo.
+
+**Links:** BR-058 · EC-029 · SCR-021
+
+**Acceptance criteria**
+
+- AC1: Given đơn đang chờ quản lý duyệt, when HR duyệt, then đơn ở trạng thái Đã duyệt và nhật ký ghi HR duyệt thay.
+- AC2: Given HR mở danh sách đơn chờ duyệt, then thấy mọi đơn đang chờ; đơn đã qua ngày bắt đầu được đánh dấu quá hạn
+  (EC-029).
+
+### US-027: Quản lý xem lịch nghỉ của nhóm
+
+**Story:** Là quản lý, tôi muốn xem ai trong nhóm nghỉ ngày nào, để sắp xếp công việc.
+
+**Links:** BR-013, BR-067 · SCR-022
+
+**Acceptance criteria**
+
+- AC1: Given một tháng, then thấy ngày nghỉ của nhân viên trong phạm vi, phân biệt đơn đã duyệt và đơn đang chờ.
+- AC2: Given nhân viên ngoài phạm vi, then người đó không hiện trên lịch.
+- AC3: Given quản lý không phải người duyệt của một đơn, then chỉ thấy loại nghỉ, không thấy lý do nghỉ (BR-067).
+
+### US-028: HR quản lý loại nghỉ
+
+**Story:** Là HR, tôi muốn quản lý các loại nghỉ và thuộc tính của chúng, để hệ thống đúng với luật và quy chế của công
+ty.
+
+**Links:** BR-040, BR-041, BR-042 · SCR-023
+
+**Acceptance criteria**
+
+- AC1: Given hệ thống mới cài, then có sẵn các loại nghỉ trong bảng Default leave types của domain.
+- AC2: Given HR thêm loại "Nghỉ sinh nhật" có lương, không trừ phép năm, tối đa 1 ngày mỗi đơn, then nhân viên chọn được
+  loại này khi gửi đơn.
+- AC3: Given loại Phép năm, when HR xóa hoặc ngừng dùng, then bị từ chối (BR-041).
+- AC4: Given loại nghỉ đã có đơn, when HR xóa, then bị từ chối; HR chỉ ngừng dùng được (BR-042).
+
+### US-029: HR quản lý lịch làm việc
+
+**Story:** Là HR, tôi muốn khai báo ngày làm việc trong tuần, ngày nghỉ lễ và ngày làm bù, để số ngày nghỉ được tính
+đúng.
+
+**Links:** BR-038, BR-039, BR-064 · EC-031, EC-032 · SCR-024
+
+**Acceptance criteria**
+
+- AC1: Given HR thêm một ngày nghỉ lễ, then ngày đó không được tính trong các đơn nghỉ gửi sau đó.
+- AC2: Given có đơn đã duyệt, chưa bắt đầu, chứa ngày vừa thành ngày nghỉ lễ, then số ngày của đơn được tính lại, phép
+  được hoàn và nhân viên được thông báo (BR-064, EC-031).
+- AC3: Given ngày làm bù mới làm tăng số ngày của một đơn đã duyệt và nhân viên không đủ phép, then HR thấy cảnh báo kèm
+  danh sách đơn cần xử lý (EC-032).
+- AC4: Given một ngày vừa được khai là ngày nghỉ lễ vừa là ngày làm bù, when lưu, then bị từ chối.
+
+### US-030: Cộng phép năm hằng tháng
+
+**Story:** Là nhân viên, tôi muốn được cộng phép năm tự động mỗi tháng, để không phải nhờ HR tính.
+
+**Links:** UC-006 · BR-048, BR-049, BR-050 · EC-034, EC-037, EC-038 · SCR-019
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên có phép năm cơ bản 12 ngày và làm đủ tháng 3, then ngày 31/3 số dư tăng 1 ngày với biến động "Cộng
+  phép tháng 3".
+- AC2: Given nhân viên vừa đủ 5 năm làm việc, then từ tháng đó phép năm cơ bản là 13 ngày và mỗi tháng được cộng 13/12
+  ngày (BR-048).
+- AC3: Given nhân viên vào làm khi tháng đã qua quá nửa số ngày làm việc, then tháng đó không được cộng phép (BR-050,
+  EC-034).
+- AC4: Given lần cộng của một tháng đã chạy, when chạy lại, then không cộng thêm (EC-038).
+
+### US-031: Chuyển phép tồn sang năm sau
+
+**Story:** Là nhân viên, tôi muốn phép năm chưa dùng được chuyển sang năm sau, để không mất ngày phép khi cuối năm bận.
+
+**Links:** UC-006 · BR-051, BR-052 · EC-033 · SCR-019
+
+**Acceptance criteria**
+
+- AC1: Given cuối năm còn 7 ngày phép và `carryover_max_days` là 5, then ngày 1/1 có một biến động chuyển 5 ngày phép tồn
+  và một biến động hủy 2 ngày.
+- AC2: Given còn 2 ngày phép tồn tới hết ngày `carryover_expiry`, then ngày hôm sau có biến động hủy 2 ngày phép tồn hết
+  hạn.
+- AC3: Given nghỉ phép năm vào một ngày trước hạn phép tồn, then số ngày được trừ vào phép tồn trước (BR-052).
+
+### US-032: HR điều chỉnh số dư phép
+
+**Story:** Là HR, tôi muốn điều chỉnh số dư phép của nhân viên kèm lý do, để nhập số dư ban đầu khi công ty bắt đầu dùng
+hệ thống và để sửa sai.
+
+**Links:** BR-054, BR-055 · SCR-008
+
+**Acceptance criteria**
+
+- AC1: Given HR nhập cộng 3 ngày với lý do "Số dư chuyển từ bảng tính", then số dư tăng 3 ngày và có một biến động tương
+  ứng.
+- AC2: Given lý do để trống, when lưu, then bị từ chối (BR-055).
+- AC3: Given một biến động đã ghi sai, then không sửa hoặc xóa được; HR ghi một biến động bù (BR-054).
+
+### US-033: HR ghi đơn nghỉ thay nhân viên
+
+**Story:** Là HR, tôi muốn ghi đơn nghỉ thay cho nhân viên, để ghi nhận cả những lần nghỉ được báo qua điện thoại.
+
+**Links:** BR-062, BR-063 · SCR-020
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên gọi điện báo ốm hôm qua, when HR ghi đơn ốm đau cho hôm qua, then đơn ở trạng thái Đã duyệt ngay
+  và nhật ký ghi HR là người ghi (BR-063).
+- AC2: Given đơn HR ghi chồng buổi với đơn khác hoặc thiếu phép, then bị từ chối như đơn do nhân viên gửi.
+
+### US-034: Thông báo về đơn nghỉ
+
+**Story:** Là nhân viên hoặc người duyệt, tôi muốn nhận thông báo trong hệ thống khi đơn nghỉ thay đổi, để không phải hỏi
+lại nhau.
+
+**Links:** BR-066 · SCR-003
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên gửi đơn, then người duyệt thấy thông báo và số đơn chờ duyệt trên trang chủ.
+- AC2: Given đơn được duyệt, bị từ chối, bị hủy hoặc được tính lại, then người gửi thấy thông báo kèm lý do nếu có.
+- AC3: Given một thông báo đã được mở, then thông báo đó không còn tính vào số thông báo chưa đọc.
+
+### US-035: HR xem số phép chưa nghỉ khi nhân viên nghỉ việc
+
+**Story:** Là HR, tôi muốn biết số ngày phép năm nhân viên chưa nghỉ tới ngày làm việc cuối cùng, để thanh toán theo
+luật.
+
+**Links:** BR-065 · EC-028 · SCR-011
+
+**Acceptance criteria**
+
+- AC1: Given HR ghi nhận nghỉ việc, then màn hình hiện số ngày phép năm chưa nghỉ tính tới ngày làm việc cuối cùng; con
+  số này được dùng ở M4.
+- AC2: Given nhân viên còn đơn có ngày sau ngày làm việc cuối cùng, then các đơn đó bị hủy khi việc nghỉ có hiệu lực, và
+  nhân viên được thông báo (EC-028).

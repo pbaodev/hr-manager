@@ -9,7 +9,7 @@
 ## Goal
 
 Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](brief.md#scope) để thiết kế toàn hệ thống trước khi
-code. Tài liệu được điền theo từng milestone; bản hiện tại có phần dùng chung và M1.
+code. Tài liệu được điền theo từng milestone; bản hiện tại có phần dùng chung, M1 và M2.
 
 ## Actors
 
@@ -44,6 +44,12 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Xem cơ cấu tổ chức tại một ngày khác hôm nay (US-010) | ❌ | ❌ | ✅ |
 | Quản lý tài khoản; gán và thu hồi vai trò HR (US-002, US-003) | ❌ | ❌ | ✅ |
 | Xem nhật ký thao tác (US-004) | ❌ | ❌ | ✅ |
+| Xem số dư phép và biến động phép của mình (US-022) | ✅ | ✅ | ✅ |
+| Gửi đơn nghỉ, hủy đơn nghỉ của mình (US-023, US-024) | ✅ | ✅ | ✅ |
+| Duyệt, từ chối đơn nghỉ (US-025, US-026) | ❌ | ✅ chỉ đơn mình là người duyệt | ✅ mọi đơn, duyệt thay |
+| Xem đơn, số dư phép và lịch nghỉ của người khác (US-027) | ❌ | ✅ phạm vi; lý do nghỉ chỉ khi là người duyệt | ✅ mọi người |
+| Quản lý loại nghỉ và lịch làm việc (US-028, US-029) | ❌ | ❌ | ✅ |
+| Điều chỉnh số dư phép; ghi đơn nghỉ thay nhân viên (US-032, US-033) | ❌ | ❌ | ✅ |
 
 ## User stories
 
@@ -163,6 +169,53 @@ flowchart LR
   - `1d`. Thao tác khác đổi tên trên phòng ban gốc: từ chối (BR-007).
 - **Postconditions:** Cây tổ chức hợp lệ tại mọi ngày; nhật ký ghi lại thao tác.
 
+### UC-005: Gửi và duyệt đơn nghỉ
+
+- **Actor:** Nhân viên; Quản lý, HR · **Stories:** US-023, US-025, US-026, US-034
+- **Trigger:** Nhân viên cần nghỉ.
+- **Preconditions:** Nhân viên đang làm việc và có tài khoản.
+- **Main flow:**
+  1. Nhân viên chọn loại nghỉ, ngày và buổi bắt đầu, ngày và buổi kết thúc, nhập lý do.
+  2. Hệ thống tính số ngày nghỉ theo lịch làm việc (BR-044). Với phép năm, hệ thống hiện số phép còn lại sau đơn
+     (BR-053).
+  3. Nhân viên gửi đơn.
+  4. Hệ thống xác định người duyệt (BR-056) và gửi thông báo cho người đó (BR-066).
+  5. Người duyệt xem đơn, số dư phép của nhân viên và các đơn khác của nhóm trong cùng khoảng ngày.
+  6. Người duyệt duyệt đơn.
+  7. Hệ thống kiểm lại số phép, trừ phép nếu là phép năm (BR-053, BR-054) và thông báo cho nhân viên.
+- **Alternative flows:**
+  - `4a`. Nhân viên không có quản lý trực tiếp: HR là người duyệt (BR-056).
+  - `5a`. Người duyệt không còn quản lý nhân viên trước khi duyệt: đơn chuyển cho người duyệt mới (BR-057, EC-027).
+  - `5b`. HR duyệt thay người duyệt (BR-058).
+  - `6a`. Người duyệt từ chối và nhập lý do (BR-059). Số dư không đổi.
+- **Exceptions:**
+  - `2a`. Khoảng nghỉ không có ngày làm việc nào: từ chối (EC-025).
+  - `2b`. Đơn chồng buổi với đơn khác đang chờ duyệt hoặc đã duyệt: từ chối (BR-045).
+  - `2c`. Thiếu phép năm, vượt số ngày tối đa của loại nghỉ hoặc ra ngoài khoảng làm việc: từ chối (BR-053, BR-047,
+    BR-046).
+  - `7a`. Tại lúc duyệt, số phép không còn đủ: từ chối thao tác duyệt; đơn vẫn chờ (EC-024, EC-030).
+- **Postconditions:** Đơn được duyệt thì có một biến động phép trừ số ngày, nếu là phép năm. Đơn bị từ chối hay bị hủy
+  thì số dư không đổi. Mọi bước được ghi nhật ký.
+
+### UC-006: Cộng phép và chuyển phép tồn
+
+- **Actor:** Thời gian · **Stories:** US-030, US-031
+- **Trigger:** Tới ngày cuối tháng, ngày 1/1 hoặc ngày sau hạn phép tồn.
+- **Preconditions:** Lịch làm việc của tháng hoặc năm liên quan đã có.
+- **Main flow:**
+  1. Ngày cuối mỗi tháng, hệ thống xác định nhân viên có tháng đủ điều kiện (BR-050).
+  2. Hệ thống cộng cho mỗi người 1/12 phép năm cơ bản của họ, ghi thành biến động phép (BR-048, BR-049).
+  3. Ngày 1/1, hệ thống chuyển phép năm chưa dùng của năm trước thành phép tồn, tối đa `carryover_max_days` ngày, và hủy
+     phần vượt (BR-051).
+  4. Ngày sau `carryover_expiry`, hệ thống hủy phép tồn còn lại.
+- **Alternative flows:**
+  - `1a`. Nhân viên vào làm hoặc nghỉ việc trong tháng: tháng đó chỉ được tính khi đủ tỷ lệ ngày làm việc (BR-050,
+    EC-034).
+- **Exceptions:**
+  - `1b`. Hệ thống không chạy được đúng ngày: lần chạy sau cộng bù các tháng còn thiếu và không cộng trùng (EC-038).
+- **Postconditions:** Mỗi tháng đủ điều kiện của mỗi nhân viên được cộng đúng một lần. Số dư phép luôn bằng tổng các biến
+  động phép.
+
 ## Quality attributes
 
 Thêm ở lần cập nhật cuối của Phase 2, sau khi đủ M1–M5.
@@ -174,3 +227,10 @@ Phạm vi ngoài baseline nằm ở mục Scope của [brief](brief.md#scope). R
 - Đăng nhập bằng tài khoản Google hoặc Microsoft: một công ty nhỏ chưa cần.
 - Tự đặt lại mật khẩu qua email: HR đặt lại mật khẩu, vì chưa chắc mọi nhân viên có email công việc.
 - Đính kèm file vào hồ sơ và hợp đồng, như bản scan CCCD hay hợp đồng: để sau baseline.
+
+Riêng M2 không làm:
+
+- Nghỉ theo giờ: đơn vị nhỏ nhất là nửa ngày.
+- Duyệt nhiều cấp: chủ dự án chọn duyệt một cấp.
+- Đính kèm giấy tờ vào đơn nghỉ, như giấy nghỉ ốm: nhân viên nộp bản giấy cho HR.
+- Thông báo qua email hoặc ứng dụng chat: chỉ thông báo trong hệ thống.
