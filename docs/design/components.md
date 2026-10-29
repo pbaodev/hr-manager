@@ -75,14 +75,14 @@ kiểm ở `domain` hoặc `service` của module ghi trong cột Enforces.
 Người dùng thấy gì nằm ở [UI flow](../ui-flow.md); mục này ghi cách xây.
 
 - **Code layout:**
-  - `routes/` là một file cho mỗi màn hình `SCR-xxx`.
+  - `routes/` là một file cho mỗi màn hình `SCR-xxx`, theo React Router (ADR-0006).
   - `features/<module>/` chứa component và hook theo cùng tên module của backend.
   - `components/` là component dùng chung theo [UI design](ui.md).
   - `api/` là client sinh từ contract.
 - **Types:** sinh từ `contracts/openapi.yaml` bằng `openapi-typescript`; không viết tay kiểu của dữ liệu API. Sinh lại
   là một bước của `make check`, nên contract đổi mà frontend chưa sửa thì build lỗi.
-- **Server state:** dữ liệu từ API được cache và tải lại theo key của operation. Sau một thao tác ghi, chỉ tải lại các
-  key bị ảnh hưởng. Thư viện chọn ở Issue #12.
+- **Server state:** TanStack Query với `openapi-fetch` (ADR-0006). Dữ liệu được cache và tải lại theo key của
+  operation; sau một thao tác ghi, chỉ tải lại các key bị ảnh hưởng.
 - **Quyền ở giao diện:** ẩn menu và nút theo `roles` của `GET /me` để dễ dùng; không coi đó là kiểm quyền (BR-006).
 - **UI rules:** design system, trạng thái màn hình và accessibility theo [UI design](ui.md).
 

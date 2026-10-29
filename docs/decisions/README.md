@@ -24,3 +24,4 @@ Cột Options not chosen giúp tìm lại phương án đã cân nhắc mà khô
 | [0003](0003-data-store.md) | PostgreSQL là nơi lưu dữ liệu duy nhất | Accepted | 2026-10-30 | QA-001, QA-002, QA-005 | MySQL; SQLite |
 | [0004](0004-authentication.md) | Xác thực tự làm bằng JWT ngắn hạn và refresh token lưu DB | Accepted | 2026-10-30 | QA-003 | Session lưu DB; dịch vụ auth ngoài |
 | [0005](0005-hosting.md) | Render cho production, gói miễn phí cho staging | Accepted | 2026-10-30 | QA-004, QA-005 | Railway; app trên Render với DB trên Neon |
+| [0006](0006-frontend-libraries.md) | Mantine, TanStack Query, openapi-fetch và React Router cho frontend | Accepted | 2026-10-30 | QA-003 | shadcn/ui; Ant Design; SWR; Orval; TanStack Router |
