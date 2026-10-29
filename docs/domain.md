@@ -6,7 +6,7 @@
 - **Related:** [requirements](requirements.md) · [questions](questions.md) · [research](research.md) ·
   [data design](design/data.md) · [analysis guide](playbook/analysis.md)
 
-Bản hiện tại có phần dùng chung và M1 tới M3. Luật của M4 và M5 được thêm ở lần phân tích của milestone đó.
+Bản hiện tại có phần dùng chung và M1 tới M4. Luật của M5 được thêm ở lần phân tích của milestone đó.
 
 ## Glossary
 
@@ -53,6 +53,24 @@ Hệ thống có một bounded context.
 | Giờ làm ban đêm | Giờ làm trong khoảng từ `night_start` tới `night_end` | `nightHours` | — |
 | Kỳ công | Một tháng dương lịch dùng để tổng hợp và chốt công | `AttendancePeriod` | — |
 | Bảng công tháng | Tổng hợp công, nghỉ, đi muộn và làm thêm của một nhân viên trong một kỳ công | `MonthlyTimesheet` | — |
+| Lương cơ bản | Mức lương tháng theo công việc hoặc chức danh, ghi trong hợp đồng, chưa gồm phụ cấp | `baseSalary` | Lương đóng bảo hiểm |
+| Lương đóng bảo hiểm | Mức lương HR khai để tính BHXH, BHYT, BHTN | `insuranceSalary` | Lương cơ bản |
+| Phụ cấp | Khoản trả thêm theo tháng ngoài lương cơ bản, như ăn giữa ca hay trách nhiệm | `Allowance` | Khoản điều chỉnh: chỉ áp cho một phiếu lương |
+| Bản ghi lương | Lương cơ bản, lương đóng bảo hiểm và các phụ cấp của một nhân viên trong một khoảng hiệu lực | `SalaryRecord` | Hợp đồng lao động |
+| Công chuẩn | Số ngày làm việc của cả tháng theo ca, dùng làm mẫu số khi tính lương (BR-103) | `standardWorkDays` | Số ngày làm việc chuẩn trong bảng công: chỉ đếm ngày trong khoảng làm việc (BR-092) |
+| Công hưởng lương | Công cộng ngày nghỉ được công ty trả lương (BR-104) | `paidWorkDays` | Công |
+| Đơn giá giờ | Tiền lương cho một giờ làm việc bình thường (BR-107) | `hourlyRate` | — |
+| Lương tối thiểu vùng | Mức lương tháng thấp nhất theo vùng do Chính phủ quy định | `regionalMinWage` | Mức tham chiếu |
+| Mức tham chiếu | Mức tiền dùng để tính trần đóng BHXH, BHYT theo Luật Bảo hiểm xã hội 2024 | `referenceWage` | Lương tối thiểu vùng |
+| Người phụ thuộc | Người được nhân viên khai để giảm trừ gia cảnh khi tính thuế | `Dependent` | Người liên hệ khẩn cấp |
+| Thu nhập chịu thuế | Phần thu nhập từ tiền lương, tiền công phải tính thuế, sau khi bỏ phần được miễn (BR-111) | `taxableIncome` | Thu nhập tính thuế |
+| Thu nhập tính thuế | Thu nhập chịu thuế trừ bảo hiểm nhân viên đóng và giảm trừ gia cảnh; là cơ sở áp biểu thuế (BR-112) | `assessableIncome` | Thu nhập chịu thuế |
+| Cam kết thu nhập | Văn bản nhân viên không có hợp đồng từ 3 tháng cam kết tổng thu nhập năm chưa tới mức phải nộp thuế | `incomeCommitment` | — |
+| Tham số lương | Giá trị luật định dùng khi tính lương, như tỷ lệ bảo hiểm hay biểu thuế, có ngày hiệu lực | `PayrollParameter` | Tham số khác trong mục Parameters: một giá trị cấu hình, không có ngày hiệu lực |
+| Bảng lương | Tập phiếu lương của mọi nhân viên trong một tháng | `PayrollRun` | Bảng công tháng |
+| Phiếu lương | Kết quả tính lương của một nhân viên trong một tháng, gồm từng dòng thu nhập và khấu trừ | `Payslip` | — |
+| Khoản điều chỉnh | Dòng HR thêm tay vào một phiếu lương, như thưởng, tạm ứng, truy lĩnh hay truy thu | `PayAdjustment` | Phụ cấp |
+| Thực lĩnh | Số tiền nhân viên nhận sau mọi khoản khấu trừ (BR-114) | `netPay` | Tổng thu nhập |
 
 ## Entities
 
@@ -134,6 +152,35 @@ classDiagram
 Trạng thái của AttendanceDay được tính lại mỗi khi dữ liệu nguồn đổi, nên không có vòng đời riêng: Chưa tới, Ngày nghỉ,
 Đủ công, Nghỉ theo đơn, Nửa công nửa nghỉ, Thiếu chấm công, Vắng chưa xử lý, Vắng không lý do.
 
+**M4: lương và phúc lợi**
+
+```mermaid
+classDiagram
+  Employee "1" --> "*" SalaryRecord : có
+  SalaryRecord "1" --> "*" SalaryAllowance : gồm
+  SalaryAllowance "*" --> "1" AllowanceType : thuộc loại
+  Employee "1" --> "*" Dependent : khai
+  PayrollRun "1" --> "*" Payslip : gồm
+  Payslip "*" --> "1" Employee : của
+  Payslip "1" --> "*" PayslipLine : gồm
+  PayrollRun "1" --> "1" AttendancePeriod : tính từ
+  PayrollParameter "*" ..> PayrollRun : dùng khi tính
+```
+
+| Name | Kind | Key attributes | Relations |
+|---|---|---|---|
+| Employee | Entity, bổ sung ở M4 | Mã số thuế, mã số BHXH, năm có cam kết thu nhập | — |
+| AllowanceType | Entity | Tên, cách tính (theo công hoặc cố định theo tháng), chế độ thuế (chịu thuế, miễn thuế, miễn thuế trong mức), mức miễn thuế, đang dùng hay ngừng | Có nhiều SalaryAllowance |
+| SalaryRecord | Entity | Khoảng hiệu lực, lương cơ bản, lương đóng bảo hiểm, lý do | Thuộc một Employee; gồm nhiều SalaryAllowance |
+| SalaryAllowance | Value object | Loại phụ cấp, số tiền mỗi tháng | Thuộc một SalaryRecord |
+| Dependent | Entity | Họ tên, quan hệ, ngày sinh, số định danh hoặc mã số thuế, tháng bắt đầu, tháng kết thúc | Thuộc một Employee |
+| PayrollParameter | Entity | Tên tham số, giá trị, ngày hiệu lực. Biểu thuế là danh sách bậc, mỗi bậc có cận dưới, cận trên và thuế suất | Một tham số có nhiều giá trị theo ngày hiệu lực |
+| PayrollRun | Entity | Tháng, trạng thái, người và thời điểm tính gần nhất, người và thời điểm chốt | Một bảng lương mỗi tháng cho cả công ty; gồm nhiều Payslip |
+| Payslip | Entity | Công chuẩn, công hưởng lương, số người phụ thuộc, giá trị tham số đã dùng, tổng thu nhập, thu nhập chịu thuế, thu nhập tính thuế, thuế, thực lĩnh, phần công ty đóng, lỗi và cảnh báo | Thuộc một PayrollRun và một Employee; gồm nhiều PayslipLine |
+| PayslipLine | Entity | Nhóm (thu nhập, khấu trừ, công ty đóng), tên, số tiền, phần chịu thuế, nguồn (hệ thống tính hoặc HR thêm), lý do nếu HR thêm | Thuộc một Payslip |
+
+Phiếu lương lưu lại mọi số liệu đầu vào đã dùng, để đọc phiếu cũ không phải tính lại từ dữ liệu hiện tại.
+
 ## Aggregates and invariants
 
 | Aggregate (root) | Contains | Invariants | Cross-aggregate rules |
@@ -152,6 +199,11 @@ Trạng thái của AttendanceDay được tính lại mỗi khi dữ liệu ngu
 | PunchImport | PunchImport, PunchRecord | Lượt chấm không trùng (BR-073) | Không nhập vào tháng đã chốt (BR-090) |
 | OvertimeRequest | OvertimeRequest | Nằm ngoài giờ ca; gửi trước giờ bắt đầu (BR-083, BR-086) | Giới hạn giờ làm thêm theo ngày, tháng, năm, tính cả đơn khác (BR-084) |
 | AttendancePeriod | AttendancePeriod, MonthlyTimesheet | Bảng công đã chụp không đổi khi kỳ đã chốt | Điều kiện chốt (BR-089); mở lại chỉ khi bảng lương chưa chốt (BR-091) |
+| AllowanceType | AllowanceType | Tên không trùng (BR-097) | — |
+| SalaryRecord | SalaryRecord, SalaryAllowance | Mỗi loại phụ cấp tối đa một lần trong một bản ghi | Các bản ghi của một nhân viên không chồng, không hở (BR-093); mức sàn theo lương tối thiểu vùng tại ngày hiệu lực (BR-094, BR-096) |
+| Dependent | Dependent | Tháng kết thúc không trước tháng bắt đầu | Một người phụ thuộc không được tính cho hai nhân viên trong cùng tháng (BR-099) |
+| PayrollParameter | PayrollParameter | Biểu thuế có các bậc liền nhau, bậc đầu từ 0, bậc cuối không có cận trên | Mỗi tham số không có hai giá trị cùng ngày hiệu lực; giá trị đã dùng ở bảng lương đã chốt không sửa được (BR-123) |
+| PayrollRun | PayrollRun, Payslip, PayslipLine | Thực lĩnh của phiếu bằng tổng các dòng (BR-114); không đổi khi đã chốt (BR-118) | Chỉ tính khi bảng công đã chốt (BR-102); điều kiện chốt (BR-117); hai thao tác chốt cùng lúc chỉ một thành công (EC-072) |
 
 ## Lifecycles
 
@@ -326,6 +378,31 @@ stateDiagram-v2
 | `open` | `closed` | HR chốt | Không còn việc chặn theo BR-089 |
 | `closed` | `open` | HR mở lại | Có lý do; bảng lương của tháng chưa chốt (BR-091) |
 
+**PayrollRun**
+
+```mermaid
+stateDiagram-v2
+  state "Nháp" as draft
+  state "Cần tính lại" as stale
+  state "Đã chốt" as closed
+  [*] --> draft: HR tính lương
+  draft --> draft: HR tính lại hoặc sửa khoản điều chỉnh
+  draft --> stale: dữ liệu nguồn đổi
+  stale --> draft: HR tính lại
+  draft --> closed: HR chốt
+  closed --> [*]
+```
+
+| From | To | Trigger and actor | Guard |
+|---|---|---|---|
+| — | `draft` | HR tính lương | Bảng công của tháng đã chốt (BR-102) |
+| `draft` | `draft` | HR tính lại; HR thêm, sửa hoặc xóa khoản điều chỉnh | — (BR-115, BR-116) |
+| `draft` | `stale` | Hệ thống, khi dữ liệu nguồn của tháng đổi | BR-119 |
+| `stale` | `draft` | HR tính lại | Bảng công của tháng đã chốt (BR-102) |
+| `draft` | `closed` | HR chốt | BR-117 |
+
+Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
+
 ## Business rules
 
 - **Status:** `Confirmed` khi có nguồn xác nhận; `Assumed` khi dựa trên assumption; `Disputed` khi các nguồn mâu thuẫn và
@@ -480,10 +557,61 @@ stateDiagram-v2
 | BR-091 | HR mở lại bảng công đã chốt | Lý do là bắt buộc; chỉ được khi bảng lương của tháng đó chưa chốt | A-003 | Assumed |
 | BR-092 | Tổng hợp bảng công tháng của một nhân viên | Gồm số ngày làm việc chuẩn, số công, số ngày nghỉ theo từng loại nghỉ, số ngày vắng không lý do, số lần và tổng phút đi muộn, về sớm, số giờ làm thêm theo từng loại, số giờ làm ban đêm. Chỉ tính các ngày trong khoảng làm việc của nhân viên | A-003 | Assumed |
 
+**Lương và phụ cấp**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-093 | HR ghi bản ghi lương với ngày hiệu lực D | Bản ghi gồm lương cơ bản, lương đóng bảo hiểm, các phụ cấp và lý do. Bản ghi chứa D kết thúc ở D−1; bản ghi mới kéo dài tới ngày trước bản ghi kế tiếp đã có. Từ bản ghi đầu tiên tới ngày làm việc cuối cùng, các bản ghi không chồng, không hở | A-003 | Assumed |
+| BR-094 | Lưu lương cơ bản | Từ chối nếu thấp hơn lương tối thiểu vùng của `company_region` tại ngày hiệu lực | Bộ luật Lao động 2019, Điều 90 và Điều 91 | Assumed |
+| BR-095 | Lưu lương đóng bảo hiểm | HR nhập riêng, không tự suy ra từ lương và phụ cấp. Thấp hơn lương cơ bản thì cảnh báo; HR xác nhận thì vẫn lưu | Chủ dự án, 2026-10-30 | Confirmed |
+| BR-096 | Lưu lương đóng bảo hiểm thấp hơn lương tối thiểu vùng tại ngày hiệu lực | Từ chối | Luật Bảo hiểm xã hội 2024, Điều 31 | Assumed |
+| BR-097 | Tạo hoặc sửa loại phụ cấp | Tên không trùng, không phân biệt hoa thường. Cách tính là theo công hoặc cố định theo tháng. Chế độ thuế là chịu thuế, miễn thuế, hoặc miễn thuế trong mức kèm mức miễn mỗi tháng | A-003 | Assumed |
+| BR-098 | Ghi bản ghi lương có ngày hiệu lực thuộc tháng có bảng lương đã chốt | Được lưu; bảng lương đã chốt không đổi. Hệ thống hiện chênh lệch thực lĩnh ước tính của từng tháng đã chốt bị ảnh hưởng, để HR thêm khoản truy lĩnh hoặc truy thu vào bảng lương chưa chốt | A-003 | Assumed |
+
+**Thông tin thuế và bảo hiểm**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-099 | HR ghi người phụ thuộc | Có họ tên, quan hệ, ngày sinh, số định danh hoặc mã số thuế, tháng bắt đầu; tháng kết thúc nếu có. Từ chối nếu cùng số định danh đang được tính cho nhân viên khác trong một tháng chung | Luật Thuế thu nhập cá nhân | Assumed |
+| BR-100 | Xác định nhân viên phải đóng bảo hiểm bắt buộc trong tháng | Phải đóng nếu có hợp đồng xác định thời hạn hoặc không xác định thời hạn hiệu lực trong tháng. Tháng chỉ có hợp đồng thử việc thì không đóng | Luật Bảo hiểm xã hội 2024, Điều 2 | Assumed |
+| BR-101 | Tháng có từ `insurance_skip_unpaid_days` ngày làm việc trở lên nhân viên không làm và không được công ty trả lương, kể cả ngày ngoài khoảng làm việc | Không đóng BHXH, BHYT, BHTN tháng đó | Luật Bảo hiểm xã hội 2024 | Assumed |
+
+**Tính lương**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-102 | HR tính bảng lương của một tháng | Mỗi tháng có một bảng lương cho cả công ty, kỳ lương trùng kỳ công (BR-088). Chỉ tính được khi bảng công của tháng đã chốt. Bảng lương gồm mọi nhân viên có ít nhất một ngày trong khoảng làm việc thuộc tháng | A-003 | Assumed |
+| BR-103 | Xác định công chuẩn của nhân viên trong tháng | Số ngày làm việc theo BR-038 trên mọi ngày của tháng. Ngày ngoài khoảng làm việc dùng ca của ngày làm việc gần nhất | A-003 | Assumed |
+| BR-104 | Xác định công hưởng lương | Bằng công theo bảng công đã chốt cộng số ngày nghỉ thuộc loại nghỉ công ty trả lương. Nghỉ BHXH chi trả, nghỉ không hưởng lương và vắng không lý do không được tính | A-003 | Assumed |
+| BR-105 | Tính lương theo công | Với mỗi bản ghi lương có hiệu lực trong tháng: lương cơ bản × công hưởng lương trong khoảng của bản ghi ÷ công chuẩn. Lương theo công là tổng các phần đó | Chủ dự án, 2026-10-30 | Confirmed |
+| BR-106 | Tính phụ cấp | Theo từng bản ghi lương như BR-105. Phụ cấp theo công: mức × công hưởng lương ÷ công chuẩn. Phụ cấp cố định theo tháng: mức × số ngày làm việc trong khoảng làm việc ÷ công chuẩn, nên chỉ giảm khi vào làm hoặc nghỉ việc giữa tháng | A-003 | Assumed |
+| BR-107 | Tính đơn giá giờ của một ngày | Lương cơ bản của bản ghi có hiệu lực tại ngày đó ÷ công chuẩn ÷ giờ làm chuẩn của ca tại ngày đó | Nghị định 145/2020/NĐ-CP, Điều 55 | Assumed |
+| BR-108 | Tính tiền làm thêm giờ | Tổng theo từng ngày: giờ làm thêm thực tế (BR-085) × đơn giá giờ × hệ số. Hệ số ban ngày theo loại ngày: `ot_rate_working_day`, `ot_rate_weekly_off`, `ot_rate_holiday`. Giờ làm thêm ban đêm có hệ số bằng hệ số ban ngày + `night_work_premium` + `ot_night_extra` × hệ số ban ngày | Bộ luật Lao động 2019, Điều 98; Nghị định 145/2020/NĐ-CP, Điều 57 | Assumed |
+| BR-109 | Tính tiền làm ban đêm không phải làm thêm giờ | Giờ làm ban đêm trong giờ ca (BR-071) × đơn giá giờ × `night_work_premium` | Bộ luật Lao động 2019, Điều 98 | Assumed |
+| BR-110 | Tính bảo hiểm bắt buộc | Mức đóng là lương đóng bảo hiểm của bản ghi có hiệu lực tại ngày cuối cùng của tháng mà nhân viên còn trong khoảng làm việc. BHXH và BHYT chặn ở `insurance_cap_multiplier` × mức tham chiếu; BHTN chặn ở `insurance_cap_multiplier` × lương tối thiểu vùng. Phần nhân viên và phần công ty bằng mức đóng × tỷ lệ tương ứng. Kinh phí công đoàn do công ty đóng, bằng mức đóng BHXH × `union_fee_rate` | Luật Bảo hiểm xã hội 2024; Luật Việc làm; Luật Công đoàn | Assumed |
+| BR-111 | Tính thu nhập chịu thuế | Tổng thu nhập trừ các phần được miễn: phụ cấp miễn thuế; phần phụ cấp miễn thuế trong mức; phần tiền làm thêm giờ cao hơn 100% đơn giá giờ; toàn bộ tiền làm ban đêm theo BR-109; khoản điều chỉnh cộng không chịu thuế | Luật Thuế thu nhập cá nhân, Điều 4 | Assumed |
+| BR-112 | Tính thuế TNCN của nhân viên có hợp đồng từ 3 tháng trở lên hiệu lực trong tháng | Thu nhập tính thuế = thu nhập chịu thuế − bảo hiểm nhân viên đóng − `pit_personal_deduction` − `pit_dependent_deduction` × số người phụ thuộc có hiệu lực trong tháng; âm thì lấy 0. Thuế tính theo `pit_brackets` lũy tiến từng phần. Tham số lấy giá trị có hiệu lực tại ngày cuối tháng (BR-123) | Chủ dự án, 2026-10-30; Luật Thuế thu nhập cá nhân | Assumed |
+| BR-113 | Tính thuế TNCN của nhân viên chỉ có hợp đồng thử việc hoặc hợp đồng dưới 3 tháng | Khấu trừ `short_contract_tax_rate` × thu nhập chịu thuế nếu tổng thu nhập của tháng từ `short_contract_tax_threshold` trở lên. Không khấu trừ nếu nhân viên có cam kết thu nhập cho năm đó | Thông tư 111/2013/TT-BTC, Điều 25 | Assumed |
+| BR-114 | Tính thực lĩnh | Thực lĩnh = tổng thu nhập − bảo hiểm nhân viên đóng − thuế TNCN + khoản điều chỉnh cộng − khoản điều chỉnh trừ. Mỗi dòng của phiếu làm tròn tới đồng, từ 0,5 trở lên làm tròn lên; tổng tính từ các dòng đã làm tròn | A-003 | Assumed |
+| BR-115 | HR thêm, sửa hoặc xóa khoản điều chỉnh | Chỉ trên bảng lương chưa chốt. Khoản điều chỉnh gồm tên, cộng hay trừ, số tiền, có chịu thuế không nếu là khoản cộng, và lý do bắt buộc. Khoản trừ không làm giảm thu nhập chịu thuế. Lưu xong thì phiếu được tính lại | A-003 | Assumed |
+| BR-116 | HR tính lại bảng lương chưa chốt | Mọi dòng do hệ thống tính được thay theo dữ liệu và tham số tại lúc tính; khoản điều chỉnh được giữ | A-003 | Assumed |
+| BR-117 | HR chốt bảng lương | Từ chối nếu bảng lương Cần tính lại, còn phiếu có lỗi như thiếu bản ghi lương, hoặc còn phiếu có thực lĩnh âm. Cảnh báo không chặn việc chốt. Chốt xong thì phiếu lương được công bố | A-003 | Assumed |
+| BR-118 | Bảng lương đã chốt | Không tính lại, không sửa khoản điều chỉnh, không mở lại. Sai sót được sửa bằng khoản truy lĩnh hoặc truy thu ở bảng lương chưa chốt | A-003 | Assumed |
+| BR-119 | Dữ liệu nguồn của một tháng đổi sau khi bảng lương tháng đó đã tính và chưa chốt | Bảng lương chuyển sang Cần tính lại. Dữ liệu nguồn gồm bảng công, bản ghi lương, người phụ thuộc, thông tin thuế và bảo hiểm, hợp đồng, loại phụ cấp và tham số lương | A-003 | Assumed |
+| BR-120 | Nhân viên có ngày làm việc cuối cùng trong tháng và còn phép năm chưa nghỉ theo BR-065 | Phiếu lương tháng đó có thêm khoản chịu thuế: số ngày phép chưa nghỉ × lương ngày. Lương ngày = bình quân lương cơ bản của `unused_leave_avg_months` tháng liền trước tháng nghỉ việc ÷ bình quân công chuẩn của các tháng đó. Làm chưa đủ số tháng đó thì lấy bình quân các tháng đã làm | Bộ luật Lao động 2019, Điều 113; Nghị định 145/2020/NĐ-CP, Điều 67 | Assumed |
+| BR-121 | Nhân viên nghỉ việc giữa tháng | Lương được tính trong bảng lương của tháng đó như mọi người, chỉ gồm các ngày trong khoảng làm việc; không có kỳ tính lương riêng | A-003 | Assumed |
+| BR-122 | Xem lương, phụ cấp, phiếu lương, người phụ thuộc, thông tin thuế và bảo hiểm | Chỉ HR và chính nhân viên xem được. Quản lý không xem được, kể cả nhân viên trong phạm vi. Nhân viên chỉ thấy phiếu lương của bảng lương đã chốt | A-003 | Assumed |
+| BR-123 | Lưu một giá trị của tham số lương | Mỗi giá trị có ngày hiệu lực. Bảng lương dùng giá trị có hiệu lực tại ngày cuối tháng; kiểm mức sàn ở BR-094, BR-096 dùng giá trị tại ngày hiệu lực của bản ghi lương. Giá trị đã được dùng trong bảng lương đã chốt không sửa, không xóa được | A-003 | Assumed |
+| BR-124 | Tạo, sửa hoặc xóa bản ghi lương, người phụ thuộc, thông tin thuế và bảo hiểm, loại phụ cấp, tham số lương, khoản điều chỉnh; tính hoặc chốt bảng lương | Ghi nhật ký như BR-030 | A-003 | Assumed |
+| BR-125 | Bảng lương được chốt | Mỗi nhân viên có phiếu lương nhận thông báo trong hệ thống | A-003 | Assumed |
+| BR-126 | Xuất danh sách chuyển khoản | Chỉ xuất được khi bảng lương đã chốt. Mỗi nhân viên có thực lĩnh lớn hơn 0 một dòng gồm họ tên, số tài khoản, ngân hàng, số tiền. Nhân viên thiếu số tài khoản không có trong file và được cảnh báo khi chốt | A-003 | Assumed |
+
 ### Parameters
 
 Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP chưa được đối chiếu văn bản gốc, xem
-[questions](questions.md). Giá trị không có nguồn luật là đề xuất của agent, chờ HR công ty xác nhận.
+[questions](questions.md). Giá trị không có nguồn luật là đề xuất của agent, chờ HR công ty xác nhận. Từ M4, các giá trị
+đánh dấu "tham số lương" có ngày hiệu lực và HR cập nhật được (BR-123); giá trị ghi ở đây là giá trị ban đầu, chờ đối
+chiếu theo Q-008 và Q-023.
 
 | Parameter | Meaning and unit | Value | Used by |
 |---|---|---|---|
@@ -514,6 +642,25 @@ Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP
 | `ot_max_hours_non_working_day` | Giờ làm thêm tối đa trong một ngày không phải ngày làm việc | 12 | BR-084 |
 | `ot_max_hours_per_month` | Giờ làm thêm tối đa trong một tháng | 40 | BR-084 |
 | `ot_max_hours_per_year` | Giờ làm thêm tối đa trong một năm; một số ngành được tới 300 giờ theo Điều 107 | 200 | BR-084 |
+| `company_region` | Vùng lương tối thiểu của công ty | Vùng I (A-008) | BR-094, BR-096, BR-110 |
+| `regional_min_wage` | Tham số lương. Lương tối thiểu tháng theo vùng, đồng | Từ 01/01/2026: vùng I 5.310.000; vùng II 4.730.000; vùng III 4.140.000; vùng IV 3.700.000 | BR-094, BR-096, BR-110 |
+| `reference_wage` | Tham số lương. Mức tham chiếu, đồng | 2.340.000 | BR-110 |
+| `insurance_cap_multiplier` | Số lần mức tham chiếu hoặc lương tối thiểu vùng làm trần mức đóng bảo hiểm | 20 | BR-110 |
+| `employee_insurance_rates` | Tham số lương. Tỷ lệ nhân viên đóng | BHXH 8%; BHYT 1,5%; BHTN 1% | BR-110 |
+| `employer_insurance_rates` | Tham số lương. Tỷ lệ công ty đóng | BHXH 17,5%, gồm 0,5% bảo hiểm tai nạn lao động, bệnh nghề nghiệp; BHYT 3%; BHTN 1% | BR-110 |
+| `union_fee_rate` | Tham số lương. Tỷ lệ kinh phí công đoàn công ty đóng | 2% | BR-110 |
+| `insurance_skip_unpaid_days` | Số ngày làm việc không làm và không hưởng lương trong tháng để không đóng bảo hiểm | 14 | BR-101 |
+| `pit_personal_deduction` | Tham số lương. Giảm trừ cho bản thân mỗi tháng, đồng | 15.500.000 | BR-112 |
+| `pit_dependent_deduction` | Tham số lương. Giảm trừ cho mỗi người phụ thuộc mỗi tháng, đồng | 6.200.000 | BR-112 |
+| `pit_brackets` | Tham số lương. Biểu thuế lũy tiến từng phần theo thu nhập tính thuế tháng | Từ 01/07/2026: tới 10 triệu 5%; trên 10 tới 30 triệu 10%; trên 30 tới 60 triệu 20%; trên 60 tới 100 triệu 30%; trên 100 triệu 35% | BR-112 |
+| `short_contract_tax_rate` | Tham số lương. Tỷ lệ khấu trừ thuế với hợp đồng thử việc hoặc dưới 3 tháng | 10% | BR-113 |
+| `short_contract_tax_threshold` | Tham số lương. Tổng thu nhập tháng từ mức này thì khấu trừ theo BR-113, đồng | 2.000.000 | BR-113 |
+| `ot_rate_working_day` | Hệ số làm thêm ban ngày vào ngày làm việc | 150% | BR-108 |
+| `ot_rate_weekly_off` | Hệ số làm thêm ban ngày vào ngày nghỉ hằng tuần | 200% | BR-108 |
+| `ot_rate_holiday` | Hệ số làm thêm ban ngày vào ngày nghỉ lễ, chưa gồm tiền lương ngày lễ | 300% | BR-108 |
+| `night_work_premium` | Phần trả thêm cho giờ làm ban đêm, theo đơn giá giờ | 30% | BR-108, BR-109 |
+| `ot_night_extra` | Phần trả thêm cho giờ làm thêm ban đêm, theo hệ số ban ngày | 20%. Hệ số làm thêm ban đêm vì thế là 210% ngày làm việc, 270% ngày nghỉ hằng tuần, 390% ngày nghỉ lễ | BR-108 |
+| `unused_leave_avg_months` | Số tháng liền trước tháng nghỉ việc để tính lương ngày trả phép chưa nghỉ | 6 | BR-120 |
 
 ### Default leave types
 
@@ -529,6 +676,18 @@ Các loại nghỉ có sẵn khi cài hệ thống (US-028). HR sửa, thêm ho�
 | Ốm đau | BHXH chi trả | Không | — | Luật Bảo hiểm xã hội 2024 |
 | Thai sản | BHXH chi trả | Không | — | Luật Bảo hiểm xã hội 2024 |
 
+### Default allowance types
+
+Các loại phụ cấp có sẵn khi cài hệ thống (US-050), theo cách làm phổ biến ở doanh nghiệp nhỏ (A-009). HR sửa, thêm hoặc
+ngừng dùng theo quy chế công ty.
+
+| Allowance type | Cách tính | Chế độ thuế | Source |
+|---|---|---|---|
+| Ăn giữa ca | Theo công | Miễn thuế trong mức 730.000 đồng mỗi tháng | A-009; mức miễn chờ đối chiếu (Q-023) |
+| Trách nhiệm | Cố định theo tháng | Chịu thuế | A-009 |
+| Điện thoại | Cố định theo tháng | Chịu thuế | A-009 |
+| Đi lại | Cố định theo tháng | Chịu thuế | A-009 |
+
 ## Sensitive data
 
 | Data | Purpose | Who may see | Retention |
@@ -540,6 +699,9 @@ Các loại nghỉ có sẵn khi cài hệ thống (US-028). HR sửa, thêm ho�
 | Mật khẩu | Đăng nhập | Không ai, kể cả HR; HR chỉ đặt lại được | Tới khi tài khoản bị xóa |
 | Nhật ký thao tác | Truy vết thay đổi | HR | Undecided (Q-012) |
 | Lý do nghỉ; đơn nghỉ ốm đau và thai sản | Duyệt đơn, chấm công, BHXH | Chính nhân viên, người duyệt, HR. Quản lý khác trong phạm vi chỉ thấy loại nghỉ (BR-067) | Undecided (Q-012) |
+| Lương, phụ cấp, phiếu lương, bảng lương | Trả lương | HR; chính nhân viên, chỉ phiếu đã chốt (BR-122) | Undecided (Q-012) |
+| Mã số thuế, mã số BHXH, cam kết thu nhập | Khấu trừ thuế, đóng bảo hiểm | HR; chính nhân viên | Undecided (Q-012) |
+| Người phụ thuộc: họ tên, ngày sinh, số định danh, quan hệ | Giảm trừ gia cảnh | HR; chính nhân viên | Undecided (Q-012) |
 
 ## Edge cases
 
@@ -603,3 +765,22 @@ Các loại nghỉ có sẵn khi cài hệ thống (US-028). HR sửa, thêm ho�
 | EC-056 | HR mở lại bảng công khi bảng lương của tháng đó đã chốt | Từ chối | BR-091 | — |
 | EC-057 | Nhân viên đi muộn 4 giờ mà không có đơn | Ngày vẫn đủ công theo lựa chọn của chủ dự án; ngày bị đánh dấu bất thường để quản lý xử lý theo quy chế kỷ luật | BR-075, BR-078 | — |
 | EC-058 | Ngày đã có giờ vào và giờ ra nhưng máy ghi sai giờ | Nhân viên gửi giải trình; khi được duyệt, giờ đề nghị thay giờ từ máy | BR-081 | — |
+| EC-059 | Nhân viên được tăng lương từ ngày 15 | Tháng đó tính thành hai đoạn theo hai bản ghi lương, mỗi đoạn theo công hưởng lương trong đoạn | BR-105, BR-106 | — |
+| EC-060 | Nhân viên vào làm ngày 20 của tháng | Lương theo công chỉ gồm các ngày từ 20; phụ cấp cố định giảm theo số ngày làm việc trong khoảng làm việc; không đóng bảo hiểm nếu số ngày không làm từ `insurance_skip_unpaid_days` trở lên | BR-101, BR-105, BR-106 | — |
+| EC-061 | Nhân viên nghỉ không lương cả tháng | Lương và phụ cấp bằng 0; không đóng bảo hiểm; thực lĩnh 0 nếu không có khoản điều chỉnh | BR-101, BR-104 | — |
+| EC-062 | Khoản tạm ứng lớn hơn thu nhập của tháng | Thực lĩnh âm nên không chốt được; HR giảm khoản trừ ở tháng này và thêm phần còn lại vào tháng sau | BR-117 | — |
+| EC-063 | Tăng lương có hiệu lực từ một tháng đã chốt lương | Bảng lương đã chốt không đổi; hệ thống hiện chênh lệch từng tháng để HR thêm khoản truy lĩnh vào bảng lương chưa chốt | BR-098, BR-118 | — |
+| EC-064 | HR mở lại bảng công khi bảng lương của tháng đang Nháp | Bảng lương chuyển sang Cần tính lại; tính lại chỉ được sau khi bảng công chốt lại | BR-102, BR-119 | — |
+| EC-065 | Lương đóng bảo hiểm cao hơn trần | Mức đóng bị chặn ở trần của từng loại bảo hiểm | BR-110 | — |
+| EC-066 | Lương đóng bảo hiểm thấp hơn lương tối thiểu vùng | Từ chối lưu bản ghi lương | BR-096 | — |
+| EC-067 | Hai nhân viên, ví dụ vợ và chồng cùng làm ở công ty, cùng khai một con là người phụ thuộc | Từ chối người khai sau trong các tháng chung | BR-099 | — |
+| EC-068 | Thu nhập chịu thuế thấp hơn tổng bảo hiểm và giảm trừ | Thu nhập tính thuế là 0; thuế là 0 | BR-112 | — |
+| EC-069 | Nhân viên thử việc có thu nhập chịu thuế trong tháng 5.000.000 đồng và chưa có cam kết thu nhập | Khấu trừ 10%, tức 500.000 đồng | BR-113 | — |
+| EC-070 | Biểu thuế mới có hiệu lực từ 01/07/2026 | Bảng lương tháng 6 dùng biểu cũ; tháng 7 dùng biểu mới | BR-123 | — |
+| EC-071 | Nhân viên nghỉ việc ngày 10/05 và còn 3,5 ngày phép chưa nghỉ | Phiếu lương tháng 5 có lương theo công tới 10/05 và tiền 3,5 ngày phép | BR-120, BR-121 | — |
+| EC-072 | Hai HR cùng chốt, hoặc một người tính lại trong lúc người kia chốt | Chỉ một thao tác thành công; bảng lương đã chốt khớp đúng một lần tính | BR-117 | — |
+| EC-073 | Nhân viên chưa có số tài khoản ngân hàng | Cảnh báo khi chốt nhưng vẫn chốt được; người đó không có trong danh sách chuyển khoản | BR-126 | — |
+| EC-074 | Làm thêm sau 22:00 vào ngày làm việc | Phần sau 22:00 có hệ số 210% với giá trị tham số ban đầu | BR-108 | — |
+| EC-075 | Nhân viên đổi sang ca có giờ làm chuẩn khác giữa tháng | Đơn giá giờ của mỗi ngày tính theo ca tại ngày đó | BR-107 | — |
+| EC-076 | Nhân viên có ngày làm việc trong tháng nhưng không có bản ghi lương | Phiếu của người đó có lỗi; bảng lương không chốt được tới khi HR ghi lương và tính lại | BR-117 | — |
+| EC-077 | HR sửa tỷ lệ bảo hiểm đã được dùng trong bảng lương đã chốt | Từ chối; HR thêm giá trị mới với ngày hiệu lực mới | BR-123 | — |

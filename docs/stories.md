@@ -10,7 +10,7 @@
 
 - **Priority:** `Must` khi thiếu story đó thì bản phát hành vô nghĩa; `Should`, `Could` cho phần còn lại.
 - **Feature:** Issue Feature trên tracker chứa story; điền khi tạo Issue ở Phase 4.
-- Bản hiện tại có story của M1 tới M3. Story của M4 và M5 được thêm ở lần phân tích của milestone đó.
+- Bản hiện tại có story của M1 tới M4. Story của M5 được thêm ở lần phân tích của milestone đó.
 
 | ID | Story | Priority | Milestone | Feature |
 |---|---|---|---|---|
@@ -63,6 +63,20 @@
 | US-047 | HR xử lý ngày thiếu chấm công | Must | M3 | |
 | US-048 | HR chốt và mở lại bảng công tháng | Must | M3 | |
 | US-049 | HR xuất bảng công ra bảng tính | Should | M3 | |
+| US-050 | HR quản lý loại phụ cấp | Must | M4 | |
+| US-051 | HR ghi lương và phụ cấp của nhân viên theo ngày hiệu lực | Must | M4 | |
+| US-052 | HR ghi thông tin thuế và bảo hiểm của nhân viên | Must | M4 | |
+| US-053 | HR quản lý người phụ thuộc | Must | M4 | |
+| US-054 | HR quản lý tham số lương theo ngày hiệu lực | Must | M4 | |
+| US-055 | HR tính bảng lương tháng | Must | M4 | |
+| US-056 | Tính tiền làm thêm giờ và làm ban đêm | Must | M4 | |
+| US-057 | Tính bảo hiểm bắt buộc | Must | M4 | |
+| US-058 | Tính thuế TNCN | Must | M4 | |
+| US-059 | HR thêm khoản điều chỉnh vào phiếu lương | Must | M4 | |
+| US-060 | HR chốt bảng lương | Must | M4 | |
+| US-061 | Nhân viên xem phiếu lương | Must | M4 | |
+| US-062 | Trả tiền phép chưa nghỉ khi nghỉ việc | Should | M4 | |
+| US-063 | HR xuất bảng lương và danh sách chuyển khoản | Should | M4 | |
 
 ## Details
 
@@ -785,3 +799,224 @@ tính lương trên hệ thống.
 
 - AC1: Given một tháng, when HR xuất, then file có mỗi nhân viên một dòng với các cột tổng hợp theo BR-092.
 - AC2: Given tháng chưa chốt, then file ghi rõ là số liệu tạm tính.
+
+### US-050: HR quản lý loại phụ cấp
+
+**Story:** Là HR, tôi muốn định nghĩa các loại phụ cấp theo quy chế công ty, để ghi phụ cấp cho nhân viên và tính thuế
+đúng.
+
+**Links:** BR-097 · SCR-033
+
+**Acceptance criteria**
+
+- AC1: Given hệ thống mới cài, then có sẵn các loại phụ cấp trong mục Default allowance types của domain.
+- AC2: Given HR thêm loại "Ăn giữa ca" theo công, miễn thuế trong mức 730.000 đồng, then loại đó chọn được khi ghi lương.
+- AC3: Given tên trùng một loại đã có, không phân biệt hoa thường, when lưu, then bị từ chối (BR-097).
+- AC4: Given loại phụ cấp đang được dùng trong bản ghi lương, when HR ngừng dùng, then bản ghi cũ giữ nguyên và loại đó
+  không chọn được cho bản ghi mới.
+
+### US-051: HR ghi lương và phụ cấp của nhân viên theo ngày hiệu lực
+
+**Story:** Là HR, tôi muốn ghi lương cơ bản, lương đóng bảo hiểm và phụ cấp kèm ngày hiệu lực, để tăng lương giữa tháng
+vẫn được tính đúng và lịch sử lương được giữ lại.
+
+**Links:** UC-011 · BR-093 tới BR-096, BR-098, BR-119 · EC-059, EC-063, EC-066 · SCR-008, SCR-035
+
+**Acceptance criteria**
+
+- AC1: Given lương 10.000.000 đồng từ 01/01, when HR ghi lương 12.000.000 đồng từ 15/03, then bản ghi cũ kết thúc ở
+  14/03 và bản ghi mới bắt đầu từ 15/03 (BR-093).
+- AC2: Given lương cơ bản dưới lương tối thiểu vùng tại ngày hiệu lực, when lưu, then bị từ chối (BR-094).
+- AC3: Given lương đóng bảo hiểm thấp hơn lương cơ bản, when lưu, then hệ thống cảnh báo và chỉ lưu khi HR xác nhận
+  (BR-095).
+- AC4: Given lương đóng bảo hiểm dưới lương tối thiểu vùng, when lưu, then bị từ chối (BR-096, EC-066).
+- AC5: Given ngày hiệu lực thuộc tháng có bảng lương đã chốt, when lưu, then bảng lương đó không đổi và HR thấy chênh lệch
+  của từng tháng bị ảnh hưởng (BR-098, EC-063).
+- AC6: Given đã có bản ghi cùng ngày hiệu lực, when lưu, then bị từ chối.
+
+### US-052: HR ghi thông tin thuế và bảo hiểm của nhân viên
+
+**Story:** Là HR, tôi muốn ghi mã số thuế, mã số BHXH và cam kết thu nhập của nhân viên, để tính khấu trừ thuế và bảo
+hiểm đúng đối tượng.
+
+**Links:** BR-100, BR-113, BR-122 · EC-069 · SCR-008
+
+**Acceptance criteria**
+
+- AC1: Given HR mở tab Lương của nhân viên, then thấy và sửa được mã số thuế, mã số BHXH và đánh dấu đã nộp cam kết thu
+  nhập kèm năm áp dụng.
+- AC2: Given Quản lý mở hồ sơ nhân viên trong phạm vi, then không thấy tab Lương (BR-122).
+- AC3: Given nhân viên chỉ có hợp đồng thử việc và đã có cam kết thu nhập cho năm đó, then phiếu lương không khấu trừ 10%
+  (BR-113).
+
+### US-053: HR quản lý người phụ thuộc
+
+**Story:** Là HR, tôi muốn ghi người phụ thuộc của nhân viên kèm tháng bắt đầu và kết thúc, để giảm trừ gia cảnh đúng
+từng tháng.
+
+**Links:** BR-099, BR-112 · EC-067 · SCR-036
+
+**Acceptance criteria**
+
+- AC1: Given HR ghi một người phụ thuộc từ tháng 3/2026, then phiếu lương từ tháng 3 được giảm trừ thêm một người.
+- AC2: Given người phụ thuộc có cùng số định danh với người phụ thuộc của nhân viên khác trong cùng tháng, when lưu, then
+  bị từ chối (BR-099, EC-067).
+- AC3: Given HR nhập tháng kết thúc là 9/2026, then từ tháng 10 người đó không được tính giảm trừ.
+
+### US-054: HR quản lý tham số lương theo ngày hiệu lực
+
+**Story:** Là HR, tôi muốn cập nhật lương tối thiểu vùng, mức tham chiếu, tỷ lệ bảo hiểm, mức giảm trừ và biểu thuế kèm
+ngày hiệu lực, để khi luật đổi không phải sửa code và các kỳ cũ vẫn giữ giá trị cũ.
+
+**Links:** BR-123 · EC-070, EC-077 · SCR-034
+
+**Acceptance criteria**
+
+- AC1: Given biểu thuế 5 bậc có hiệu lực từ 01/07/2026, then bảng lương tháng 6/2026 dùng biểu cũ và tháng 7/2026 dùng
+  biểu mới (BR-123, EC-070).
+- AC2: Given một giá trị đã được dùng trong bảng lương đã chốt, when HR sửa giá trị đó, then bị từ chối; HR thêm giá trị
+  mới với ngày hiệu lực mới (EC-077).
+- AC3: Given biểu thuế có bậc không liền nhau, ví dụ thiếu khoảng từ 10 tới 12 triệu đồng, when lưu, then bị từ chối.
+
+### US-055: HR tính bảng lương tháng
+
+**Story:** Là HR, tôi muốn hệ thống tính lương của mọi nhân viên từ bảng công đã chốt, để không phải tính tay trên bảng
+tính.
+
+**Links:** UC-010 · BR-102 tới BR-106, BR-114, BR-116, BR-119, BR-121 · EC-059 tới EC-061, EC-064, EC-076 · SCR-037,
+SCR-038
+
+**Acceptance criteria**
+
+- AC1: Given bảng công tháng chưa chốt, when HR tính lương, then bị từ chối (BR-102).
+- AC2: Given lương 10.000.000 đồng, công chuẩn 22, công hưởng lương 20, then lương theo công là 9.090.909 đồng (BR-105,
+  BR-114).
+- AC3: Given lương 10.000.000 đồng tới 14/03 và 12.000.000 đồng từ 15/03, then lương theo công là tổng của hai đoạn, mỗi
+  đoạn tính theo công hưởng lương trong đoạn đó (BR-105, EC-059).
+- AC4: Given nhân viên không có bản ghi lương trong tháng, then phiếu của người đó có lỗi và bảng lương không chốt được
+  (BR-117, EC-076).
+- AC5: Given bảng lương Nháp, when HR mở lại bảng công của tháng, then bảng lương ở trạng thái Cần tính lại (BR-119,
+  EC-064).
+- AC6: Given HR tính lại bảng lương Nháp, then số tính tự động được thay và khoản điều chỉnh được giữ (BR-116).
+
+### US-056: Tính tiền làm thêm giờ và làm ban đêm
+
+**Story:** Là nhân viên, tôi muốn giờ làm thêm và giờ làm ban đêm được trả đúng hệ số luật định, để không bị thiệt.
+
+**Links:** BR-107 tới BR-109, BR-111 · EC-074, EC-075 · SCR-038
+
+**Acceptance criteria**
+
+- AC1: Given lương 22.000.000 đồng, công chuẩn 22, ca 8 giờ, then đơn giá giờ là 125.000 đồng (BR-107).
+- AC2: Given 2 giờ làm thêm ngày làm việc, then tiền làm thêm là 2 × 125.000 × 150% = 375.000 đồng (BR-108).
+- AC3: Given 1 giờ làm thêm ban đêm ngày làm việc, then hệ số là `ot_rate_working_day` cộng `night_work_premium` cộng
+  `ot_night_extra` nhân `ot_rate_working_day` (BR-108, EC-074).
+- AC4: Given 8 giờ làm ban đêm trong ca đêm, không phải làm thêm, then được thêm 8 × đơn giá × `night_work_premium`
+  (BR-109).
+- AC5: Given tiền làm thêm 375.000 đồng, then chỉ 250.000 đồng, phần tương ứng 100% đơn giá, vào thu nhập chịu thuế
+  (BR-111).
+
+### US-057: Tính bảo hiểm bắt buộc
+
+**Story:** Là HR, tôi muốn hệ thống tính phần BHXH, BHYT, BHTN của nhân viên và của công ty, để khấu trừ và nộp đúng.
+
+**Links:** BR-100, BR-101, BR-110 · EC-060, EC-061, EC-065 · SCR-038
+
+**Acceptance criteria**
+
+- AC1: Given lương đóng bảo hiểm 8.000.000 đồng, then nhân viên đóng 8% BHXH, 1,5% BHYT, 1% BHTN, tổng 840.000 đồng; phần
+  công ty đóng hiện trên phiếu ở mục chi phí công ty (BR-110).
+- AC2: Given lương đóng bảo hiểm trên trần, then mức đóng bị chặn ở trần của từng loại (BR-110, EC-065).
+- AC3: Given nhân viên chỉ có hợp đồng thử việc trong tháng, then không đóng bảo hiểm (BR-100).
+- AC4: Given nhân viên có từ `insurance_skip_unpaid_days` ngày làm việc trở lên không làm và không hưởng lương trong
+  tháng, then không đóng bảo hiểm tháng đó (BR-101, EC-060, EC-061).
+
+### US-058: Tính thuế TNCN
+
+**Story:** Là HR, tôi muốn hệ thống tự tính thuế TNCN khấu trừ hằng tháng, để không phải tra biểu thuế bằng tay.
+
+**Links:** BR-111 tới BR-113 · EC-068, EC-069 · SCR-038
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên có hợp đồng từ 3 tháng trở lên, then thuế tính theo biểu lũy tiến trên thu nhập tính thuế sau khi
+  trừ bảo hiểm nhân viên đóng, giảm trừ bản thân và người phụ thuộc (BR-112).
+- AC2: Given thu nhập tính thuế âm, then thuế là 0 (BR-112, EC-068).
+- AC3: Given nhân viên chỉ có hợp đồng thử việc, thu nhập chịu thuế trong tháng 5.000.000 đồng, chưa có cam kết thu nhập,
+  then thuế là 500.000 đồng (BR-113, EC-069).
+- AC4: Given phụ cấp ăn giữa ca 900.000 đồng, miễn thuế trong mức 730.000 đồng, then 170.000 đồng vào thu nhập chịu thuế
+  (BR-111).
+
+### US-059: HR thêm khoản điều chỉnh vào phiếu lương
+
+**Story:** Là HR, tôi muốn thêm thưởng, tạm ứng, truy lĩnh hoặc truy thu vào phiếu lương, để xử lý các khoản ngoài công
+thức.
+
+**Links:** UC-010 · BR-115, BR-116, BR-118 · EC-062, EC-063 · SCR-038
+
+**Acceptance criteria**
+
+- AC1: Given bảng lương Nháp, when HR thêm khoản cộng "Thưởng dự án" 2.000.000 đồng chịu thuế, then thu nhập chịu thuế,
+  thuế và thực lĩnh của phiếu được tính lại (BR-115).
+- AC2: Given lý do để trống, when lưu, then bị từ chối.
+- AC3: Given bảng lương đã chốt, then không thêm, sửa hay xóa khoản điều chỉnh được (BR-118).
+- AC4: Given khoản trừ làm thực lĩnh âm, then phiếu có lỗi và bảng lương không chốt được (BR-117, EC-062).
+
+### US-060: HR chốt bảng lương
+
+**Story:** Là HR, tôi muốn chốt bảng lương, để số liệu không đổi nữa và nhân viên xem được phiếu lương.
+
+**Links:** UC-010 · BR-091, BR-117, BR-118, BR-125, BR-126 · EC-072, EC-073 · SCR-037
+
+**Acceptance criteria**
+
+- AC1: Given còn phiếu có lỗi hoặc bảng lương Cần tính lại, when chốt, then bị từ chối và hiện danh sách lỗi (BR-117).
+- AC2: Given nhân viên thiếu số tài khoản ngân hàng, when chốt, then hệ thống cảnh báo nhưng vẫn cho chốt (BR-126,
+  EC-073).
+- AC3: Given chốt thành công, then phiếu lương được công bố, nhân viên được thông báo (BR-125) và bảng công của tháng
+  không mở lại được (BR-091).
+- AC4: Given bảng lương đã chốt, then không có thao tác mở lại (BR-118).
+- AC5: Given hai HR bấm chốt cùng lúc, then chỉ một thao tác thành công (EC-072).
+
+### US-061: Nhân viên xem phiếu lương
+
+**Story:** Là nhân viên, tôi muốn xem phiếu lương hằng tháng với từng khoản, để biết vì sao mình nhận số tiền đó.
+
+**Links:** BR-122, BR-125 · SCR-039
+
+**Acceptance criteria**
+
+- AC1: Given bảng lương tháng đã chốt, then nhân viên thấy phiếu gồm công chuẩn, công hưởng lương, lương theo công, từng
+  phụ cấp, tiền làm thêm, bảo hiểm, thuế, khoản điều chỉnh và thực lĩnh.
+- AC2: Given bảng lương tháng còn Nháp, then nhân viên không thấy phiếu của tháng đó (BR-122).
+- AC3: Given nhân viên mở phiếu lương của người khác bằng đường dẫn trực tiếp, then bị từ chối (BR-122).
+
+### US-062: Trả tiền phép chưa nghỉ khi nghỉ việc
+
+**Story:** Là nhân viên nghỉ việc, tôi muốn được trả tiền những ngày phép năm chưa nghỉ, theo luật.
+
+**Links:** UC-010 · BR-065, BR-120, BR-121 · EC-071 · SCR-038
+
+**Acceptance criteria**
+
+- AC1: Given ngày làm việc cuối cùng là 10/05 và còn 3,5 ngày phép chưa nghỉ, then phiếu lương tháng 5 có lương theo
+  công tới 10/05 và một khoản tiền phép chưa nghỉ (BR-120, BR-121, EC-071).
+- AC2: Given nhân viên làm đủ 6 tháng trước tháng nghỉ việc, then lương ngày bằng bình quân lương cơ bản của 6 tháng đó
+  chia công chuẩn bình quân của 6 tháng đó (BR-120).
+- AC3: Given tiền phép chưa nghỉ, then khoản đó chịu thuế TNCN.
+
+### US-063: HR xuất bảng lương và danh sách chuyển khoản
+
+**Story:** Là HR, tôi muốn xuất bảng lương và danh sách chuyển khoản ra bảng tính, để trình ký và chuyển lương qua ngân
+hàng.
+
+**Links:** BR-126 · EC-073 · SCR-037
+
+**Acceptance criteria**
+
+- AC1: Given một tháng, when HR xuất bảng lương, then file có mỗi nhân viên một dòng với các cột như phiếu lương và phần
+  công ty đóng.
+- AC2: Given bảng lương đã chốt, when HR xuất danh sách chuyển khoản, then file có mỗi nhân viên có thực lĩnh lớn hơn 0
+  một dòng với họ tên, số tài khoản, ngân hàng, số tiền (BR-126).
+- AC3: Given bảng lương còn Nháp, then danh sách chuyển khoản không xuất được và bảng lương xuất ra ghi rõ là số liệu tạm
+  tính.

@@ -9,7 +9,7 @@
 ## Goal
 
 Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](brief.md#scope) để thiết kế toàn hệ thống trước khi
-code. Tài liệu được điền theo từng milestone; bản hiện tại có phần dùng chung và M1 tới M3.
+code. Tài liệu được điền theo từng milestone; bản hiện tại có phần dùng chung và M1 tới M4.
 
 ## Actors
 
@@ -20,7 +20,7 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 |---|---|---|---|
 | Nhân viên | Người | Xem và cập nhật thông tin của mình; tra cứu đồng nghiệp | Mọi người có tài khoản đang hoạt động đều có vai trò này (BR-006) |
 | Quản lý | Người | Nắm thông tin nhân sự trong phạm vi mình phụ trách; từ M2, duyệt yêu cầu của nhân viên trong phạm vi | Tự có khi đang là trưởng của ít nhất một phòng ban, không gán tay (BR-006). Phạm vi gồm phòng ban mình làm trưởng và mọi phòng ban con (BR-013) |
-| HR | Người | Giữ hồ sơ, hợp đồng và cơ cấu tổ chức đúng; quản lý tài khoản và cấu hình | Được gán tay (BR-006). HR kiêm quản trị hệ thống |
+| HR | Người | Giữ hồ sơ, hợp đồng và cơ cấu tổ chức đúng; quản lý tài khoản và cấu hình; từ M4, tính và chốt lương | Được gán tay (BR-006). HR kiêm quản trị hệ thống và tính lương; hệ thống không có vai trò Kế toán |
 | Thời gian | Lịch | Làm cho thay đổi có ngày hiệu lực tự có tác dụng khi tới ngày | Chỉ thực hiện các chuyển trạng thái do thời gian trong mục Lifecycles của [domain](domain.md#lifecycles) |
 | Máy chấm công | Hệ thống ngoài | Cung cấp lượt chấm công của nhân viên qua file do HR xuất ra và tải lên | Hệ thống không kết nối trực tiếp với máy |
 
@@ -57,6 +57,11 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Quản lý ca, gán ca, khai báo mã chấm công (US-036 tới US-038) | ❌ | ❌ | ✅ |
 | Nhập file chấm công; xử lý ngày thiếu chấm công (US-039, US-047) | ❌ | ❌ | ✅ |
 | Chốt, mở lại và xuất bảng công (US-048, US-049) | ❌ | ❌ | ✅ |
+| Xem phiếu lương đã chốt của mình (US-061) | ✅ | ✅ | ✅ |
+| Xem lương, phụ cấp, thông tin thuế, bảo hiểm và người phụ thuộc của người khác (US-051 tới US-053) | ❌ | ❌ kể cả trong phạm vi (BR-122) | ✅ |
+| Ghi lương, thông tin thuế, bảo hiểm và người phụ thuộc (US-051 tới US-053) | ❌ | ❌ | ✅ |
+| Quản lý loại phụ cấp và tham số lương (US-050, US-054) | ❌ | ❌ | ✅ |
+| Tính, điều chỉnh, chốt và xuất bảng lương (US-055 tới US-060, US-062, US-063) | ❌ | ❌ | ✅ |
 
 ## User stories
 
@@ -284,6 +289,52 @@ flowchart LR
 - **Postconditions:** Tháng đã chốt không nhận thay đổi về đơn, lượt chấm hay lịch làm việc (BR-090). Bảng công đã chốt
   là đầu vào của bảng lương ở M4.
 
+### UC-010: Tính và chốt bảng lương tháng
+
+- **Actor:** HR · **Stories:** US-055 tới US-060, US-062
+- **Trigger:** Bảng công tháng đã chốt, tới ngày tính lương.
+- **Preconditions:** Bảng công của tháng đã chốt (BR-102); tham số lương có giá trị hiệu lực cho tháng đó (BR-123).
+- **Main flow:**
+  1. HR chọn tháng và bấm Tính lương.
+  2. Hệ thống tạo phiếu lương cho mỗi nhân viên có ngày làm việc trong tháng: lương theo công, phụ cấp, tiền làm thêm và
+     làm đêm, bảo hiểm, thuế TNCN, thực lĩnh (BR-103 tới BR-114).
+  3. Hệ thống hiện bảng lương ở trạng thái Nháp, kèm danh sách lỗi và cảnh báo, như thiếu bản ghi lương hay thiếu số tài
+     khoản ngân hàng.
+  4. HR thêm khoản điều chỉnh vào từng phiếu nếu cần: thưởng, tạm ứng, truy lĩnh, truy thu (BR-115). Hệ thống tính lại
+     thuế và thực lĩnh của phiếu đó.
+  5. HR kiểm bảng lương rồi bấm Chốt.
+  6. Hệ thống chốt bảng lương, công bố phiếu lương và thông báo cho nhân viên (BR-117, BR-125).
+- **Alternative flows:**
+  - `2a`. Nhân viên có ngày làm việc cuối cùng trong tháng: phiếu có thêm tiền phép chưa nghỉ (BR-120, BR-121).
+  - `4a`. Dữ liệu nguồn đổi sau khi tính, như HR sửa lương hay mở lại bảng công: bảng lương được đánh dấu Cần tính lại;
+    HR tính lại, khoản điều chỉnh được giữ (BR-116, BR-119).
+- **Exceptions:**
+  - `1a`. Bảng công của tháng chưa chốt: không tính được (BR-102).
+  - `5a`. Còn lỗi, phiếu có thực lĩnh âm, hoặc bảng lương Cần tính lại: không chốt được (BR-117).
+  - `5b`. Hai HR cùng chốt: chỉ một thao tác thành công (EC-072).
+- **Postconditions:** Bảng lương đã chốt không đổi và không mở lại được; sai sót được sửa bằng khoản điều chỉnh ở kỳ sau
+  (BR-118). Bảng công của tháng không mở lại được nữa (BR-091). Mọi bước được ghi nhật ký (BR-124).
+
+### UC-011: Thay đổi lương của nhân viên
+
+- **Actor:** HR · **Stories:** US-051
+- **Trigger:** Nhân viên được tăng lương, đổi phụ cấp, hoặc ký hợp đồng mới với mức lương khác.
+- **Preconditions:** Nhân viên đang làm việc hoặc sắp vào làm.
+- **Main flow:**
+  1. HR mở tab Lương của nhân viên và chọn Thay đổi lương.
+  2. HR nhập ngày hiệu lực, lương cơ bản, lương đóng bảo hiểm và các phụ cấp, kèm lý do.
+  3. Hệ thống kiểm mức sàn (BR-094, BR-096) và hiện bản ghi lương trước và sau thay đổi.
+  4. HR xác nhận. Hệ thống lưu; bản ghi trước kết thúc ở ngày trước ngày hiệu lực (BR-093).
+- **Alternative flows:**
+  - `3a`. Lương đóng bảo hiểm thấp hơn lương cơ bản: hệ thống cảnh báo; HR xác nhận thì vẫn lưu (BR-095).
+  - `3b`. Ngày hiệu lực thuộc tháng có bảng lương nháp: bảng lương đó được đánh dấu Cần tính lại (BR-119).
+  - `3c`. Ngày hiệu lực thuộc tháng có bảng lương đã chốt: hệ thống cảnh báo và hiện chênh lệch của từng tháng để HR thêm
+    khoản truy lĩnh hoặc truy thu ở kỳ chưa chốt (BR-098, EC-063).
+- **Exceptions:**
+  - `3d`. Lương cơ bản hoặc lương đóng bảo hiểm dưới lương tối thiểu vùng: từ chối (BR-094, BR-096).
+  - `2a`. Đã có bản ghi lương khác cùng ngày hiệu lực: từ chối; HR sửa bản ghi đó.
+- **Postconditions:** Các bản ghi lương của nhân viên không chồng, không hở (BR-093); nhật ký ghi giá trị trước và sau.
+
 ## Quality attributes
 
 Thêm ở lần cập nhật cuối của Phase 2, sau khi đủ M1–M5.
@@ -310,3 +361,13 @@ Riêng M3 không làm:
 - Xếp ca theo lịch và ca xoay: mỗi nhân viên một ca cố định.
 - Quản lý giao làm thêm giờ cho nhân viên: nhân viên tự đăng ký, và việc tự đăng ký cũng là sự đồng ý mà luật yêu cầu.
 - Tính tiền làm thêm giờ và phụ cấp ca đêm: làm ở M4.
+
+Riêng M4 không làm:
+
+- Chuyển tiền lương qua ngân hàng: hệ thống chỉ xuất file danh sách chuyển khoản để HR tải lên ngân hàng.
+- Quyết toán thuế TNCN cuối năm: chủ dự án chọn chỉ tính khấu trừ hằng tháng.
+- Tính và chi trả chế độ BHXH như ốm đau, thai sản: cơ quan BHXH chi trả; hệ thống chỉ ghi ngày nghỉ.
+- Khai báo và nộp hồ sơ BHXH, tờ khai thuế điện tử.
+- Quản lý chương trình phúc lợi riêng như bảo hiểm sức khỏe hay quà lễ: HR ghi bằng phụ cấp hoặc khoản điều chỉnh.
+- Lương theo sản phẩm, doanh số, hoa hồng; nhiều kỳ trả lương trong tháng: tạm ứng giữa tháng ghi bằng khoản trừ.
+- Nhân viên không cư trú về thuế và trả lương bằng ngoại tệ.

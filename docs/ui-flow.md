@@ -7,7 +7,7 @@
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
 được kiểm ở backend theo Permission matrix trong [requirements](requirements.md#permission-matrix). Bản hiện tại có
-information architecture cho cả baseline và các màn hình của M1 tới M3.
+information architecture cho cả baseline và các màn hình của M1 tới M4.
 
 ## Information architecture
 
@@ -34,6 +34,8 @@ flowchart TD
   ADM --> CAL["Lịch làm việc<br/>SCR-024"]
   ADM --> SH["Ca làm việc<br/>SCR-025"]
   ADM --> SHA["Gán ca<br/>SCR-026"]
+  ADM --> ALW["Loại phụ cấp<br/>SCR-033"]
+  ADM --> PPAR["Tham số lương<br/>SCR-034"]
   HOME --> APR["Đơn chờ duyệt<br/>SCR-021"]
   HOME --> LV["Nghỉ phép"]
   LV --> LVME["Nghỉ phép của tôi<br/>SCR-019"]
@@ -46,7 +48,10 @@ flowchart TD
   AT --> ATTEAM["Bảng công của nhóm<br/>SCR-031"]
   AT --> ATIMP["Nhập file chấm công<br/>SCR-027"]
   AT --> ATCLOSE["Chốt bảng công<br/>SCR-032"]
-  HOME --> PY["Lương · M4"]
+  HOME --> PY["Lương"]
+  PY --> PYME["Phiếu lương của tôi<br/>SCR-039"]
+  PY --> PYRUN["Bảng lương<br/>SCR-037"]
+  PYRUN --> PYSLIP["Chi tiết phiếu lương<br/>SCR-038"]
   HOME --> RP["Báo cáo · M5"]
 ```
 
@@ -60,7 +65,8 @@ flowchart TD
 | Đơn chờ duyệt | ❌ | ✅ đơn mình là người duyệt | ✅ mọi đơn | SCR-021 |
 | Nghỉ phép | ✅ chỉ nghỉ phép của mình | ✅ thêm lịch nghỉ của nhóm | ✅ thêm lịch nghỉ của nhóm | SCR-019, SCR-020, SCR-022 |
 | Chấm công | ✅ chỉ bảng công của mình | ✅ thêm bảng công của nhóm | ✅ thêm nhập file và chốt bảng công | SCR-027 tới SCR-032 |
-| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026 |
+| Lương | ✅ chỉ phiếu lương của mình | ✅ chỉ phiếu lương của mình | ✅ thêm bảng lương | SCR-037 tới SCR-039 |
+| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034 |
 
 Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem không có quyền thì không hiện.
 
@@ -71,6 +77,7 @@ Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem kh�
 | Hợp đồng | Các hợp đồng lao động | ❌ | ✅ |
 | Nghỉ phép | Số dư phép, biến động phép, các đơn nghỉ | ✅ không thấy lý do nghỉ của đơn mình không duyệt | ✅ thêm nút Điều chỉnh số dư |
 | Chấm công | Mã chấm công, lịch sử ca, bảng công theo tháng | ✅ | ✅ thêm nút Đổi ca và sửa mã chấm công |
+| Lương | Các bản ghi lương, thông tin thuế và bảo hiểm, người phụ thuộc, phiếu lương các tháng; mở SCR-035, SCR-036 | ❌ (BR-122) | ✅ |
 | Tài khoản | Trạng thái tài khoản, vai trò | ❌ | ✅ |
 | Nhật ký | Thay đổi trên hồ sơ này | ❌ | ✅ |
 
@@ -137,6 +144,25 @@ flowchart LR
   để mở SCR-030. Đơn gửi đi vào SCR-021 của người duyệt.
 - **Chốt bảng công:** cuối tháng, HR mở SCR-032. Nếu còn việc chặn, mỗi việc có đường dẫn tới SCR-021 hoặc tới ngày cần
   xử lý trên SCR-031. Xử lý xong thì quay lại SCR-032 để chốt.
+
+```mermaid
+flowchart LR
+  close["SCR-032 Chốt bảng công"] -->|"đã chốt"| run["SCR-037 Bảng lương"]
+  run -->|"tính lương"| run
+  run --> slip["SCR-038 Chi tiết phiếu lương"]
+  slip -->|"thêm khoản điều chỉnh"| slip
+  slip --> run
+  run -->|"phiếu thiếu bản ghi lương"| emp["SCR-008 Chi tiết nhân viên, tab Lương"]
+  emp --> sal["SCR-035 Thay đổi lương"]
+  sal --> emp
+  run -->|"chốt"| mine["SCR-039 Phiếu lương của tôi"]
+```
+
+- **Tính lương:** sau khi chốt bảng công, HR mở SCR-037, chọn tháng và bấm Tính lương. Bảng lương hiện ở trạng thái Nháp
+  kèm danh sách lỗi và cảnh báo. Lỗi thiếu bản ghi lương có đường dẫn tới tab Lương của SCR-008.
+- **Điều chỉnh:** HR bấm một dòng của SCR-037 để mở SCR-038, thêm khoản điều chỉnh, rồi quay lại. Phiếu được tính lại
+  ngay.
+- **Chốt lương:** khi không còn lỗi, HR bấm Chốt ở SCR-037. Nhân viên nhận thông báo và thấy phiếu ở SCR-039.
 
 ## Screens
 
@@ -461,3 +487,101 @@ flowchart LR
 - **Content and actions:** ô chọn tháng và trạng thái kỳ công. Khi Đang mở: danh sách việc còn chặn theo BR-089, mỗi
   việc có đường dẫn tới chỗ xử lý; nút Chốt chỉ bật khi danh sách trống. Khi Đã chốt: người chốt, thời điểm chốt, nút Mở
   lại có ô lý do bắt buộc; nút này tắt nếu bảng lương của tháng đã chốt (BR-091).
+
+### SCR-033: Loại phụ cấp
+
+- **Purpose:** định nghĩa loại phụ cấp theo quy chế · **Stories:** US-050
+- **Content and actions:** bảng loại phụ cấp với cách tính, chế độ thuế, mức miễn thuế, số nhân viên đang có. Thao tác
+  thêm, sửa, ngừng dùng.
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Tên | Có | Không trùng (BR-097) | Tên loại phụ cấp đã tồn tại. |
+  | Cách tính | Có | Theo công hoặc cố định theo tháng | Chọn cách tính. |
+  | Chế độ thuế | Có | Chịu thuế, miễn thuế, hoặc miễn thuế trong mức | Chọn chế độ thuế. |
+  | Mức miễn thuế mỗi tháng | Khi chọn miễn thuế trong mức | Lớn hơn 0 | Nhập mức miễn thuế. |
+
+### SCR-034: Tham số lương
+
+- **Purpose:** cập nhật giá trị luật định theo ngày hiệu lực · **Stories:** US-054
+- **Content and actions:** danh sách tham số lương; mỗi tham số hiện giá trị đang hiệu lực, giá trị sắp tới và lịch sử
+  các giá trị cũ. Thao tác Thêm giá trị mới; giá trị chưa dùng ở bảng lương đã chốt thì sửa hoặc xóa được. Biểu thuế
+  nhập thành bảng các bậc.
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Ngày hiệu lực | Có | Không trùng giá trị khác của cùng tham số | Tham số này đã có giá trị từ ngày này. |
+  | Giá trị | Có | Số không âm; biểu thuế có các bậc liền nhau | Các bậc thuế phải liền nhau, bậc đầu bắt đầu từ 0. |
+
+- **States:** sửa giá trị đã dùng: "Giá trị này đã dùng ở bảng lương đã chốt. Thêm giá trị mới với ngày hiệu lực mới."
+  (BR-123)
+
+### SCR-035: Thay đổi lương
+
+- **Purpose:** ghi bản ghi lương mới · **Stories:** US-051 · **Use case:** UC-011
+- **Content and actions:** hộp thoại mở từ tab Lương của SCR-008. Có bước xem trước bản ghi trước và sau thay đổi. Ngày
+  hiệu lực thuộc tháng có bảng lương đã chốt thì bước xem trước hiện chênh lệch của từng tháng (BR-098).
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Ngày hiệu lực | Có | Trong khoảng làm việc; không trùng bản ghi khác (BR-093) | Đã có bản ghi lương từ ngày này. |
+  | Lương cơ bản | Có | Từ lương tối thiểu vùng trở lên (BR-094) | Lương cơ bản thấp hơn lương tối thiểu vùng [số tiền] đồng. |
+  | Lương đóng bảo hiểm | Có | Từ lương tối thiểu vùng trở lên (BR-096) | Lương đóng bảo hiểm thấp hơn lương tối thiểu vùng [số tiền] đồng. |
+  | Phụ cấp | Không | Mỗi loại một lần; số tiền lớn hơn 0 | Loại phụ cấp này đã có trong bản ghi. |
+  | Lý do | Có | Không trống | Nhập lý do, ví dụ tăng lương định kỳ. |
+
+- **States:** lương đóng bảo hiểm thấp hơn lương cơ bản: "Lương đóng bảo hiểm thấp hơn lương cơ bản. Kiểm tra lại trước
+  khi lưu." kèm ô xác nhận (BR-095).
+
+### SCR-036: Người phụ thuộc
+
+- **Purpose:** ghi người phụ thuộc để giảm trừ gia cảnh · **Stories:** US-053
+- **Content and actions:** hộp thoại mở từ tab Lương của SCR-008, dùng để thêm hoặc sửa một người phụ thuộc.
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Họ tên, quan hệ, ngày sinh | Có | Không trống | Nhập đủ họ tên, quan hệ và ngày sinh. |
+  | Số định danh hoặc mã số thuế | Có | Không đang được tính cho nhân viên khác trong tháng chung (BR-099) | Người này đang là người phụ thuộc của nhân viên khác trong cùng thời gian. |
+  | Tháng bắt đầu, tháng kết thúc | Tháng bắt đầu bắt buộc | Tháng kết thúc không trước tháng bắt đầu | Tháng kết thúc phải sau tháng bắt đầu. |
+
+### SCR-037: Bảng lương
+
+- **Purpose:** tính, kiểm và chốt lương tháng · **Stories:** US-055, US-060, US-063 · **Use case:** UC-010
+- **Content and actions:** ô chọn tháng; trạng thái bảng lương (Chưa tính, Nháp, Cần tính lại, Đã chốt) và trạng thái bảng
+  công của tháng. Khu lỗi và cảnh báo, mỗi mục có đường dẫn tới chỗ xử lý. Bảng mỗi nhân viên một dòng: công chuẩn, công
+  hưởng lương, tổng thu nhập, bảo hiểm nhân viên đóng, thuế, điều chỉnh, thực lĩnh, phần công ty đóng; dòng tổng ở cuối.
+  Bấm một dòng mở SCR-038. Nút Tính lương hoặc Tính lại, nút Chốt, nút Xuất bảng lương, nút Xuất danh sách chuyển khoản.
+- **States:**
+  - Bảng công chưa chốt: "Bảng công tháng [tháng] chưa chốt. Chốt bảng công trước khi tính lương." kèm đường dẫn tới
+    SCR-032 (BR-102).
+  - Cần tính lại: "Dữ liệu đã thay đổi sau lần tính trước. Tính lại trước khi chốt." Nút Chốt tắt (BR-119).
+  - Đã chốt: người chốt, thời điểm chốt; không còn nút Tính lại và Chốt (BR-118).
+
+### SCR-038: Chi tiết phiếu lương
+
+- **Purpose:** xem cách tính và thêm khoản điều chỉnh cho một nhân viên · **Stories:** US-056 tới US-059, US-062
+- **Content and actions:** phần đầu: nhân viên, tháng, công chuẩn, công hưởng lương, số người phụ thuộc. Các nhóm dòng:
+  thu nhập (lương theo công từng đoạn, phụ cấp, làm thêm theo loại, làm ban đêm, tiền phép chưa nghỉ), khấu trừ (BHXH,
+  BHYT, BHTN, thuế TNCN), khoản điều chỉnh, thực lĩnh, phần công ty đóng. Mỗi dòng tự tính có diễn giải công thức, ví dụ
+  "10.000.000 × 20 ÷ 22". Khi bảng lương chưa chốt, HR thêm, sửa hoặc xóa khoản điều chỉnh.
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Tên khoản | Có | Không trống | Nhập tên khoản, ví dụ Thưởng dự án. |
+  | Cộng hay trừ | Có | — | Chọn khoản cộng hoặc khoản trừ. |
+  | Số tiền | Có | Lớn hơn 0 | Số tiền phải lớn hơn 0. |
+  | Chịu thuế | Khi là khoản cộng | — | Chọn khoản này có chịu thuế không. |
+  | Lý do | Có | Không trống (BR-115) | Nhập lý do. |
+
+- **States:** thực lĩnh âm: "Thực lĩnh âm. Giảm khoản trừ hoặc chuyển một phần sang tháng sau." (BR-117)
+
+### SCR-039: Phiếu lương của tôi
+
+- **Purpose:** nhân viên xem phiếu lương · **Stories:** US-061
+- **Content and actions:** danh sách các tháng có bảng lương đã chốt; chọn một tháng để xem phiếu với các nhóm dòng như
+  SCR-038, không có phần công ty đóng và không có thao tác sửa. Tháng chưa chốt không hiện (BR-122).
