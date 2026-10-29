@@ -12,9 +12,6 @@ Chủ dự án muốn xây một hệ thống quản lý nhân sự chạy trên
 sáu nhóm chức năng: quản trị hệ thống, quản lý nhân viên, cơ cấu tổ chức, chấm công và nghỉ phép, lương và phúc lợi,
 báo cáo và phân tích. Tính năng AI là hướng mở rộng, làm sau khi phần nghiệp vụ đã xong.
 
-Dự án có hai mục tiêu. Mục tiêu trước mắt là luyện phân tích và thiết kế hệ thống: mọi nhóm chức năng trên được phân
-tích và thiết kế chi tiết trước khi viết code. Mục tiêu dài hạn là đưa hệ thống cho một công ty quen dùng thật. Chủ dự
-án đã chọn được công ty này nhưng chưa trao đổi với ai ở đó.
 
 ## Problem
 
