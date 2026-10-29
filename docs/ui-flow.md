@@ -7,7 +7,7 @@
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
 được kiểm ở backend theo Permission matrix trong [requirements](requirements.md#permission-matrix). Bản hiện tại có
-information architecture cho cả baseline và các màn hình của M1 và M2.
+information architecture cho cả baseline và các màn hình của M1 tới M3.
 
 ## Information architecture
 
@@ -32,12 +32,20 @@ flowchart TD
   ADM --> LOG["Nhật ký thao tác<br/>SCR-017"]
   ADM --> LT["Loại nghỉ<br/>SCR-023"]
   ADM --> CAL["Lịch làm việc<br/>SCR-024"]
+  ADM --> SH["Ca làm việc<br/>SCR-025"]
+  ADM --> SHA["Gán ca<br/>SCR-026"]
+  HOME --> APR["Đơn chờ duyệt<br/>SCR-021"]
   HOME --> LV["Nghỉ phép"]
   LV --> LVME["Nghỉ phép của tôi<br/>SCR-019"]
   LVME --> LVREQ["Gửi đơn nghỉ<br/>SCR-020"]
-  LV --> LVAPR["Đơn chờ duyệt<br/>SCR-021"]
   LV --> LVCAL["Lịch nghỉ của nhóm<br/>SCR-022"]
-  HOME --> AT["Chấm công · M3"]
+  HOME --> AT["Chấm công"]
+  AT --> ATME["Bảng công của tôi<br/>SCR-028"]
+  ATME --> ATADJ["Giải trình<br/>SCR-029"]
+  ATME --> ATOT["Đăng ký làm thêm<br/>SCR-030"]
+  AT --> ATTEAM["Bảng công của nhóm<br/>SCR-031"]
+  AT --> ATIMP["Nhập file chấm công<br/>SCR-027"]
+  AT --> ATCLOSE["Chốt bảng công<br/>SCR-032"]
   HOME --> PY["Lương · M4"]
   HOME --> RP["Báo cáo · M5"]
 ```
@@ -49,8 +57,10 @@ flowchart TD
 | Danh bạ | ✅ | ✅ | ✅ | SCR-005 |
 | Sơ đồ tổ chức | ✅ | ✅ | ✅ | SCR-006 |
 | Nhân viên | ❌ | ✅ chỉ trong phạm vi, không có nút thao tác | ✅ | SCR-007 tới SCR-013, SCR-018 |
-| Nghỉ phép | ✅ chỉ nghỉ phép của mình | ✅ thêm đơn chờ duyệt và lịch nghỉ của nhóm | ✅ thêm mọi đơn chờ duyệt | SCR-019 tới SCR-022 |
-| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023, SCR-024 |
+| Đơn chờ duyệt | ❌ | ✅ đơn mình là người duyệt | ✅ mọi đơn | SCR-021 |
+| Nghỉ phép | ✅ chỉ nghỉ phép của mình | ✅ thêm lịch nghỉ của nhóm | ✅ thêm lịch nghỉ của nhóm | SCR-019, SCR-020, SCR-022 |
+| Chấm công | ✅ chỉ bảng công của mình | ✅ thêm bảng công của nhóm | ✅ thêm nhập file và chốt bảng công | SCR-027 tới SCR-032 |
+| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026 |
 
 Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem không có quyền thì không hiện.
 
@@ -60,6 +70,7 @@ Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem kh�
 | Công tác | Các quá trình công tác, thay đổi sắp tới, bổ nhiệm trưởng | ✅ | ✅ |
 | Hợp đồng | Các hợp đồng lao động | ❌ | ✅ |
 | Nghỉ phép | Số dư phép, biến động phép, các đơn nghỉ | ✅ không thấy lý do nghỉ của đơn mình không duyệt | ✅ thêm nút Điều chỉnh số dư |
+| Chấm công | Mã chấm công, lịch sử ca, bảng công theo tháng | ✅ | ✅ thêm nút Đổi ca và sửa mã chấm công |
 | Tài khoản | Trạng thái tài khoản, vai trò | ❌ | ✅ |
 | Nhật ký | Thay đổi trên hồ sơ này | ❌ | ✅ |
 
@@ -105,7 +116,27 @@ flowchart LR
   phép còn lại. Gửi thành công thì quay về SCR-019 với đơn ở trạng thái Chờ duyệt. Lỗi như thiếu phép hay chồng đơn thì
   ở lại SCR-020 kèm thông báo.
 - **Duyệt đơn:** người duyệt thấy thông báo trên SCR-003, mở SCR-021, chọn một đơn để xem chi tiết, rồi duyệt hoặc từ
-  chối kèm lý do. Từ SCR-021 có thể mở SCR-022 để xem lịch nghỉ của nhóm.
+  chối kèm lý do. Từ SCR-021 có thể mở SCR-022 để xem lịch nghỉ của nhóm. SCR-021 nhận cả đơn nghỉ, đơn làm thêm giờ và
+  giải trình chấm công.
+
+```mermaid
+flowchart LR
+  imp["SCR-027 Nhập file chấm công"] -->|"xác nhận"| team["SCR-031 Bảng công của nhóm"]
+  my["SCR-028 Bảng công của tôi"] --> adj["SCR-029 Giải trình"]
+  my --> ot["SCR-030 Đăng ký làm thêm"]
+  adj -->|"gửi"| queue["SCR-021 Đơn chờ duyệt"]
+  ot -->|"gửi"| queue
+  team -->|"xử lý ngày thiếu chấm công"| team
+  team --> close["SCR-032 Chốt bảng công"]
+  close -->|"còn việc chặn"| team
+```
+
+- **Nhập chấm công:** HR mở SCR-027, tải file, xem kết quả kiểm từng dòng rồi xác nhận. Công được tính lại và hiện ở
+  SCR-028 và SCR-031.
+- **Giải trình và làm thêm:** từ SCR-028, nhân viên bấm Giải trình trên một ngày để mở SCR-029, hoặc bấm Đăng ký làm thêm
+  để mở SCR-030. Đơn gửi đi vào SCR-021 của người duyệt.
+- **Chốt bảng công:** cuối tháng, HR mở SCR-032. Nếu còn việc chặn, mỗi việc có đường dẫn tới SCR-021 hoặc tới ngày cần
+  xử lý trên SCR-031. Xử lý xong thì quay lại SCR-032 để chốt.
 
 ## Screens
 
@@ -176,7 +207,8 @@ flowchart LR
 
 ### SCR-008: Chi tiết nhân viên
 
-- **Purpose:** xem và thao tác trên một hồ sơ · **Stories:** US-012, US-013, US-014, US-015, US-018, US-032
+- **Purpose:** xem và thao tác trên một hồ sơ · **Stories:** US-012, US-013, US-014, US-015, US-018, US-032, US-037,
+  US-038
 - **Content and actions:** các tab theo bảng ở mục Information architecture. Nếu có thay đổi công tác hoặc ngày nghỉ việc
   ở tương lai, đầu trang hiện dòng báo kèm ngày hiệu lực. HR có các nút Sửa hồ sơ, Ghi nhận thay đổi công tác, Ghi nhận
   nghỉ việc, Thêm hợp đồng; ở tab Nghỉ phép có nút Điều chỉnh số dư, mở hộp thoại nhập số ngày cộng hoặc trừ và lý do
@@ -311,11 +343,13 @@ flowchart LR
 
 ### SCR-021: Đơn chờ duyệt
 
-- **Purpose:** duyệt đơn nghỉ · **Stories:** US-025, US-026 · **Use case:** UC-005
-- **Content and actions:** danh sách đơn đang chờ: người gửi, loại nghỉ, ngày, số ngày, ngày gửi; đơn đã qua ngày bắt đầu
-  được đánh dấu quá hạn. Quản lý chỉ thấy đơn mình là người duyệt; HR thấy mọi đơn và lọc được theo người duyệt. Chọn một
-  đơn để xem chi tiết: lý do, số phép của người gửi trước và sau đơn, các đơn đã duyệt khác của nhóm trong cùng khoảng
-  ngày. Nút Duyệt và Từ chối; Từ chối mở ô lý do bắt buộc.
+- **Purpose:** duyệt mọi loại đơn · **Stories:** US-025, US-026, US-043, US-045 · **Use case:** UC-005, UC-008
+- **Content and actions:** danh sách đơn đang chờ, có bộ lọc theo loại đơn: đơn nghỉ, đơn làm thêm giờ, giải trình chấm
+  công. Mỗi dòng có người gửi, loại đơn, ngày, số ngày hoặc số giờ, ngày gửi; đơn đã qua ngày bắt đầu được đánh dấu quá
+  hạn. Quản lý chỉ thấy đơn mình là người duyệt; HR thấy mọi đơn và lọc được theo người duyệt. Chi tiết theo loại đơn:
+  đơn nghỉ hiện lý do, số phép trước và sau đơn, các đơn đã duyệt khác của nhóm trong cùng khoảng ngày; đơn làm thêm hiện
+  số giờ làm thêm đã dùng và còn lại trong tháng và năm; giải trình hiện giờ từ máy và giờ đề nghị. Nút Duyệt và Từ chối;
+  Từ chối mở ô lý do bắt buộc.
 - **States:** không còn đơn chờ: "Không có đơn nào chờ bạn duyệt."
 
 ### SCR-022: Lịch nghỉ của nhóm
@@ -334,10 +368,10 @@ flowchart LR
 
 ### SCR-024: Lịch làm việc
 
-- **Purpose:** khai báo ngày làm việc của công ty · **Stories:** US-029
-- **Content and actions:** ô chọn các ngày làm việc trong tuần; ô chọn năm; danh sách ngày nghỉ lễ và ngày làm bù của
-  năm đó với ngày, loại, tên. Thao tác thêm, sửa, xóa ngày. Trước khi lưu một thay đổi, màn hình hiện các đơn bị tính lại
-  và các đơn sẽ làm số phép bị âm (BR-064, EC-032).
+- **Purpose:** khai báo ngày nghỉ lễ và ngày làm bù · **Stories:** US-029
+- **Content and actions:** ô chọn năm; danh sách ngày nghỉ lễ và ngày làm bù của năm đó với ngày, loại, tên. Thao tác
+  thêm, sửa, xóa ngày; ngày thuộc tháng đã chốt không sửa được (BR-090). Trước khi lưu một thay đổi, màn hình hiện các đơn
+  bị tính lại và các đơn sẽ làm số phép bị âm (BR-064, EC-032). Ngày làm việc trong tuần khai báo ở SCR-025.
 - **Inputs:**
 
   | Field | Required | Rule | Message when invalid |
@@ -345,3 +379,85 @@ flowchart LR
   | Ngày | Có | Không vừa là ngày nghỉ lễ vừa là ngày làm bù | Ngày này đã được khai là [loại]. |
   | Loại | Có | Nghỉ lễ hoặc làm bù | Chọn loại ngày. |
   | Tên | Có | Không trống | Nhập tên, ví dụ Tết Nguyên đán. |
+
+### SCR-025: Ca làm việc
+
+- **Purpose:** định nghĩa ca · **Stories:** US-036
+- **Content and actions:** bảng ca với giờ bắt đầu, giờ kết thúc, nghỉ giữa ca, giờ làm chuẩn, ngày làm việc trong tuần,
+  số nhân viên đang dùng. Thao tác thêm, sửa, ngừng dùng. Form hiện ngay giờ làm chuẩn và hai buổi của ca khi nhập.
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Tên ca | Có | Không trùng (BR-068) | Tên ca đã tồn tại. |
+  | Giờ bắt đầu, giờ kết thúc | Có | Khác nhau; kết thúc sớm hơn bắt đầu là ca qua nửa đêm | Giờ bắt đầu và giờ kết thúc không được trùng nhau. |
+  | Nghỉ giữa ca | Không | Nằm trong ca | Giờ nghỉ phải nằm trong ca. |
+  | Ngày làm việc trong tuần | Có | Ít nhất một ngày | Chọn ít nhất một ngày làm việc. |
+
+- **States:** giờ làm chuẩn vượt `normal_hours_max_per_day`: "Ca dài hơn 8 giờ làm việc bình thường. Kiểm tra lại trước
+  khi lưu." kèm ô xác nhận (BR-069).
+
+### SCR-026: Gán ca
+
+- **Purpose:** gán ca cho nhiều nhân viên cùng lúc · **Stories:** US-037
+- **Content and actions:** chọn ca, ngày hiệu lực, rồi chọn nhân viên theo danh sách hoặc theo phòng ban. Bước xem trước
+  liệt kê từng người với ca cũ và ca mới. Ngày hiệu lực thuộc tháng đã chốt thì hiện cảnh báo theo BR-090. Đổi ca cho một
+  người cũng làm được ở tab Chấm công của SCR-008.
+
+### SCR-027: Nhập file chấm công
+
+- **Purpose:** đưa lượt chấm từ máy vào hệ thống · **Stories:** US-039 · **Use case:** UC-007
+- **Content and actions:** ba bước. Bước 1: tải file lên, kèm mô tả các cột bắt buộc. Bước 2: kết quả kiểm gồm số dòng sẽ
+  lưu, số dòng trùng, bảng dòng bị bỏ qua kèm lý do. Bước 3: nút Xác nhận; sau khi lưu, hiện báo cáo nhập. Danh sách các
+  lần nhập trước nằm dưới cùng.
+- **States:** file thiếu cột: "File thiếu cột [tên cột]. Kiểm tra lại file xuất từ máy chấm công."
+
+### SCR-028: Bảng công của tôi
+
+- **Purpose:** xem công từng ngày và tổng hợp tháng · **Stories:** US-040, US-041, US-042, US-044
+- **Content and actions:** ô chọn tháng; trạng thái kỳ công (Đang mở hoặc Đã chốt); bảng mỗi ngày một dòng với ca, giờ
+  vào, giờ ra, đi muộn, về sớm, trạng thái, giờ làm thêm; phần tổng hợp theo BR-092. Ngày Thiếu chấm công hoặc Vắng chưa
+  xử lý có nút Giải trình mở SCR-029. Nút Đăng ký làm thêm mở SCR-030. Danh sách đơn làm thêm và giải trình của tháng kèm
+  trạng thái, có nút Hủy với đơn được hủy.
+
+### SCR-029: Gửi giải trình chấm công
+
+- **Purpose:** đề nghị sửa giờ vào hoặc giờ ra · **Stories:** US-042
+- **Content and actions:** hộp thoại hiện giờ từ máy của ngày đó, các trường dưới và người duyệt.
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Giờ vào đề nghị | Một trong hai | Trước giờ ra đề nghị hoặc giờ ra từ máy | Giờ vào phải trước giờ ra. |
+  | Giờ ra đề nghị | Một trong hai | Sau giờ vào | Giờ ra phải sau giờ vào. |
+  | Lý do | Có | Không trống | Nhập lý do, ví dụ quên chấm hoặc đi công tác. |
+
+### SCR-030: Đăng ký làm thêm giờ
+
+- **Purpose:** xin làm thêm trước khi làm · **Stories:** US-044 · **Use case:** UC-008
+- **Content and actions:** form gồm các trường dưới. Khi nhập, form hiện số giờ của đơn, số giờ làm thêm đã dùng và còn
+  lại trong tháng và năm, và người duyệt.
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Ngày | Có | Tháng chưa chốt; không có đơn nghỉ cả ngày (BR-087, BR-090) | Không đăng ký làm thêm được vào ngày này. |
+  | Giờ bắt đầu, giờ kết thúc | Có | Sau thời điểm gửi; ngoài giờ ca; không chồng đơn khác (BR-083, BR-086) | Giờ làm thêm phải sau thời điểm gửi đơn và nằm ngoài giờ ca. |
+  | Lý do | Có | Không trống | Nhập lý do làm thêm. |
+
+- **States:** vượt giới hạn: "Vượt giới hạn làm thêm. Tháng này bạn còn được làm thêm [số giờ] giờ." (BR-084)
+
+### SCR-031: Bảng công của nhóm
+
+- **Purpose:** xem và xử lý bảng công của nhiều người · **Stories:** US-046, US-047, US-049
+- **Content and actions:** ô chọn tháng; bộ lọc phòng ban trong phạm vi và bộ lọc chỉ hiện ngày cần xử lý. Bảng mỗi
+  nhân viên một dòng, mỗi ngày một cột, ô ghi trạng thái ngắn gọn; ô bất thường hoặc được đánh dấu được tô nổi bật; các
+  cột cuối là tổng hợp theo BR-092. Bấm một ô để xem chi tiết ngày. HR có thêm thao tác ghi công cho ngày Thiếu chấm công
+  hoặc Vắng chưa xử lý (BR-082) và nút Xuất bảng tính. Quản lý chỉ xem.
+
+### SCR-032: Chốt bảng công
+
+- **Purpose:** chốt hoặc mở lại kỳ công · **Stories:** US-048 · **Use case:** UC-009
+- **Content and actions:** ô chọn tháng và trạng thái kỳ công. Khi Đang mở: danh sách việc còn chặn theo BR-089, mỗi
+  việc có đường dẫn tới chỗ xử lý; nút Chốt chỉ bật khi danh sách trống. Khi Đã chốt: người chốt, thời điểm chốt, nút Mở
+  lại có ô lý do bắt buộc; nút này tắt nếu bảng lương của tháng đã chốt (BR-091).

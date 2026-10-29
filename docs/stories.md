@@ -10,7 +10,7 @@
 
 - **Priority:** `Must` khi thiếu story đó thì bản phát hành vô nghĩa; `Should`, `Could` cho phần còn lại.
 - **Feature:** Issue Feature trên tracker chứa story; điền khi tạo Issue ở Phase 4.
-- Bản hiện tại có story của M1 và M2. Story của M3–M5 được thêm ở lần phân tích của milestone đó.
+- Bản hiện tại có story của M1 tới M3. Story của M4 và M5 được thêm ở lần phân tích của milestone đó.
 
 | ID | Story | Priority | Milestone | Feature |
 |---|---|---|---|---|
@@ -49,6 +49,20 @@
 | US-033 | HR ghi đơn nghỉ thay nhân viên | Should | M2 | |
 | US-034 | Thông báo về đơn nghỉ | Should | M2 | |
 | US-035 | HR xem số phép chưa nghỉ khi nhân viên nghỉ việc | Should | M2 | |
+| US-036 | HR quản lý ca làm việc | Must | M3 | |
+| US-037 | HR gán ca cho nhân viên | Must | M3 | |
+| US-038 | HR khai báo mã chấm công của nhân viên | Must | M3 | |
+| US-039 | HR nhập file chấm công | Must | M3 | |
+| US-040 | Tính công từng ngày | Must | M3 | |
+| US-041 | Nhân viên xem bảng công của mình | Must | M3 | |
+| US-042 | Nhân viên gửi giải trình chấm công | Must | M3 | |
+| US-043 | Quản lý duyệt giải trình chấm công | Must | M3 | |
+| US-044 | Nhân viên đăng ký làm thêm giờ | Must | M3 | |
+| US-045 | Quản lý duyệt đơn làm thêm giờ | Must | M3 | |
+| US-046 | Quản lý xem bảng công của nhóm | Should | M3 | |
+| US-047 | HR xử lý ngày thiếu chấm công | Must | M3 | |
+| US-048 | HR chốt và mở lại bảng công tháng | Must | M3 | |
+| US-049 | HR xuất bảng công ra bảng tính | Should | M3 | |
 
 ## Details
 
@@ -472,10 +486,10 @@ ty.
 
 ### US-029: HR quản lý lịch làm việc
 
-**Story:** Là HR, tôi muốn khai báo ngày làm việc trong tuần, ngày nghỉ lễ và ngày làm bù, để số ngày nghỉ được tính
-đúng.
+**Story:** Là HR, tôi muốn khai báo ngày nghỉ lễ và ngày làm bù của từng năm, để số ngày nghỉ và bảng công được tính
+đúng. Ngày làm việc trong tuần được khai báo ở từng ca (US-036).
 
-**Links:** BR-038, BR-039, BR-064 · EC-031, EC-032 · SCR-024
+**Links:** BR-038, BR-039, BR-064, BR-090 · EC-031, EC-032, EC-054 · SCR-024
 
 **Acceptance criteria**
 
@@ -568,3 +582,206 @@ luật.
   số này được dùng ở M4.
 - AC2: Given nhân viên còn đơn có ngày sau ngày làm việc cuối cùng, then các đơn đó bị hủy khi việc nghỉ có hiệu lực, và
   nhân viên được thông báo (EC-028).
+
+### US-036: HR quản lý ca làm việc
+
+**Story:** Là HR, tôi muốn định nghĩa các ca làm việc, để mỗi nhóm nhân viên được tính công theo đúng giờ của mình.
+
+**Links:** BR-068, BR-069, BR-071 · EC-039 · SCR-025
+
+**Acceptance criteria**
+
+- AC1: Given hệ thống mới cài, then có sẵn ca mặc định theo `default_shift`.
+- AC2: Given HR tạo ca 8:00–17:00, nghỉ 12:00–13:00 không tính giờ làm, then giờ làm chuẩn của ca là 8 giờ và ca chia
+  thành buổi sáng 8:00–12:00, buổi chiều 13:00–17:00 (BR-068, BR-069).
+- AC3: Given ca 22:00–06:00, then ca được lưu là ca qua nửa đêm và toàn bộ giờ trong ca là giờ làm ban đêm (BR-071,
+  EC-039).
+- AC4: Given giờ làm chuẩn của ca vượt `normal_hours_max_per_day`, when lưu, then hệ thống cảnh báo và chỉ lưu khi HR xác
+  nhận (BR-069).
+- AC5: Given tên ca trùng một ca đã có, when lưu, then bị từ chối (BR-068).
+
+### US-037: HR gán ca cho nhân viên
+
+**Story:** Là HR, tôi muốn gán ca cho nhân viên từ một ngày, để công của từng ngày được tính theo đúng ca.
+
+**Links:** BR-070, BR-090 · EC-043, EC-053 · SCR-026
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên mới tiếp nhận, then nhân viên có ca mặc định từ ngày vào làm (BR-070).
+- AC2: Given HR gán ca B cho một phòng ban từ ngày 15, then mọi nhân viên đang thuộc phòng ban đó có ca B từ ngày 15; các
+  ngày trước vẫn tính theo ca cũ (EC-043).
+- AC3: Given ngày hiệu lực thuộc tháng đã chốt, when lưu, then hệ thống cảnh báo rằng bảng công đã chốt không đổi
+  (BR-090, EC-053).
+
+### US-038: HR khai báo mã chấm công của nhân viên
+
+**Story:** Là HR, tôi muốn khai báo mã chấm công của nhân viên trên máy, để lượt chấm trong file được ghép đúng người.
+
+**Links:** BR-072 · SCR-008
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên chưa có mã chấm công, when HR nhập mã 105, then các lượt chấm có mã 105 được ghép với nhân viên đó.
+- AC2: Given mã đã thuộc một nhân viên đang làm khác, when lưu, then bị từ chối (BR-072).
+- AC3: Given mã từng thuộc một nhân viên đã nghỉ việc, when gán cho người mới, then được phép; lượt chấm cũ vẫn thuộc người
+  cũ.
+
+### US-039: HR nhập file chấm công
+
+**Story:** Là HR, tôi muốn tải file xuất từ máy chấm công lên hệ thống, để không phải gõ giờ vào và giờ ra của từng người.
+
+**Links:** UC-007 · BR-073, BR-090 · EC-041, EC-042 · SCR-027
+
+**Acceptance criteria**
+
+- AC1: Given file hợp lệ, when HR tải lên, then hệ thống hiện số dòng sẽ lưu, số dòng trùng, và từng dòng bị bỏ qua kèm
+  lý do trước khi HR xác nhận.
+- AC2: Given dòng có mã chấm công không khớp nhân viên nào, then dòng đó bị bỏ qua và có trong danh sách (EC-042).
+- AC3: Given HR tải lại đúng file đã nhập, when xác nhận, then không có lượt chấm mới nào được lưu (EC-041).
+- AC4: Given dòng có thời điểm thuộc tháng đã chốt, then dòng đó bị bỏ qua (BR-090).
+- AC5: Given file thiếu cột bắt buộc, when tải lên, then cả file bị từ chối và màn hình chỉ ra cột thiếu.
+
+### US-040: Tính công từng ngày
+
+**Story:** Là nhân viên, tôi muốn công mỗi ngày được tính tự động từ chấm công, ca và đơn nghỉ, để bảng công không phụ
+thuộc vào việc HR tính tay.
+
+**Links:** UC-007 · BR-038, BR-074 tới BR-080 · EC-040, EC-044 tới EC-046, EC-055, EC-057 · SCR-028
+
+**Acceptance criteria**
+
+- AC1: Given ca 8:00–17:00 và chấm 8:12, 17:30, với `late_grace_minutes` là 5, then ngày đủ công, đi muộn 12 phút, về sớm
+  0 phút (BR-075).
+- AC2: Given ngày làm việc chỉ có một lượt chấm, then ngày ở trạng thái Thiếu chấm công (BR-077, EC-040).
+- AC3: Given ngày làm việc không có lượt chấm và không có đơn nghỉ, then ngày ở trạng thái Vắng chưa xử lý (BR-077).
+- AC4: Given đơn nghỉ phép năm buổi sáng đã duyệt và chấm 13:05, 17:00, then ngày gồm nửa ngày phép năm và nửa ngày công,
+  không đi muộn (BR-076, EC-044).
+- AC5: Given tổng phút đi muộn và về sớm vượt `anomaly_minutes`, then ngày vẫn đủ công nhưng bị đánh dấu bất thường
+  (BR-078, EC-057).
+- AC6: Given chấm công vào ngày nghỉ lễ mà không có đơn làm thêm, then ngày không có công hay giờ làm thêm, và được đánh
+  dấu cho HR (BR-079, EC-045).
+
+### US-041: Nhân viên xem bảng công của mình
+
+**Story:** Là nhân viên, tôi muốn xem công từng ngày và tổng hợp của tháng, để phát hiện sai sót trước khi bảng công bị
+chốt.
+
+**Links:** BR-092 · SCR-028
+
+**Acceptance criteria**
+
+- AC1: Given một tháng, then thấy từng ngày với ca, giờ vào, giờ ra, phút đi muộn, phút về sớm, trạng thái và giờ làm
+  thêm.
+- AC2: Given một tháng, then thấy phần tổng hợp theo BR-092.
+- AC3: Given một ngày Thiếu chấm công hoặc Vắng chưa xử lý trong tháng chưa chốt, then ngày đó có nút Giải trình.
+
+### US-042: Nhân viên gửi giải trình chấm công
+
+**Story:** Là nhân viên, tôi muốn giải trình ngày quên chấm công hoặc đi công tác, để ngày đó được tính đúng công.
+
+**Links:** BR-081, BR-090 · EC-058 · SCR-029
+
+**Acceptance criteria**
+
+- AC1: Given ngày thiếu giờ ra, when gửi giải trình với giờ ra 17:30 và lý do "Quên chấm", then đơn ở trạng thái Chờ
+  duyệt và người duyệt là quản lý trực tiếp (BR-081).
+- AC2: Given ngày đã có giờ vào và giờ ra nhưng giờ máy ghi sai, when gửi giải trình, then được phép (EC-058).
+- AC3: Given ngày thuộc tháng đã chốt, when gửi, then bị từ chối (BR-090).
+
+### US-043: Quản lý duyệt giải trình chấm công
+
+**Story:** Là quản lý, tôi muốn duyệt hoặc từ chối giải trình chấm công của nhân viên mình, để công chỉ được sửa khi có
+xác nhận.
+
+**Links:** BR-056 tới BR-059, BR-081 · SCR-021
+
+**Acceptance criteria**
+
+- AC1: Given giải trình đang chờ mình duyệt, when duyệt, then giờ đề nghị thay giờ từ máy cho ngày đó và công được tính
+  lại.
+- AC2: Given từ chối mà để trống lý do, then không từ chối được (BR-059).
+- AC3: Given giải trình mà mình không phải người duyệt, when duyệt bằng đường dẫn trực tiếp, then bị từ chối.
+
+### US-044: Nhân viên đăng ký làm thêm giờ
+
+**Story:** Là nhân viên, tôi muốn đăng ký làm thêm giờ trước khi làm, để giờ làm thêm được ghi nhận và trả lương đúng.
+
+**Links:** UC-008 · BR-083, BR-084, BR-086, BR-087 · EC-050, EC-051 · SCR-030
+
+**Acceptance criteria**
+
+- AC1: Given ca 8:00–17:00, when đăng ký làm thêm 18:00–21:00 hôm nay lúc 15:00, then đơn ở trạng thái Chờ duyệt.
+- AC2: Given đã qua giờ bắt đầu làm thêm, when gửi, then bị từ chối (BR-083, EC-051).
+- AC3: Given khoảng làm thêm chồng giờ ca, when gửi, then bị từ chối (BR-086).
+- AC4: Given tổng giờ làm thêm đã duyệt và đang chờ trong tháng cộng với đơn mới vượt `ot_max_hours_per_month`, when
+  gửi, then bị từ chối và hiện số giờ còn được làm (BR-084, EC-050).
+- AC5: Given đơn đang chờ hoặc đã duyệt mà chưa tới giờ bắt đầu, when nhân viên hủy, then đơn ở trạng thái Đã hủy.
+
+### US-045: Quản lý duyệt đơn làm thêm giờ
+
+**Story:** Là quản lý, tôi muốn duyệt đơn làm thêm giờ của nhân viên mình, để chỉ làm thêm khi công việc cần.
+
+**Links:** UC-008 · BR-056 tới BR-059, BR-084, BR-085 · EC-047 tới EC-049 · SCR-021
+
+**Acceptance criteria**
+
+- AC1: Given đơn đang chờ mình duyệt, when duyệt, then đơn ở trạng thái Đã duyệt và nhân viên được thông báo.
+- AC2: Given tại lúc duyệt, đơn làm vượt giới hạn giờ làm thêm vì đơn khác vừa được duyệt, when duyệt, then thao tác bị
+  từ chối (BR-084).
+- AC3: Given đơn đã duyệt 18:00–21:00 và chấm công ra 20:00, then giờ làm thêm thực tế là 2 giờ (BR-085, EC-047).
+
+### US-046: Quản lý xem bảng công của nhóm
+
+**Story:** Là quản lý, tôi muốn xem bảng công của nhân viên trong phạm vi, để biết ai thường đi muộn hay thiếu chấm
+công.
+
+**Links:** BR-013, BR-078, BR-092 · SCR-031
+
+**Acceptance criteria**
+
+- AC1: Given một tháng, then thấy bảng nhân viên trong phạm vi theo từng ngày, kèm cột tổng hợp theo BR-092.
+- AC2: Given ngày bị đánh dấu bất thường, then ô của ngày đó được tô nổi bật (BR-078).
+- AC3: Given nhân viên ngoài phạm vi, then người đó không có trong bảng.
+
+### US-047: HR xử lý ngày thiếu chấm công
+
+**Story:** Là HR, tôi muốn ghi công trực tiếp cho ngày thiếu chấm công hoặc vắng chưa xử lý, để bảng công chốt được đúng
+hạn kể cả khi nhân viên không giải trình.
+
+**Links:** UC-009 · BR-077, BR-082 · SCR-031
+
+**Acceptance criteria**
+
+- AC1: Given ngày Vắng chưa xử lý, when HR chọn ghi vắng không lý do và nhập lý do, then ngày ở trạng thái Vắng không lý
+  do và nhật ký ghi lại (BR-082).
+- AC2: Given ngày Thiếu chấm công, when HR nhập giờ ra kèm lý do, then công được tính lại theo giờ đó.
+- AC3: Given lý do để trống, when lưu, then bị từ chối.
+
+### US-048: HR chốt và mở lại bảng công tháng
+
+**Story:** Là HR, tôi muốn chốt bảng công mỗi tháng, để số liệu không đổi nữa khi tính lương.
+
+**Links:** UC-009 · BR-088 tới BR-092 · EC-052 tới EC-056 · SCR-032
+
+**Acceptance criteria**
+
+- AC1: Given còn đơn đang chờ duyệt hoặc ngày chưa xử lý trong tháng, when chốt, then bị từ chối và hiện danh sách việc
+  còn lại (BR-089).
+- AC2: Given không còn việc chặn, when chốt, then tháng ở trạng thái Đã chốt và bảng công của mọi nhân viên được chụp lại
+  (BR-092).
+- AC3: Given tháng đã chốt, when nhân viên hủy một đơn nghỉ có ngày trong tháng đó, then bị từ chối (BR-090, EC-052).
+- AC4: Given bảng lương của tháng chưa chốt, when HR mở lại kèm lý do, then tháng trở về trạng thái Đang mở (BR-091).
+- AC5: Given bảng lương của tháng đã chốt, when HR mở lại, then bị từ chối (BR-091, EC-056).
+
+### US-049: HR xuất bảng công ra bảng tính
+
+**Story:** Là HR, tôi muốn xuất bảng công tháng ra file bảng tính, để gửi kế toán hoặc lưu trữ trong giai đoạn chưa có
+tính lương trên hệ thống.
+
+**Links:** BR-092 · SCR-031
+
+**Acceptance criteria**
+
+- AC1: Given một tháng, when HR xuất, then file có mỗi nhân viên một dòng với các cột tổng hợp theo BR-092.
+- AC2: Given tháng chưa chốt, then file ghi rõ là số liệu tạm tính.

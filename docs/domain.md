@@ -6,7 +6,7 @@
 - **Related:** [requirements](requirements.md) · [questions](questions.md) · [research](research.md) ·
   [data design](design/data.md) · [analysis guide](playbook/analysis.md)
 
-Bản hiện tại có phần dùng chung, M1 và M2. Luật của M3–M5 được thêm ở lần phân tích của milestone đó.
+Bản hiện tại có phần dùng chung và M1 tới M3. Luật của M4 và M5 được thêm ở lần phân tích của milestone đó.
 
 ## Glossary
 
@@ -41,7 +41,18 @@ Hệ thống có một bounded context.
 | Ngày làm việc | Ngày nhân viên phải đi làm theo lịch làm việc của công ty | `workingDay` | Ngày dương lịch |
 | Ngày làm bù | Ngày cuối tuần được đổi thành ngày làm việc, thường để bù cho kỳ nghỉ lễ dài | `makeupWorkday` | — |
 | Buổi | Nửa ngày làm việc: sáng hoặc chiều | `HalfDay` | — |
-| Người duyệt | Người được giao duyệt một đơn nghỉ | `approver` | Quản lý trực tiếp: người duyệt mặc định |
+| Người duyệt | Người được giao duyệt một đơn nghỉ, đơn làm thêm giờ hoặc giải trình chấm công | `approver` | Quản lý trực tiếp: người duyệt mặc định |
+| Ca làm việc | Khung giờ làm việc lặp lại theo tuần, gồm giờ bắt đầu, giờ kết thúc, nghỉ giữa ca và các ngày làm việc trong tuần | `Shift` | — |
+| Giờ làm chuẩn | Số giờ làm việc bình thường của một ca trong một ngày | `standardHours` | Giờ làm thực tế |
+| Mã chấm công | Số định danh của nhân viên trên máy chấm công | `deviceUserId` | Mã nhân viên |
+| Lượt chấm | Một lần nhân viên chấm trên máy, gồm mã chấm công và thời điểm | `PunchRecord` | — |
+| Giờ vào, giờ ra | Lượt chấm sớm nhất và muộn nhất trong khoảng tính của một ngày ca | `checkIn`, `checkOut` | — |
+| Công | Phần ngày làm việc được tính là đã làm: 1, 0,5 hoặc 0 | `workCredit` | Giờ làm thêm |
+| Giải trình chấm công | Yêu cầu sửa giờ vào hoặc giờ ra của một ngày, kèm lý do, cần người duyệt | `AttendanceAdjustment` | — |
+| Làm thêm giờ | Thời gian làm việc ngoài giờ làm chuẩn, đã được đăng ký và duyệt trước | `Overtime` | Ngồi lại muộn không đăng ký |
+| Giờ làm ban đêm | Giờ làm trong khoảng từ `night_start` tới `night_end` | `nightHours` | — |
+| Kỳ công | Một tháng dương lịch dùng để tổng hợp và chốt công | `AttendancePeriod` | — |
+| Bảng công tháng | Tổng hợp công, nghỉ, đi muộn và làm thêm của một nhân viên trong một kỳ công | `MonthlyTimesheet` | — |
 
 ## Entities
 
@@ -89,8 +100,39 @@ classDiagram
 | LeaveType | Entity | Tên, chế độ hưởng (công ty trả lương, BHXH chi trả, không hưởng lương), có trừ phép năm không, số ngày tối đa mỗi đơn, đang dùng hay ngừng | Có nhiều LeaveRequest |
 | LeaveRequest | Entity | Loại nghỉ, ngày và buổi bắt đầu, ngày và buổi kết thúc, số ngày, lý do, người duyệt, người ghi nếu HR ghi thay, trạng thái, lý do từ chối hoặc hủy | Thuộc một Employee |
 | LeaveLedgerEntry | Entity | Ngày, loại biến động, số ngày có dấu, năm phép, là phép tồn hay không, hạn dùng nếu là phép tồn, lý do | Thuộc một Employee; có thể phát sinh từ một LeaveRequest |
-| WorkCalendar | Entity | Các ngày làm việc trong tuần | Một lịch cho cả công ty; chứa nhiều CalendarDay |
+| WorkCalendar | Entity | Ngày nghỉ lễ và ngày làm bù của công ty; ngày làm việc trong tuần thuộc về ca từ M3 | Một lịch cho cả công ty; chứa nhiều CalendarDay |
 | CalendarDay | Value object | Ngày, loại (nghỉ lễ hoặc làm bù), tên | Thuộc WorkCalendar |
+
+**M3: chấm công**
+
+```mermaid
+classDiagram
+  Employee "1" --> "1..*" ShiftAssignment : có
+  ShiftAssignment "*" --> "1" Shift : dùng
+  PunchImport "1" --> "*" PunchRecord : tạo
+  PunchRecord "*" --> "0..1" Employee : ghép theo mã chấm công
+  Employee "1" --> "*" AttendanceDay : có
+  Employee "1" --> "*" AttendanceAdjustment : gửi
+  Employee "1" --> "*" OvertimeRequest : gửi
+  AttendancePeriod "1" --> "*" MonthlyTimesheet : chụp khi chốt
+  Employee "1" --> "*" MonthlyTimesheet : có
+```
+
+| Name | Kind | Key attributes | Relations |
+|---|---|---|---|
+| Employee | Entity, bổ sung ở M3 | Mã chấm công | — |
+| Shift | Entity | Tên, giờ bắt đầu, giờ kết thúc, khoảng nghỉ giữa ca, nghỉ giữa ca có tính vào giờ làm không, các ngày làm việc trong tuần, đang dùng hay ngừng | Có nhiều ShiftAssignment |
+| ShiftAssignment | Entity | Khoảng hiệu lực, ca | Thuộc một Employee |
+| PunchImport | Entity | Tên file, người nhập, thời điểm, số dòng đã lưu, số dòng trùng, các dòng bị bỏ qua kèm lý do | Tạo nhiều PunchRecord |
+| PunchRecord | Entity | Mã chấm công, thời điểm | Thuộc một PunchImport; ghép với Employee theo mã chấm công |
+| AttendanceDay | Entity | Ngày, ca, giờ vào, giờ ra, phút đi muộn, phút về sớm, công, loại nghỉ nếu có, giờ làm thêm theo loại, giờ làm ban đêm, trạng thái, đánh dấu cần xem | Thuộc một Employee; được tính từ lượt chấm, đơn nghỉ, đơn làm thêm và giải trình |
+| AttendanceAdjustment | Entity | Ngày, giờ vào đề nghị, giờ ra đề nghị, lý do, người duyệt, trạng thái | Thuộc một Employee |
+| OvertimeRequest | Entity | Ngày, giờ bắt đầu, giờ kết thúc, lý do, người duyệt, trạng thái | Thuộc một Employee |
+| AttendancePeriod | Entity | Tháng, trạng thái, người chốt, thời điểm chốt, lý do mở lại | Một kỳ công cho cả công ty |
+| MonthlyTimesheet | Entity | Các số tổng hợp theo BR-092 | Thuộc một Employee và một AttendancePeriod |
+
+Trạng thái của AttendanceDay được tính lại mỗi khi dữ liệu nguồn đổi, nên không có vòng đời riêng: Chưa tới, Ngày nghỉ,
+Đủ công, Nghỉ theo đơn, Nửa công nửa nghỉ, Thiếu chấm công, Vắng chưa xử lý, Vắng không lý do.
 
 ## Aggregates and invariants
 
@@ -104,7 +146,12 @@ classDiagram
 | LeaveRequest | LeaveRequest | Số ngày khớp lịch làm việc (BR-044); không vượt tối đa của loại nghỉ (BR-047) | Không chồng buổi với đơn khác (BR-045); nằm trong khoảng làm việc (BR-046); hai đơn phép năm gửi hoặc duyệt cùng lúc không được làm thiếu phép (BR-053, EC-024) |
 | LeaveLedgerEntry | LeaveLedgerEntry | Không sửa, không xóa (BR-054) | Số dư phép bằng tổng các biến động (BR-054); mỗi tháng chỉ được cộng một lần (EC-038) |
 | LeaveType | LeaveType | BR-040 | Có đúng một loại Phép năm (BR-041) |
-| WorkCalendar | WorkCalendar, CalendarDay | Một ngày không vừa là ngày nghỉ lễ vừa là ngày làm bù | Đổi lịch thì tính lại các đơn chưa bắt đầu (BR-064) |
+| WorkCalendar | WorkCalendar, CalendarDay | Một ngày không vừa là ngày nghỉ lễ vừa là ngày làm bù | Đổi lịch thì tính lại các đơn chưa bắt đầu (BR-064); không đổi lịch trong tháng đã chốt (BR-090) |
+| Shift | Shift | Giờ làm chuẩn và hai buổi tính được (BR-068, BR-069) | — |
+| Employee (M3) | ShiftAssignment | Mỗi ngày từ ngày vào làm có đúng một ca (BR-070) | Mã chấm công không trùng giữa nhân viên đang làm (BR-072) |
+| PunchImport | PunchImport, PunchRecord | Lượt chấm không trùng (BR-073) | Không nhập vào tháng đã chốt (BR-090) |
+| OvertimeRequest | OvertimeRequest | Nằm ngoài giờ ca; gửi trước giờ bắt đầu (BR-083, BR-086) | Giới hạn giờ làm thêm theo ngày, tháng, năm, tính cả đơn khác (BR-084) |
+| AttendancePeriod | AttendancePeriod, MonthlyTimesheet | Bảng công đã chụp không đổi khi kỳ đã chốt | Điều kiện chốt (BR-089); mở lại chỉ khi bảng lương chưa chốt (BR-091) |
 
 ## Lifecycles
 
@@ -232,6 +279,53 @@ stateDiagram-v2
 | `approved` | `cancelled` | Nhân viên hủy; HR hủy; hoặc Thời gian, khi việc nghỉ việc có hiệu lực | Nhân viên chỉ hủy được trước ngày bắt đầu; HR phải nhập lý do (BR-061, BR-065) |
 | `approved` | `approved` | HR rút ngắn đơn đã bắt đầu | Có lý do; phép năm được hoàn phần rút ngắn (BR-061) |
 
+Mọi chuyển trạng thái của LeaveRequest bị chặn khi đơn có ngày thuộc tháng đã chốt (BR-090).
+
+**OvertimeRequest và AttendanceAdjustment**
+
+Hai loại đơn này dùng chung vòng đời và luật duyệt của đơn nghỉ (BR-056 tới BR-059), không có HR ghi thay.
+
+```mermaid
+stateDiagram-v2
+  state "Chờ duyệt" as pending
+  state "Đã duyệt" as approved
+  state "Bị từ chối" as rejected
+  state "Đã hủy" as cancelled
+  [*] --> pending: nhân viên gửi
+  pending --> approved: người duyệt hoặc HR duyệt
+  pending --> rejected: người duyệt hoặc HR từ chối
+  pending --> cancelled: nhân viên hủy
+  approved --> cancelled: nhân viên hủy đơn làm thêm trước giờ bắt đầu, hoặc HR hủy
+  approved --> [*]
+  rejected --> [*]
+  cancelled --> [*]
+```
+
+| From | To | Trigger and actor | Guard |
+|---|---|---|---|
+| — | `pending` | Nhân viên gửi | Đơn làm thêm: BR-083, BR-084, BR-086, BR-087. Giải trình: BR-081. Tháng chưa chốt (BR-090) |
+| `pending` | `approved` | Người duyệt hoặc HR duyệt | Người duyệt không phải người gửi (BR-060); đơn làm thêm vẫn trong giới hạn (BR-084) |
+| `pending` | `rejected` | Người duyệt hoặc HR từ chối | Có lý do (BR-059) |
+| `pending` | `cancelled` | Nhân viên hủy | Tháng chưa chốt |
+| `approved` | `cancelled` | Nhân viên hủy đơn làm thêm trước giờ bắt đầu; HR hủy kèm lý do | Tháng chưa chốt |
+
+**AttendancePeriod**
+
+```mermaid
+stateDiagram-v2
+  state "Đang mở" as open
+  state "Đã chốt" as closed
+  [*] --> open: tháng bắt đầu
+  open --> closed: HR chốt
+  closed --> open: HR mở lại
+```
+
+| From | To | Trigger and actor | Guard |
+|---|---|---|---|
+| — | `open` | Thời gian, ngày đầu tháng | — |
+| `open` | `closed` | HR chốt | Không còn việc chặn theo BR-089 |
+| `closed` | `open` | HR mở lại | Có lý do; bảng lương của tháng chưa chốt (BR-091) |
+
 ## Business rules
 
 - **Status:** `Confirmed` khi có nguồn xác nhận; `Assumed` khi dựa trên assumption; `Disputed` khi các nguồn mâu thuẫn và
@@ -305,7 +399,7 @@ stateDiagram-v2
 
 | ID | When | Then | Source | Status |
 |---|---|---|---|---|
-| BR-038 | Xác định một ngày có phải ngày làm việc không | Là ngày làm việc nếu thuộc `working_weekdays` và không phải ngày nghỉ lễ, hoặc nếu là ngày làm bù do HR khai báo | A-003, A-005 | Assumed |
+| BR-038 | Xác định ngày D có phải ngày làm việc của nhân viên X không | Là ngày làm việc nếu D thuộc các ngày làm việc trong tuần của ca của X tại D và không phải ngày nghỉ lễ, hoặc nếu D là ngày làm bù do HR khai báo | A-003, A-005 | Assumed |
 | BR-039 | Bắt đầu một năm mới | HR khai báo ngày nghỉ lễ và ngày làm bù của năm đó theo Điều 112 Bộ luật Lao động và thông báo của Chính phủ | Bộ luật Lao động 2019, Điều 112 | Assumed |
 | BR-040 | Tạo hoặc sửa loại nghỉ | Mỗi loại có tên không trùng, chế độ hưởng (công ty trả lương, BHXH chi trả hoặc không hưởng lương), có trừ phép năm hay không, số ngày tối đa mỗi đơn nếu có | Chủ dự án, 2026-10-30 | Confirmed |
 | BR-041 | Quản lý loại Phép năm | Hệ thống có đúng một loại trừ số dư phép năm là Phép năm; loại này không xóa và không ngừng dùng được | A-003 | Assumed |
@@ -346,6 +440,46 @@ stateDiagram-v2
 | BR-064 | HR thêm hoặc bỏ ngày nghỉ lễ hoặc ngày làm bù | Số ngày của các đơn đã duyệt hoặc đang chờ mà chưa bắt đầu được tính lại; chênh lệch phép năm được trừ hoặc hoàn; nhân viên được thông báo. Đơn đã bắt đầu không tự đổi | A-003 | Assumed |
 | BR-065 | Việc nghỉ việc có hiệu lực | Các đơn có ngày sau ngày làm việc cuối cùng bị hủy. Số ngày phép năm chưa nghỉ tính tới ngày làm việc cuối cùng được chốt để thanh toán ở M4 | Bộ luật Lao động 2019, Điều 113 | Assumed |
 
+**Ca và chấm công**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-068 | Tạo hoặc sửa ca | Ca có tên không trùng, giờ bắt đầu, giờ kết thúc, khoảng nghỉ giữa ca nếu có, nghỉ giữa ca có tính vào giờ làm không, và các ngày làm việc trong tuần. Giờ kết thúc sớm hơn giờ bắt đầu nghĩa là ca qua nửa đêm. Ca chia thành buổi sáng và buổi chiều tại khoảng nghỉ giữa ca, hoặc tại điểm giữa ca nếu không có nghỉ | Chủ dự án, 2026-10-30; A-003 | Confirmed |
+| BR-069 | Tính giờ làm chuẩn của ca | Bằng thời gian từ giờ bắt đầu tới giờ kết thúc, trừ nghỉ giữa ca nếu nghỉ không tính vào giờ làm. Vượt `normal_hours_max_per_day` thì cảnh báo; HR xác nhận thì vẫn lưu | Bộ luật Lao động 2019, Điều 105 | Assumed |
+| BR-070 | Gán ca | Từ ngày vào làm, mỗi ngày nhân viên có đúng một ca; các lần gán ca có ngày hiệu lực, không chồng, không hở. Nhân viên mới nhận ca `default_shift` từ ngày vào làm | Chủ dự án, 2026-10-30; A-003 | Confirmed |
+| BR-071 | Tính giờ làm ban đêm | Giờ làm trong khoảng từ `night_start` tới `night_end` là giờ làm ban đêm, kể cả giờ làm thêm | Bộ luật Lao động 2019, Điều 106 | Assumed |
+| BR-072 | Khai báo mã chấm công | Mỗi nhân viên có tối đa một mã chấm công. Mã không trùng giữa các nhân viên đang làm hoặc sắp vào làm; mã của người đã nghỉ việc được dùng lại | A-003 | Assumed |
+| BR-073 | Nhập file chấm công | Mỗi dòng gồm mã chấm công và thời điểm. Dòng có mã không khớp nhân viên nào hoặc thời điểm thuộc tháng đã chốt bị bỏ qua và được liệt kê. Lượt chấm trùng cùng nhân viên, cùng thời điểm chỉ lưu một lần | Chủ dự án, 2026-10-30; A-006 | Assumed |
+| BR-074 | Xác định giờ vào và giờ ra của ngày ca D | Lượt chấm thuộc ngày ca D nếu nằm trong khoảng từ `punch_window_before` phút trước giờ bắt đầu ca tới `punch_window_after` phút sau giờ kết thúc ca. Giờ vào là lượt sớm nhất, giờ ra là lượt muộn nhất trong khoảng đó. Ca qua nửa đêm thuộc ngày bắt đầu ca | A-003 | Assumed |
+| BR-075 | Ngày làm việc có giờ vào và giờ ra khác nhau | Ngày được tính đủ công. Phút đi muộn là số phút giờ vào trễ hơn giờ bắt đầu ca; phút về sớm là số phút giờ ra sớm hơn giờ kết thúc ca. Số phút không quá `late_grace_minutes` được ghi là 0. Đi muộn, về sớm không làm giảm công | Chủ dự án, 2026-10-30 | Confirmed |
+| BR-076 | Ngày làm việc có đơn nghỉ nửa ngày đã duyệt | Buổi nghỉ tính theo loại nghỉ của đơn; buổi còn lại tính công như BR-075 nhưng so với giờ bắt đầu và kết thúc của buổi đó | A-003 | Assumed |
+| BR-077 | Ngày làm việc thiếu chấm công | Có đúng một lượt chấm thì ngày ở trạng thái Thiếu chấm công. Không có lượt chấm nào và không có đơn nghỉ thì ở trạng thái Vắng chưa xử lý. Cả hai cần giải trình hoặc HR xử lý trước khi chốt | A-003 | Assumed |
+| BR-078 | Tổng phút đi muộn và về sớm của một ngày vượt `anomaly_minutes` | Ngày được đánh dấu bất thường để quản lý và HR xem; công không đổi | A-003 | Assumed |
+| BR-079 | Có lượt chấm vào ngày không phải ngày làm việc | Lượt chấm không tạo công. Chỉ giờ làm thêm đã duyệt được tính; lượt chấm không có đơn làm thêm được đánh dấu cho HR | A-003 | Assumed |
+| BR-080 | Có lượt chấm vào ngày có đơn nghỉ cả ngày đã duyệt | Ngày vẫn là ngày nghỉ theo đơn; ngày được đánh dấu cho HR | A-003 | Assumed |
+
+**Giải trình và làm thêm giờ**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-081 | Nhân viên gửi giải trình chấm công | Giải trình cho một ngày làm việc thuộc tháng chưa chốt, gồm giờ vào hoặc giờ ra đề nghị và lý do. Người duyệt theo BR-056 tới BR-059. Được duyệt thì giờ đề nghị thay giờ từ máy cho ngày đó | A-003 | Assumed |
+| BR-082 | HR xử lý ngày Thiếu chấm công hoặc Vắng chưa xử lý | HR ghi giờ vào và giờ ra, hoặc ghi Vắng không lý do. Lý do là bắt buộc; nhật ký ghi lại | A-003 | Assumed |
+| BR-083 | Nhân viên đăng ký làm thêm giờ | Đơn gồm ngày, giờ bắt đầu, giờ kết thúc, lý do, và phải được gửi trước giờ bắt đầu. Người duyệt theo BR-056 tới BR-059 | Chủ dự án, 2026-10-30 | Confirmed |
+| BR-084 | Gửi hoặc duyệt đơn làm thêm giờ | Từ chối nếu vượt một trong các giới hạn: ngày làm việc không quá `ot_max_daily_ratio` giờ làm chuẩn của ca; ngày không phải ngày làm việc không quá `ot_max_hours_non_working_day` giờ; mỗi tháng không quá `ot_max_hours_per_month` giờ; mỗi năm không quá `ot_max_hours_per_year` giờ. Giới hạn tính cả đơn đang chờ và đã duyệt | Bộ luật Lao động 2019, Điều 107; Nghị định 145/2020/NĐ-CP, Điều 60 | Assumed |
+| BR-085 | Tính giờ làm thêm thực tế | Bằng phần giao giữa khoảng đã duyệt và khoảng từ giờ vào tới giờ ra. Giờ làm thêm được phân loại theo ngày làm việc, ngày nghỉ hằng tuần hoặc ngày nghỉ lễ, và tách phần ban đêm theo BR-071 | Chủ dự án, 2026-10-30; Bộ luật Lao động 2019, Điều 98 | Confirmed |
+| BR-086 | Đăng ký làm thêm vào ngày làm việc | Khoảng làm thêm phải nằm ngoài giờ ca của ngày đó và không chồng đơn làm thêm khác | A-003 | Assumed |
+| BR-087 | Đăng ký làm thêm vào ngày có đơn nghỉ cả ngày đã duyệt | Từ chối | A-003 | Assumed |
+
+**Bảng công**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-088 | Xác định kỳ công | Kỳ công là tháng dương lịch | A-007 | Assumed |
+| BR-089 | HR chốt bảng công tháng | Từ chối nếu còn đơn nghỉ, đơn làm thêm hay giải trình đang chờ duyệt có ngày trong tháng, hoặc còn ngày Thiếu chấm công hay Vắng chưa xử lý | A-003 | Assumed |
+| BR-090 | Tháng đã chốt | Không tạo, duyệt, hủy hay sửa đơn nghỉ, đơn làm thêm, giải trình có ngày trong tháng; không nhập lượt chấm; không thêm hay bỏ ngày nghỉ lễ, ngày làm bù. Gán ca hay thay đổi công tác có hiệu lực trong tháng đó vẫn lưu được, nhưng không đổi bảng công đã chốt, và HR được cảnh báo | A-003 | Assumed |
+| BR-091 | HR mở lại bảng công đã chốt | Lý do là bắt buộc; chỉ được khi bảng lương của tháng đó chưa chốt | A-003 | Assumed |
+| BR-092 | Tổng hợp bảng công tháng của một nhân viên | Gồm số ngày làm việc chuẩn, số công, số ngày nghỉ theo từng loại nghỉ, số ngày vắng không lý do, số lần và tổng phút đi muộn, về sớm, số giờ làm thêm theo từng loại, số giờ làm ban đêm. Chỉ tính các ngày trong khoảng làm việc của nhân viên | A-003 | Assumed |
+
 ### Parameters
 
 Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP chưa được đối chiếu văn bản gốc, xem
@@ -361,7 +495,7 @@ Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP
 | `contract_auto_convert_days` | Số ngày sau khi hợp đồng xác định thời hạn hết hạn mà luật coi là không xác định thời hạn, nếu chưa ký hợp đồng mới | 30 | BR-027 |
 | `probation_max_days` | Thời gian thử việc tối đa theo nhóm công việc | Quản lý doanh nghiệp: 180 ngày. Cần trình độ cao đẳng trở lên: 60 ngày. Trung cấp, công nhân kỹ thuật, nhân viên nghiệp vụ: 30 ngày. Công việc khác: 6 ngày làm việc | BR-028 |
 | `contract_expiry_warning_days` | Số ngày trước ngày kết thúc hợp đồng để đưa vào danh sách sắp hết hạn | 30 | BR-029 |
-| `working_weekdays` | Các ngày làm việc trong tuần | Thứ Hai tới thứ Sáu | BR-038 |
+| `default_shift` | Ca gán cho nhân viên mới | Ca hành chính 8:00–17:00, nghỉ 12:00–13:00 không tính giờ làm, thứ Hai tới thứ Sáu | BR-038, BR-070 |
 | `annual_leave_base_days` | Phép năm cơ bản mặc định, ngày | 12 | BR-048 |
 | `seniority_step_years` | Số năm làm việc để được thêm 1 ngày phép năm | 5 | BR-048 |
 | `accrual_min_month_ratio` | Tỷ lệ ngày làm việc tối thiểu để tháng vào làm hoặc nghỉ việc được cộng phép | 50% | BR-050 |
@@ -370,6 +504,16 @@ Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP
 | `carryover_max_days` | Số ngày phép tồn tối đa được chuyển sang năm sau | 5 | BR-051 |
 | `carryover_expiry` | Ngày cuối cùng dùng được phép tồn, tính trong năm mới | 31/3 | BR-051 |
 | `leave_backdate_days` | Số ngày tối đa nhân viên được gửi đơn cho ngày đã qua | 7 | BR-062 |
+| `normal_hours_max_per_day` | Giờ làm việc bình thường tối đa trong một ngày | 8 | BR-069 |
+| `night_start`, `night_end` | Khoảng giờ làm ban đêm | 22:00 tới 06:00 | BR-071 |
+| `punch_window_before` | Số phút trước giờ bắt đầu ca mà lượt chấm vẫn thuộc ngày ca đó | 180 | BR-074 |
+| `punch_window_after` | Số phút sau giờ kết thúc ca mà lượt chấm vẫn thuộc ngày ca đó | 300 | BR-074 |
+| `late_grace_minutes` | Số phút đi muộn hoặc về sớm được bỏ qua | 5 | BR-075 |
+| `anomaly_minutes` | Tổng phút đi muộn và về sớm trong một ngày để đánh dấu bất thường | 120 | BR-078 |
+| `ot_max_daily_ratio` | Giờ làm thêm tối đa trong một ngày làm việc, tính theo giờ làm chuẩn của ca | 50% | BR-084 |
+| `ot_max_hours_non_working_day` | Giờ làm thêm tối đa trong một ngày không phải ngày làm việc | 12 | BR-084 |
+| `ot_max_hours_per_month` | Giờ làm thêm tối đa trong một tháng | 40 | BR-084 |
+| `ot_max_hours_per_year` | Giờ làm thêm tối đa trong một năm; một số ngành được tới 300 giờ theo Điều 107 | 200 | BR-084 |
 
 ### Default leave types
 
@@ -439,3 +583,23 @@ Các loại nghỉ có sẵn khi cài hệ thống (US-028). HR sửa, thêm ho�
 | EC-036 | Nhân viên muốn sửa đơn đang chờ duyệt | Không có thao tác sửa; nhân viên hủy rồi gửi đơn mới | BR-061 | — |
 | EC-037 | HR đổi phép năm cơ bản của nhân viên giữa năm, ví dụ từ 12 lên 14 ngày | Các tháng đã cộng giữ nguyên; từ tháng kế tiếp cộng theo mức mới | BR-048 | — |
 | EC-038 | Lần cộng phép hằng tháng không chạy được đúng ngày, hoặc chạy hai lần | Lần chạy sau cộng bù các tháng còn thiếu; tháng đã cộng không được cộng lại | BR-049 | — |
+| EC-039 | Ca qua nửa đêm, ví dụ 22:00–06:00 | Lượt chấm sau nửa đêm thuộc ngày bắt đầu ca | BR-074 | — |
+| EC-040 | Ngày làm việc chỉ có một lượt chấm | Ngày ở trạng thái Thiếu chấm công cho tới khi có giải trình được duyệt hoặc HR xử lý | BR-077 | — |
+| EC-041 | HR nhập cùng một file chấm công hai lần | Lần thứ hai không tạo lượt chấm mới | BR-073 | — |
+| EC-042 | File có mã chấm công không khớp nhân viên nào | Dòng đó bị bỏ qua và có trong danh sách bỏ qua | BR-073 | — |
+| EC-043 | Nhân viên đổi ca giữa tháng | Mỗi ngày tính theo ca có hiệu lực tại ngày đó | BR-070 | — |
+| EC-044 | Nghỉ phép buổi sáng, đi làm buổi chiều | Nửa ngày nghỉ theo loại nghỉ và nửa công; đi muộn tính so với giờ bắt đầu buổi chiều | BR-076 | — |
+| EC-045 | Chấm công vào ngày nghỉ lễ hoặc cuối tuần mà không có đơn làm thêm | Không tạo công hay giờ làm thêm; ngày được đánh dấu cho HR | BR-079 | — |
+| EC-046 | Có đơn nghỉ cả ngày đã duyệt nhưng vẫn có lượt chấm | Giữ ngày nghỉ theo đơn; ngày được đánh dấu cho HR | BR-080 | — |
+| EC-047 | Đơn làm thêm được duyệt 18:00–21:00 nhưng giờ ra là 20:00 | Giờ làm thêm thực tế là 2 giờ | BR-085 | — |
+| EC-048 | Làm thêm kéo dài qua 22:00 | Phần sau 22:00 là giờ làm thêm ban đêm | BR-071, BR-085 | — |
+| EC-049 | Làm thêm vào ngày nghỉ lễ | Giờ làm thêm thuộc loại ngày nghỉ lễ | BR-085 | — |
+| EC-050 | Đơn làm thêm làm tổng giờ của tháng vượt giới hạn | Từ chối và hiện số giờ còn được làm trong tháng | BR-084 | — |
+| EC-051 | Nhân viên gửi đơn làm thêm sau giờ bắt đầu | Từ chối | BR-083 | — |
+| EC-052 | Nhân viên hủy đơn nghỉ đã duyệt có ngày thuộc tháng đã chốt | Từ chối | BR-090 | — |
+| EC-053 | HR ghi thay đổi công tác hoặc đổi ca có hiệu lực trong tháng đã chốt | Thay đổi được lưu; bảng công đã chốt không đổi; HR được cảnh báo | BR-090 | — |
+| EC-054 | HR thêm ngày nghỉ lễ vào tháng đã chốt | Từ chối | BR-090 | — |
+| EC-055 | Nhân viên vào làm hoặc nghỉ việc giữa tháng | Bảng công chỉ gồm các ngày trong khoảng làm việc | BR-092 | — |
+| EC-056 | HR mở lại bảng công khi bảng lương của tháng đó đã chốt | Từ chối | BR-091 | — |
+| EC-057 | Nhân viên đi muộn 4 giờ mà không có đơn | Ngày vẫn đủ công theo lựa chọn của chủ dự án; ngày bị đánh dấu bất thường để quản lý xử lý theo quy chế kỷ luật | BR-075, BR-078 | — |
+| EC-058 | Ngày đã có giờ vào và giờ ra nhưng máy ghi sai giờ | Nhân viên gửi giải trình; khi được duyệt, giờ đề nghị thay giờ từ máy | BR-081 | — |
