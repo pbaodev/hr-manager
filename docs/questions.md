@@ -27,6 +27,9 @@
 | Q-012 | Công ty giữ dữ liệu cá nhân và nhật ký của nhân viên đã nghỉ việc trong bao lâu? | Thời hạn lưu trong mục Sensitive data của domain | blocks-design | HR công ty mục tiêu; Luật Bảo vệ dữ liệu cá nhân | Open | |
 | Q-013 | Điều 20, 24 và 25 Bộ luật Lao động 2019 về loại hợp đồng, thời hạn hợp đồng và thời gian thử việc có đúng như domain đang ghi không? | Luật hợp đồng của M1 và các tham số đi kèm | blocks-design | Cơ sở dữ liệu quốc gia về văn bản pháp luật | Open | |
 | Q-014 | Mọi nhân viên của công ty có email công việc không? | Tên đăng nhập và cách đặt lại mật khẩu | blocks-design | HR công ty mục tiêu | Assumed | Xem A-004 |
+| Q-015 | Công ty làm việc những ngày nào trong tuần? Có làm sáng thứ Bảy không? | Cách tính số ngày nghỉ; bảng công ở M3 | blocks-design | HR công ty mục tiêu | Assumed | Xem A-005 |
+| Q-016 | Quy chế phép tồn của công ty: được chuyển tối đa bao nhiêu ngày, dùng tới ngày nào? Nhân viên được gửi đơn cho ngày đã qua trong bao lâu? | Giá trị của `carryover_max_days`, `carryover_expiry`, `leave_backdate_days` | blocks-build | HR công ty mục tiêu | Open | |
+| Q-017 | Điều 112 tới 115 Bộ luật Lao động 2019 và Điều 65, 66 Nghị định 145/2020/NĐ-CP về nghỉ lễ, phép năm, thâm niên, nghỉ việc riêng và tháng đủ điều kiện có đúng như domain đang ghi không? Văn bản nào hướng dẫn Bộ luật Lao động đang có hiệu lực? | Luật và tham số của M2 | blocks-design | Cơ sở dữ liệu quốc gia về văn bản pháp luật | Open | |
 
 ## Assumptions
 
@@ -39,3 +42,4 @@ con số thì đặt trong config.
 | A-002 | Q-002 | Nhân viên xin nghỉ qua Zalo hoặc nói miệng; quản lý duyệt miệng; HR theo dõi số dư phép bằng bảng tính | Sửa Users và Alternatives của brief; sửa luồng duyệt trong requirements | Hỏi HR công ty trước khi requirements `Accepted` | No |
 | A-003 | — | Các luật nghiệp vụ ghi nguồn A-003 trong domain do agent đề xuất theo cách làm phổ biến ở doanh nghiệp nhỏ | Sửa luật, story liên quan và có thể cả data model | Chủ dự án rà khi review domain; HR công ty rà khi có buổi trao đổi | No |
 | A-004 | Q-014 | Không phải ai cũng có email công việc, nên tên đăng nhập là mã nhân viên và HR đặt lại mật khẩu | Đổi luật tài khoản, màn hình đăng nhập và có thể thêm tự đặt lại mật khẩu qua email | Hỏi HR công ty | No |
+| A-005 | Q-015 | Công ty làm việc từ thứ Hai tới thứ Sáu, cả ngày | Đổi `working_weekdays`; nếu có làm nửa ngày thứ Bảy thì lịch làm việc cần khai báo theo buổi | Hỏi HR công ty | No |
