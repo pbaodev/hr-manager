@@ -19,7 +19,7 @@
 | Q-004 | Quy chế nghỉ phép của công ty khác Bộ luật Lao động ở đâu: số ngày phép, cộng dồn sang năm sau, nghỉ nửa ngày, cấp duyệt? | Business rule của M2 | blocks-design | HR công ty mục tiêu | Open | |
 | Q-005 | Công ty chấm công bằng gì: máy chấm công, app hay bảng tính? Hệ thống có phải nhập dữ liệu từ máy chấm công không? | Hệ thống ngoài và luồng dữ liệu của M3 | blocks-design | HR công ty mục tiêu | Assumed | Xem A-006 |
 | Q-006 | Công ty tính lương thế nào: gồm những khoản lương và phụ cấp nào, ai tính BHXH và thuế TNCN, trả lương ngày nào? | Phạm vi và business rule của M4 | blocks-design | HR hoặc kế toán công ty mục tiêu | Assumed | Xem A-009. Chủ dự án chọn HR tính lương, 2026-10-30 |
-| Q-007 | Ban giám đốc cần những báo cáo nào, và xem bao lâu một lần? | Phạm vi của M5 | blocks-design | Ban giám đốc công ty mục tiêu | Open | |
+| Q-007 | Ban giám đốc cần những báo cáo nào, và xem bao lâu một lần? | Phạm vi của M5 | blocks-design | Ban giám đốc công ty mục tiêu | Assumed | Xem A-010. Chủ dự án chọn để Quản lý xem chi phí lương tổng hợp, 2026-10-30 |
 | Q-008 | Số hiệu, mức giảm trừ gia cảnh và biểu thuế của Luật Thuế TNCN sửa đổi là gì? Tỷ lệ đóng BHYT, BHTN và lương tối thiểu vùng đang hiệu lực là bao nhiêu? | Nguồn của business rule ở M4, xem [research](research.md#legal-sources) | blocks-design | Cơ sở dữ liệu quốc gia về văn bản pháp luật | Open | |
 | Q-009 | Ngân sách hạ tầng mỗi tháng là bao nhiêu? | Chọn hosting ở Phase 3 | blocks-design | Chủ dự án, khi so sánh chi phí trong ADR hosting ở Phase 3 | Open | |
 | Q-010 | Công ty có đồng ý dùng thử không, và với điều kiện gì về dữ liệu nhân viên? | Thời điểm dùng dữ liệu thật; success metrics dài hạn | nice-to-know | Ban giám đốc công ty mục tiêu | Open | |
@@ -53,3 +53,4 @@ con số thì đặt trong config.
 | A-007 | Q-019 | Kỳ công là tháng dương lịch | Đổi cách xác định kỳ công, cách chốt và tổng hợp bảng công | Hỏi HR công ty | No |
 | A-008 | Q-022 | Công ty chỉ có một địa điểm, thuộc vùng I | Lương tối thiểu vùng phải gắn với nơi làm việc của từng nhân viên thay vì cả công ty | Hỏi HR công ty | No |
 | A-009 | Q-006 | Công ty trả lương mỗi tháng một lần sau khi chốt công; phụ cấp gồm ăn giữa ca, trách nhiệm, điện thoại, đi lại | Thêm kỳ trả lương giữa tháng; đổi loại phụ cấp mặc định | Hỏi HR hoặc kế toán công ty | No |
+| A-010 | Q-007 | Ban giám đốc xem hằng tháng năm báo cáo cố định: biến động nhân sự, cơ cấu nhân sự, nghỉ phép, chấm công và chi phí lương | Thêm hoặc bỏ báo cáo; nếu cần báo cáo tự tạo thì đổi phạm vi M5 | Hỏi ban giám đốc công ty | No |

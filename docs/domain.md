@@ -6,7 +6,7 @@
 - **Related:** [requirements](requirements.md) · [questions](questions.md) · [research](research.md) ·
   [data design](design/data.md) · [analysis guide](playbook/analysis.md)
 
-Bản hiện tại có phần dùng chung và M1 tới M4. Luật của M5 được thêm ở lần phân tích của milestone đó.
+Bản hiện tại có đủ phần dùng chung và M1 tới M5.
 
 ## Glossary
 
@@ -71,6 +71,10 @@ Hệ thống có một bounded context.
 | Phiếu lương | Kết quả tính lương của một nhân viên trong một tháng, gồm từng dòng thu nhập và khấu trừ | `Payslip` | — |
 | Khoản điều chỉnh | Dòng HR thêm tay vào một phiếu lương, như thưởng, tạm ứng, truy lĩnh hay truy thu | `PayAdjustment` | Phụ cấp |
 | Thực lĩnh | Số tiền nhân viên nhận sau mọi khoản khấu trừ (BR-114) | `netPay` | Tổng thu nhập |
+| Chi phí lương | Số tiền công ty bỏ ra cho một nhân viên trong một tháng: tổng thu nhập cộng phần công ty đóng (BR-131) | `laborCost` | Thực lĩnh; tổng thu nhập |
+| Biến động nhân sự | Số người đầu kỳ, vào mới, nghỉ việc, chuyển đến, chuyển đi và cuối kỳ trong một kỳ báo cáo (BR-132) | `headcountMovement` | — |
+| Tỷ lệ nghỉ việc | Số người nghỉ việc trong kỳ chia số người bình quân của kỳ (BR-132) | `turnoverRate` | — |
+| Kỳ báo cáo | Khoảng tháng hoặc khoảng ngày người xem chọn cho một báo cáo | `reportPeriod` | Kỳ công, kỳ lương |
 
 ## Entities
 
@@ -180,6 +184,10 @@ classDiagram
 | PayslipLine | Entity | Nhóm (thu nhập, khấu trừ, công ty đóng), tên, số tiền, phần chịu thuế, nguồn (hệ thống tính hoặc HR thêm), lý do nếu HR thêm | Thuộc một Payslip |
 
 Phiếu lương lưu lại mọi số liệu đầu vào đã dùng, để đọc phiếu cũ không phải tính lại từ dữ liệu hiện tại.
+
+**M5: báo cáo**
+
+M5 không thêm entity. Báo cáo đọc từ entity của M1 tới M4 (BR-138); việc xuất báo cáo được ghi bằng AuditEntry.
 
 ## Aggregates and invariants
 
@@ -606,6 +614,23 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 | BR-125 | Bảng lương được chốt | Mỗi nhân viên có phiếu lương nhận thông báo trong hệ thống | A-003 | Assumed |
 | BR-126 | Xuất danh sách chuyển khoản | Chỉ xuất được khi bảng lương đã chốt. Mỗi nhân viên có thực lĩnh lớn hơn 0 một dòng gồm họ tên, số tài khoản, ngân hàng, số tiền. Nhân viên thiếu số tài khoản không có trong file và được cảnh báo khi chốt | A-003 | Assumed |
 
+**Báo cáo**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-127 | Xác định dữ liệu trong một báo cáo | HR thấy mọi nhân viên. Quản lý chỉ thấy nhân viên trong phạm vi tại ngày cuối của kỳ báo cáo, hoặc tại hôm nay nếu kỳ chưa kết thúc. Mỗi nhân viên được xếp vào phòng ban tại ngày cuối cùng của kỳ mà người đó còn trong khoảng làm việc | A-003 | Assumed |
+| BR-128 | Quản lý xem chi phí lương | Chỉ thấy số tổng hợp theo phòng ban trong phạm vi, từ bảng lương đã chốt; không thấy số liệu từng người | Chủ dự án, 2026-10-30 | Confirmed |
+| BR-129 | Quản lý xem số liệu tổng hợp về lương, giới tính hay độ tuổi của một nhóm có dưới `report_min_group_size` người | Số liệu của nhóm đó được gộp vào phòng ban cha gần nhất. Nếu cả phạm vi có dưới ngưỡng thì không hiện số liệu và ghi lý do. HR không bị áp ngưỡng này | A-003 | Assumed |
+| BR-130 | Báo cáo chi phí lương gồm một tháng có bảng lương chưa chốt | Quản lý không thấy tháng đó. HR thấy, kèm nhãn tạm tính | A-003 | Assumed |
+| BR-131 | Tính chi phí lương của một nhân viên trong một tháng | Tổng thu nhập trên phiếu lương cộng phần công ty đóng BHXH, BHYT, BHTN và kinh phí công đoàn. Khoản điều chỉnh tính vào tháng của bảng lương chứa nó, kể cả truy lĩnh cho tháng trước | A-003 | Assumed |
+| BR-132 | Tính biến động nhân sự của một phòng ban trong một kỳ | Đầu kỳ: số nhân viên thuộc phòng ban ngày đầu kỳ. Vào mới: ngày vào làm trong kỳ. Nghỉ việc: ngày làm việc cuối cùng trong kỳ. Chuyển đến, chuyển đi: thay đổi công tác có ngày hiệu lực trong kỳ. Cuối kỳ = đầu kỳ + vào mới − nghỉ việc + chuyển đến − chuyển đi. Tỷ lệ nghỉ việc = nghỉ việc ÷ ((đầu kỳ + cuối kỳ) ÷ 2). Hồ sơ đã hủy tiếp nhận không được tính | A-003 | Assumed |
+| BR-133 | Xem báo cáo cơ cấu nhân sự | HR chọn được một ngày bất kỳ; báo cáo dùng dữ liệu có hiệu lực tại ngày đó. Quản lý chỉ xem tại hôm nay và không thấy các chiều giới tính, độ tuổi, loại hợp đồng | A-003 | Assumed |
+| BR-134 | Báo cáo chấm công của một tháng | Tháng đã chốt dùng bảng công đã chụp khi chốt. Tháng đang mở dùng công tính tới hiện tại, kèm nhãn tạm tính | A-003 | Assumed |
+| BR-135 | Báo cáo nghỉ phép | Số ngày nghỉ chỉ tính từ đơn đã duyệt, chia theo ngày làm việc trong kỳ báo cáo. Số dư phép tính theo BR-054 tại ngày báo cáo | A-003 | Assumed |
+| BR-136 | Xuất một báo cáo | File chỉ chứa số liệu người xuất đang thấy trên màn hình, cùng bộ lọc và cùng luật gộp nhóm. Nhật ký ghi người xuất, tên báo cáo, bộ lọc và thời điểm | A-003 | Assumed |
+| BR-137 | Hiển thị trang tổng quan | Mỗi con số tính theo phạm vi của người xem; bấm vào thì mở danh sách chi tiết mà người đó có quyền xem | A-003 | Assumed |
+| BR-138 | Mở một báo cáo | Báo cáo đọc dữ liệu hiện có tại lúc mở; không lưu bản chụp riêng. Chỉ bảng công và bảng lương đã chốt là số liệu cố định | A-003 | Assumed |
+
 ### Parameters
 
 Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP chưa được đối chiếu văn bản gốc, xem
@@ -661,6 +686,7 @@ chiếu theo Q-008 và Q-023.
 | `night_work_premium` | Phần trả thêm cho giờ làm ban đêm, theo đơn giá giờ | 30% | BR-108, BR-109 |
 | `ot_night_extra` | Phần trả thêm cho giờ làm thêm ban đêm, theo hệ số ban ngày | 20%. Hệ số làm thêm ban đêm vì thế là 210% ngày làm việc, 270% ngày nghỉ hằng tuần, 390% ngày nghỉ lễ | BR-108 |
 | `unused_leave_avg_months` | Số tháng liền trước tháng nghỉ việc để tính lương ngày trả phép chưa nghỉ | 6 | BR-120 |
+| `report_min_group_size` | Số người tối thiểu của một nhóm để Quản lý thấy số liệu tổng hợp nhạy cảm | 3 | BR-129 |
 
 ### Default leave types
 
@@ -702,6 +728,7 @@ ngừng dùng theo quy chế công ty.
 | Lương, phụ cấp, phiếu lương, bảng lương | Trả lương | HR; chính nhân viên, chỉ phiếu đã chốt (BR-122) | Undecided (Q-012) |
 | Mã số thuế, mã số BHXH, cam kết thu nhập | Khấu trừ thuế, đóng bảo hiểm | HR; chính nhân viên | Undecided (Q-012) |
 | Người phụ thuộc: họ tên, ngày sinh, số định danh, quan hệ | Giảm trừ gia cảnh | HR; chính nhân viên | Undecided (Q-012) |
+| File báo cáo xuất ra | Trình ký, lưu trữ | Người xuất; nằm ngoài hệ thống sau khi tải về, nên chỉ ghi nhật ký được (BR-136) | Undecided (Q-012) |
 
 ## Edge cases
 
@@ -784,3 +811,12 @@ ngừng dùng theo quy chế công ty.
 | EC-075 | Nhân viên đổi sang ca có giờ làm chuẩn khác giữa tháng | Đơn giá giờ của mỗi ngày tính theo ca tại ngày đó | BR-107 | — |
 | EC-076 | Nhân viên có ngày làm việc trong tháng nhưng không có bản ghi lương | Phiếu của người đó có lỗi; bảng lương không chốt được tới khi HR ghi lương và tính lại | BR-117 | — |
 | EC-077 | HR sửa tỷ lệ bảo hiểm đã được dùng trong bảng lương đã chốt | Từ chối; HR thêm giá trị mới với ngày hiệu lực mới | BR-123 | — |
+| EC-078 | Quản lý xem chi phí lương khi một phòng ban con có 2 người | Số liệu của phòng đó được gộp vào phòng ban cha gần nhất | BR-129 | — |
+| EC-079 | Phạm vi của Quản lý chỉ có 2 người | Báo cáo chi phí lương không hiện số liệu và ghi lý do | BR-129 | — |
+| EC-080 | Nhân viên chuyển phòng ban giữa tháng | Chi phí lương cả tháng tính cho phòng ban tại ngày cuối tháng mà người đó còn làm | BR-127, BR-131 | — |
+| EC-081 | Nhân viên vào làm và nghỉ việc trong cùng một kỳ | Được tính ở cả vào mới và nghỉ việc; không có trong đầu kỳ và cuối kỳ | BR-132 | — |
+| EC-082 | Hồ sơ bị hủy tiếp nhận | Không có trong báo cáo nào | BR-132 | — |
+| EC-083 | Truy lĩnh lương tháng 3 được trả trong bảng lương tháng 5 | Tính vào chi phí lương tháng 5 | BR-131 | — |
+| EC-084 | Quản lý xem kỳ trước khi phạm vi của mình đã đổi | Dùng phạm vi tại ngày cuối của kỳ báo cáo | BR-127 | — |
+| EC-085 | Tháng chưa chốt lương | Quản lý không thấy tháng đó; HR thấy kèm nhãn tạm tính | BR-130 | — |
+| EC-086 | Quản lý mở báo cáo của phòng ban ngoài phạm vi bằng đường dẫn trực tiếp | Từ chối | BR-127 | — |

@@ -10,7 +10,7 @@
 
 - **Priority:** `Must` khi thiếu story đó thì bản phát hành vô nghĩa; `Should`, `Could` cho phần còn lại.
 - **Feature:** Issue Feature trên tracker chứa story; điền khi tạo Issue ở Phase 4.
-- Bản hiện tại có story của M1 tới M4. Story của M5 được thêm ở lần phân tích của milestone đó.
+- Bản hiện tại có đủ story của M1 tới M5.
 
 | ID | Story | Priority | Milestone | Feature |
 |---|---|---|---|---|
@@ -77,6 +77,13 @@
 | US-061 | Nhân viên xem phiếu lương | Must | M4 | |
 | US-062 | Trả tiền phép chưa nghỉ khi nghỉ việc | Should | M4 | |
 | US-063 | HR xuất bảng lương và danh sách chuyển khoản | Should | M4 | |
+| US-064 | Xem trang tổng quan nhân sự | Must | M5 | |
+| US-065 | Xem báo cáo biến động nhân sự | Must | M5 | |
+| US-066 | Xem báo cáo cơ cấu nhân sự | Should | M5 | |
+| US-067 | Xem báo cáo nghỉ phép | Must | M5 | |
+| US-068 | Xem báo cáo chấm công | Must | M5 | |
+| US-069 | Xem báo cáo chi phí lương | Must | M5 | |
+| US-070 | Xuất báo cáo ra bảng tính | Should | M5 | |
 
 ## Details
 
@@ -1020,3 +1027,107 @@ hàng.
   một dòng với họ tên, số tài khoản, ngân hàng, số tiền (BR-126).
 - AC3: Given bảng lương còn Nháp, then danh sách chuyển khoản không xuất được và bảng lương xuất ra ghi rõ là số liệu tạm
   tính.
+
+### US-064: Xem trang tổng quan nhân sự
+
+**Story:** Là quản lý, tôi muốn xem nhanh các con số chính về nhân sự của phạm vi mình, để biết tình hình mà không phải
+nhờ HR lập báo cáo.
+
+**Links:** BR-127, BR-137, BR-138 · SCR-040
+
+**Acceptance criteria**
+
+- AC1: Given Quản lý mở trang tổng quan, then thấy số nhân viên đang làm, số vào mới và nghỉ việc trong tháng, số người
+  đang nghỉ hôm nay, số đơn chờ mình duyệt, tất cả chỉ trong phạm vi (BR-127).
+- AC2: Given HR mở trang tổng quan, then thấy thêm số hợp đồng sắp hết hạn, số ngày chưa xử lý của tháng đang mở và trạng
+  thái bảng công, bảng lương của tháng trước.
+- AC3: Given người xem bấm một con số, then mở danh sách chi tiết mà người đó có quyền xem (BR-137).
+
+### US-065: Xem báo cáo biến động nhân sự
+
+**Story:** Là quản lý, tôi muốn xem số người vào, ra theo tháng và tỷ lệ nghỉ việc, để biết phòng ban nào đang mất người.
+
+**Links:** BR-127, BR-132 · EC-080 tới EC-082, EC-084 · SCR-041
+
+**Acceptance criteria**
+
+- AC1: Given khoảng tháng từ 1/2026 tới 6/2026, then mỗi tháng có số đầu kỳ, vào mới, nghỉ việc, chuyển đến, chuyển đi,
+  cuối kỳ và tỷ lệ nghỉ việc, theo từng phòng ban trong phạm vi (BR-132).
+- AC2: Given đầu kỳ 20 người, cuối kỳ 18 người, 2 người nghỉ việc, then tỷ lệ nghỉ việc là 2 ÷ 19 ≈ 10,5%.
+- AC3: Given hồ sơ đã bị hủy tiếp nhận, then không được tính (BR-132, EC-082).
+- AC4: Given nhân viên chuyển từ phòng A sang phòng B trong tháng, then A có một người chuyển đi và B có một người chuyển
+  đến; tổng công ty không đổi.
+
+### US-066: Xem báo cáo cơ cấu nhân sự
+
+**Story:** Là HR, tôi muốn xem cơ cấu nhân sự tại một ngày theo phòng ban, chức danh, loại hợp đồng, giới tính, độ tuổi
+và thâm niên, để trả lời câu hỏi của ban giám đốc.
+
+**Links:** BR-127, BR-129, BR-133 · SCR-042
+
+**Acceptance criteria**
+
+- AC1: Given HR chọn ngày 31/12/2025, then báo cáo dùng quá trình công tác, hợp đồng và trạng thái nhân viên có hiệu lực
+  tại ngày đó (BR-133).
+- AC2: Given Quản lý mở báo cáo, then chỉ thấy các chiều phòng ban, chức danh và thâm niên trong phạm vi, tại hôm nay; các
+  chiều giới tính, độ tuổi, loại hợp đồng không hiện (BR-033, BR-133).
+- AC3: Given mỗi chiều, then số người được hiện cả số lượng và tỷ lệ phần trăm.
+
+### US-067: Xem báo cáo nghỉ phép
+
+**Story:** Là quản lý, tôi muốn xem số ngày nghỉ theo loại và số phép còn lại của nhóm, để sắp xếp công việc và nhắc nhân
+viên dùng phép tồn trước khi hết hạn.
+
+**Links:** BR-051, BR-054, BR-067, BR-127, BR-135 · SCR-043
+
+**Acceptance criteria**
+
+- AC1: Given khoảng ngày, then thấy số ngày nghỉ theo từng loại nghỉ, theo phòng ban và theo nhân viên, chỉ từ đơn đã
+  duyệt (BR-135).
+- AC2: Given ngày báo cáo, then thấy số dư phép năm và phép tồn của từng nhân viên, kèm hạn dùng phép tồn (BR-051,
+  BR-054).
+- AC3: Given Quản lý xem, then thấy loại nghỉ nhưng không thấy lý do nghỉ (BR-067).
+
+### US-068: Xem báo cáo chấm công
+
+**Story:** Là quản lý, tôi muốn xem tổng hợp công, vắng, đi muộn và làm thêm theo tháng, để phát hiện người hay vi phạm
+và kiểm soát giờ làm thêm.
+
+**Links:** BR-084, BR-092, BR-127, BR-134 · SCR-044
+
+**Acceptance criteria**
+
+- AC1: Given một tháng đã chốt, then số liệu lấy từ bảng công đã chụp khi chốt (BR-134).
+- AC2: Given tháng đang mở, then số liệu là tạm tính và được ghi rõ (BR-134).
+- AC3: Given năm đang xem, then có danh sách nhân viên đã dùng từ 80% `ot_max_hours_per_year` trở lên (BR-084).
+- AC4: Given báo cáo, then có xếp hạng nhân viên theo số lần đi muộn và số ngày vắng không lý do trong phạm vi.
+
+### US-069: Xem báo cáo chi phí lương
+
+**Story:** Là giám đốc, tôi muốn xem chi phí lương theo phòng ban qua các tháng, để kiểm soát chi phí nhân sự mà không
+cần thấy lương từng người.
+
+**Links:** UC-012 · BR-127 tới BR-131 · EC-078 tới EC-080, EC-083, EC-085, EC-086 · SCR-045
+
+**Acceptance criteria**
+
+- AC1: Given Quản lý xem tháng 5/2026 đã chốt lương, then mỗi phòng ban trong phạm vi có số người, tổng thu nhập, phần
+  công ty đóng, tổng chi phí và chênh lệch so với tháng trước; không có số liệu từng người (BR-128, BR-131).
+- AC2: Given một phòng ban có 2 người và `report_min_group_size` là 3, when Quản lý xem, then số liệu của phòng đó được
+  gộp vào phòng ban cha (BR-129, EC-078).
+- AC3: Given tháng chưa chốt lương, then Quản lý không thấy tháng đó; HR thấy với nhãn tạm tính (BR-130, EC-085).
+- AC4: Given khoản truy lĩnh của tháng 3 được trả trong bảng lương tháng 5, then khoản đó tính vào chi phí tháng 5
+  (BR-131, EC-083).
+- AC5: Given HR xem, then mở được tới danh sách từng nhân viên của một phòng ban.
+
+### US-070: Xuất báo cáo ra bảng tính
+
+**Story:** Là HR, tôi muốn xuất mọi báo cáo ra bảng tính, để trình ký hoặc làm báo cáo nộp cơ quan nhà nước.
+
+**Links:** BR-136 · SCR-040 tới SCR-045
+
+**Acceptance criteria**
+
+- AC1: Given người xem đang lọc một báo cáo, when xuất, then file chỉ chứa đúng số liệu đang hiện với bộ lọc đó (BR-136).
+- AC2: Given Quản lý xuất báo cáo chi phí lương, then file áp cùng luật gộp nhóm nhỏ như trên màn hình (BR-129).
+- AC3: Given xuất xong, then nhật ký ghi người xuất, tên báo cáo và bộ lọc (BR-136).
