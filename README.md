@@ -1,83 +1,270 @@
-# Software Design Playbook
+# HR Manager
 
-Template để một người cùng AI agent xây software, từ ý tưởng tới vận hành, với trọng tâm là phân tích yêu cầu và
-thiết kế hệ thống. Template gồm quy trình sáu phase, hướng dẫn kỹ thuật phân tích và thiết kế, các mẫu tài liệu và
-cấu hình GitHub. Default dành cho dự án cá nhân vừa để học vừa để chạy thật: phân tích và thiết kế làm kỹ, vận hành
-làm gọn.
+Hệ thống quản lý nhân sự chạy trên web cho doanh nghiệp nhỏ và vừa tại Việt Nam.
 
-AI có hai chỗ trong template. AI agent hỗ trợ ở mọi bước, nhưng người quyết định. Tính năng AI của sản phẩm, nếu có,
-được thiết kế như một component bình thường.
+> **Trạng thái:** Phase 3, Thiết kế. Phân tích yêu cầu đã chốt; kiến trúc, dữ liệu, API và giao diện của MVP đã có bản
+> Draft. Chưa có code. Cập nhật 2026-10-30.
 
-## Structure
+## Project Overview
 
-```text
-AGENTS.md              Hướng dẫn cho AI agent
-ARCHITECTURE.md        Phase 3: C4 Context và Container, drivers, cross-cutting, threats, deployment
-CHANGELOG.md           Phase 4 trở đi: thay đổi của từng bản phát hành
-docs/
-  playbook/            Hướng dẫn và default: phase, mũ, kỹ thuật phân tích và thiết kế, cách làm việc, git workflow
-  project.md           Phase 0: mục tiêu, quỹ thời gian, công cụ, chỗ làm khác default
-  brief.md             Phase 1: có nên làm không, làm theo hướng nào
-  questions.md         Phase 1 trở đi: câu hỏi và assumption
-  requirements.md      Phase 2: actor, phân quyền, use case, quality attribute
-  stories.md           Phase 2: user story và acceptance criteria
-  domain.md            Phase 2: thuật ngữ, entity, vòng đời, luật nghiệp vụ, edge case
-  ui-flow.md           Phase 2: màn hình và luồng, khi có giao diện
-  design/              Phase 3: component, data, API, UI, luồng, AI
-  decisions/           Phase 1 trở đi: ADR và index
-  conventions/         Phase 3 trở đi: quy tắc code máy không tự kiểm được
-  SPEC.md              Phase 3: module, traceability, lệnh, boundaries; tài liệu chính khi làm task
-  setup.md             Phase 3: chạy dự án trên máy sạch
-  testing.md           Phase 3 trở đi: ca thử tay, mức lỗi, kết quả test mỗi bản phát hành
-  runbook.md           Phase 5: deploy, rollback, backup, sự cố
-  user-guide.md        Phase 5: hướng dẫn người dùng cuối, khi có người dùng khác
-  handover.md          Phase 5: bàn giao, chỉ cho Client delivery
-contracts/             Phase 3: contract API (OpenAPI), CI lint
-scripts/               Script dựng GitHub: label, branch protection, Issue baseline
-.github/               Mẫu Issue và PR, CI
-```
+HR Manager gom hồ sơ nhân viên, cơ cấu tổ chức, nghỉ phép, chấm công, lương và báo cáo vào một hệ thống, thay cho tin
+nhắn Zalo và các bảng tính rời rạc. Dự án do một người làm cùng AI agent, theo quy trình sáu phase: phân tích và thiết
+kế xong mới code.
 
-## How it flows
+### Problem
+
+Ở công ty mục tiêu, nhân viên xin nghỉ qua Zalo hoặc nói trực tiếp, và quản lý duyệt bằng lời. Không nơi nào ghi lại số
+ngày phép đã dùng, nên cả nhân viên lẫn HR đều không biết mỗi người còn bao nhiêu ngày. Cuối tháng HR lục lại tin nhắn
+để tính công, rồi tính lương trên nhiều bảng tính. Kết quả là công và lương dễ sai, và hai bên hay tranh cãi về số ngày
+phép.
+
+Đây là nhận định của chủ dự án, chưa được công ty xác nhận. Các câu cần hỏi công ty nằm ở
+[questions](docs/questions.md).
+
+### Solution
+
+- Nhân viên tự gửi đơn nghỉ và xem số ngày phép còn lại, kể cả trên điện thoại.
+- Quản lý duyệt đơn ngay trên hệ thống và thấy lịch nghỉ của nhóm.
+- Hệ thống tự cộng phép hằng tháng, chuyển phép tồn, và tính số ngày nghỉ theo lịch làm việc và ngày lễ.
+- HR quản lý hồ sơ, hợp đồng và cơ cấu tổ chức ở một nơi, có lịch sử theo ngày hiệu lực.
+- Quản lý và HR xem báo cáo nhân sự, nghỉ phép và xuất ra bảng tính.
+- Mọi tỷ lệ và mức theo luật lao động, BHXH, thuế là tham số có ngày hiệu lực; HR cập nhật khi luật đổi mà không cần
+  sửa code.
+
+### Target users
+
+| Vai trò | Ai | Dùng hệ thống để |
+|---|---|---|
+| Nhân viên | Mọi người có tài khoản | Xem và sửa thông tin liên hệ của mình, gửi và hủy đơn nghỉ, xem số dư phép |
+| Quản lý | Trưởng phòng ban, tự có khi được bổ nhiệm; giám đốc là trưởng phòng ban gốc | Duyệt đơn của nhóm, xem hồ sơ và lịch nghỉ trong phạm vi, xem báo cáo |
+| HR | Người làm nhân sự, được gán vai trò | Quản lý hồ sơ, hợp đồng, cơ cấu, tài khoản, loại nghỉ, lịch làm việc; duyệt thay |
+
+Quyền chi tiết của từng thao tác nằm ở [permission matrix](docs/requirements.md#permission-matrix).
+
+## Product Mind Map
+
+![Product mind map](docs/assets/mind-map.png)
+
+Sáu nhóm chức năng thuộc phạm vi M1 tới M5. Ngôi sao là thuộc MVP, nửa vòng tròn là một phần thuộc MVP.
+
+## Tech Stack
+
+| Layer | Choice | Decision |
+|---|---|---|
+| Kiến trúc | Modular monolith: một backend, một SPA | [ADR-0001](docs/decisions/0001-architecture-style.md) |
+| Backend | Python 3.13, FastAPI, Pydantic v2, SQLAlchemy 2.0, Alembic, uv | [ADR-0002](docs/decisions/0002-stack.md) |
+| Frontend | React, TypeScript, Vite; Mantine, TanStack Query, openapi-fetch, React Router | [ADR-0002](docs/decisions/0002-stack.md), [ADR-0006](docs/decisions/0006-frontend-libraries.md) |
+| Database | PostgreSQL 16 trở lên, với `btree_gist`, `pg_trgm`, `unaccent` | [ADR-0003](docs/decisions/0003-data-store.md) |
+| Xác thực | Tự làm: JWT 15 phút và refresh token lưu DB, trong cookie `HttpOnly` | [ADR-0004](docs/decisions/0004-authentication.md) |
+| Hosting | Render vùng Singapore cho production, khoảng $15 mỗi tháng; gói miễn phí của Render và Neon cho staging | [ADR-0005](docs/decisions/0005-hosting.md) |
+| API contract | OpenAPI 3.1, viết contract trước code | [API design](docs/design/api.md) |
+| Kiểm tra | pytest, ruff, mypy; ESLint, Vitest. CI hiện lint tài liệu và contract | [ADR-0002](docs/decisions/0002-stack.md) |
+
+## Key Features
+
+MVP là bản phát hành đầu tiên, gồm 32 trên 72 user story. MVP giải chỗ đau xin nghỉ trước, để công ty dùng thử sớm, trước
+hai milestone có nhiều rủi ro về luật là chấm công và lương.
+
+| Milestone | Tính năng | MVP |
+|---|---|---|
+| M1 Nhân sự và tổ chức | Đăng nhập, đổi mật khẩu; quản lý tài khoản và vai trò HR | ✅ |
+| | Phòng ban có lịch sử theo ngày hiệu lực, chức danh, bổ nhiệm trưởng phòng ban, sơ đồ tổ chức | ✅ |
+| | Tiếp nhận nhân viên, sửa hồ sơ, tìm và lọc nhân viên, thay đổi công tác, nghỉ việc, hợp đồng và hợp đồng sắp hết hạn | ✅ |
+| | Nhân viên tự xem và sửa thông tin liên hệ; Quản lý xem hồ sơ trong phạm vi | ✅ |
+| | Nhật ký thao tác, giải thể phòng ban, cơ cấu tại ngày trong quá khứ, danh bạ, nhập từ bảng tính, tuyển lại, xóa dữ liệu hết hạn lưu | Sau |
+| M2 Nghỉ phép | Số dư và biến động phép; gửi, hủy, duyệt, từ chối đơn nghỉ; HR duyệt thay | ✅ |
+| | Lịch nghỉ nhóm, loại nghỉ, lịch làm việc, cộng phép tháng, chuyển phép tồn, điều chỉnh phép, thông báo | ✅ |
+| | HR ghi đơn thay nhân viên, số phép chưa nghỉ khi nghỉ việc | Sau |
+| M3 Chấm công | Ca, gán ca, nhập file máy chấm công, tính công, giải trình, làm thêm giờ, chốt bảng công | Sau |
+| M4 Lương | Lương và phụ cấp theo ngày hiệu lực, BHXH, thuế TNCN, người phụ thuộc, tính và chốt bảng lương, phiếu lương | Sau |
+| M5 Báo cáo | Trang tổng quan, biến động nhân sự, nghỉ phép, xuất bảng tính | ✅ |
+| | Cơ cấu nhân sự, chấm công, chi phí lương | Sau |
+| M6 AI | Hướng mở rộng sau M1 tới M5 | Sau |
+
+Danh sách story đầy đủ ở [stories](docs/stories.md#summary).
+
+## System Architecture
+
+Hệ thống là một modular monolith: một codebase backend chia theo module nghiệp vụ, một SPA, một PostgreSQL. Lựa chọn
+này hợp với một người vận hành và ngân sách $10 tới $25 mỗi tháng, và giữ được transaction trên nhiều module, ví dụ khi
+duyệt đơn phải trừ phép và ghi nhật ký cùng lúc.
 
 ```mermaid
 flowchart LR
-  P0["0 Setup"] --> P1["1 Discovery"] --> P2["2 Analysis"] --> P3["3 Design"] --> P4["4 Build & Release"]
-  P4 -->|"feature mới: mini Analysis + Design"| P4
-  P4 --> P5["5 Operate & Evolve"]
-  P5 -->|"lỗi, design drift"| P4
+  user["Nhân viên, Quản lý, HR<br/>[Trình duyệt, điện thoại]"] -->|"HTTPS"| web["web<br/>[SPA: React, TypeScript]"]
+  web -->|"JSON, cookie chứa token"| api["api<br/>[FastAPI]"]
+  api -->|"SQL"| db[("db<br/>[PostgreSQL]")]
+  cron["Thời gian<br/>[Render cron]"] -->|"chạy lệnh"| jobs["jobs<br/>[Python CLI]"]
+  jobs -->|"SQL"| db
 ```
 
-Phase 0–3 làm một lần để có baseline: requirements, domain và thiết kế đã `Accepted`. Từ Phase 4, mỗi feature mới chạy
-một vòng phân tích và thiết kế nhỏ trên chính các tài liệu đó trước khi code.
+| Container | Vai trò |
+|---|---|
+| web | Giao diện; không giữ luật nghiệp vụ. Build thành file tĩnh, do `api` phục vụ cùng domain |
+| api | Xác thực, kiểm quyền, giữ luật nghiệp vụ, đọc ghi DB, xuất bảng tính |
+| jobs | Việc theo lịch: cộng phép tháng, chuyển và hủy phép tồn, khóa tài khoản sau ngày làm việc cuối |
+| db | Toàn bộ dữ liệu, nhật ký thao tác, refresh token, thông báo |
 
-## Quick start
+Module backend chỉ phụ thuộc theo một chiều. Module bên trái được dùng module bên phải; chiều ngược lại đi qua interface
+hoặc event, và được kiểm tự động bằng `import-linter`.
 
-1. Tạo repo bằng **Use this template**, hoặc copy thư mục này.
-2. Đọc [playbook](docs/playbook/README.md): nguyên tắc, sáu phase, bảng Project types.
-3. Phase 0: điền [project.md](docs/project.md); chạy `scripts/bootstrap-github.sh --protect --baseline` để tạo label,
-   bật branch protection cho `main` và tạo Issue cho deliverable baseline; tạo board GitHub Projects.
-4. Đi theo [phases.md](docs/playbook/phases.md). Ở Phase 2 và 3, mở [analysis.md](docs/playbook/analysis.md) và
-   [design.md](docs/playbook/design.md) bên cạnh mẫu đang điền.
-5. Xóa mẫu không dùng theo bảng Project types, ví dụ `ui-flow.md` và `design/ui.md` khi sản phẩm không có giao diện,
-   `design/ai.md` khi không có tính năng AI, `handover.md` khi không giao cho bên nhận.
-6. Khi biến README này thành README của sản phẩm, giữ link tới playbook, [ARCHITECTURE.md](ARCHITECTURE.md) và
-   [AGENTS.md](AGENTS.md).
+```mermaid
+flowchart LR
+  reporting --> payroll --> attendance --> leave --> identity --> employees --> organization --> shared
+```
 
-## Tooling
+Điểm thiết kế chính:
 
-- Sơ đồ viết bằng Mermaid trong Markdown: GitHub render được, agent đọc và sửa được, và thay đổi hiện rõ trong diff.
-- `.github/` dành cho GitHub. Dùng công cụ khác thì chuyển mẫu Issue và PR sang công cụ đó, rồi ghi vào `project.md`.
-- CI hiện kiểm link nội bộ trong Markdown, lint `contracts/openapi.yaml` và kiểm tiêu đề PR theo Conventional Commits.
-  `make setup` và `make check` trả lỗi "chưa được cấu hình" cho tới khi cấu hình theo stack ở Phase 3.
-- `scripts/bootstrap-github.sh` cần `gh` CLI đã đăng nhập; chạy lại nhiều lần được.
+- **Dữ liệu theo ngày hiệu lực:** phòng ban, quá trình công tác, hợp đồng, lương lưu khoảng `daterange`; PostgreSQL chặn
+  hai khoảng chồng nhau bằng exclusion constraint.
+- **Số dư phép không âm khi duyệt đồng thời:** khóa dòng tài khoản phép của nhân viên rồi tính lại từ sổ phép chỉ ghi
+  thêm.
+- **Quyền:** mặc định từ chối; Quản lý chỉ thấy cây phòng ban mình phụ trách; tài nguyên ngoài phạm vi trả về 404.
+- **Khóa tài khoản có tác dụng ngay:** mỗi request kiểm trạng thái tài khoản và `token_version`.
+- **Dữ liệu:** chỉ dùng dữ liệu giả cho tới khi có thỏa thuận với công ty, vì máy chủ ở Singapore là chuyển dữ liệu cá
+  nhân ra nước ngoài.
 
-## Origin
+| Môi trường | Hạ tầng | Deploy |
+|---|---|---|
+| local | Máy cá nhân | `make setup` theo [setup](docs/setup.md) |
+| staging | Render gói miễn phí, Neon PostgreSQL gói miễn phí, dữ liệu giả | Tự động khi merge vào `main` |
+| production | Render web service Starter, Render Postgres, Render cron, vùng Singapore | Chạy tay sau release gate |
 
-Chuyển từ ai-team-playbook, bản dành cho nhóm làm sản phẩm AI. So với bản đó: sáu vai được thay bằng bốn mũ cho một
-người; review chéo được thay bằng review nguội và AI phản biện; Phase Design được tách thành Analysis và Design, kèm
-hướng dẫn kỹ thuật riêng; eval chuyển thành một phần của component AI. Sau đó bổ sung từ một playbook giao dự án theo
-phase: script dựng GitHub, contract OpenAPI có lint, exit criteria dạng checklist, INVEST trong Definition of Ready,
-Traceability nhiều cột có Status, git workflow chi tiết, testing, runbook, CHANGELOG và loại dự án Client delivery.
+Chi tiết ở [ARCHITECTURE.md](ARCHITECTURE.md): driver, cross-cutting, trust boundary, 12 threat.
+
+## Project Structure
+
+Code backend và frontend sẽ được thêm khi dựng khung dự án (Issue #14).
+
+```text
+ARCHITECTURE.md        C4 Context và Container, driver, cross-cutting, threat, deployment
+AGENTS.md              Hướng dẫn cho AI agent
+contracts/
+  openapi.yaml         Contract API của MVP
+docs/
+  brief.md             Bài toán, giải pháp, phạm vi, rủi ro
+  requirements.md      Actor, ma trận quyền, use case, quality attribute
+  stories.md           User story và acceptance criteria
+  invest.md            Rubric INVEST cho story MVP
+  domain.md            Thuật ngữ, entity, vòng đời, luật nghiệp vụ, edge case
+  ui-flow.md           Màn hình và luồng
+  questions.md         Câu hỏi và giả định chờ công ty xác nhận
+  decisions/           ADR
+  design/              Component, data, schema DBML, API, flow, UI
+  assets/              Ảnh: mind map, use case, information architecture, prototype
+  playbook/            Quy trình làm việc của dự án
+scripts/               Script dựng GitHub
+.github/               Mẫu Issue và PR, CI
+```
+
+## Documentation
+
+### Requirements
+
+[Requirements](docs/requirements.md) có 3 actor người, ma trận quyền, 12 use case và 5 quality attribute.
+[Domain](docs/domain.md) có 141 luật nghiệp vụ và 91 edge case, mỗi luật có mã `BR-xxx` để truy tới story và test.
+
+**Use case diagram**
+
+![Use case diagram](docs/assets/use-case.png)
+
+**User stories INVEST**
+
+Có 72 story, mỗi story kèm acceptance criteria dạng Given, When, Then. 32 story của MVP được chấm theo rubric INVEST:
+
+| Criterion | Pass khi | Pass |
+|---|---|---|
+| Independent | Làm và kiểm được trong MVP, không cần story ngoài MVP | 30 / 32 |
+| Negotiable | Nói người dùng cần gì, không áp đặt cách làm | 32 / 32 |
+| Valuable | Có vai trò rõ và lợi ích cho vai trò đó | 32 / 32 |
+| Estimable | Luật và edge case đã có mã, không còn câu hỏi mở chặn story | 32 / 32 |
+| Small | Làm xong backend, frontend và test trong một PR, khoảng 3 ngày công | 29 / 32 |
+| Testable | Mọi AC kiểm được | 32 / 32 |
+
+27 story đạt đủ sáu tiêu chí. Năm story còn lại và cách sửa đề xuất nằm ở [INVEST review](docs/invest.md).
+
+### Information Architecture
+
+46 màn hình, nhóm theo menu. Menu chỉ hiện mục người dùng có quyền; quyền vẫn được kiểm ở backend.
+
+![Information architecture](docs/assets/information-architecture.png)
+
+Luồng giữa các màn hình ở [UI flow](docs/ui-flow.md); design system, trạng thái màn hình và accessibility ở
+[UI design](docs/design/ui.md).
+
+### UI/UX Prototype
+
+Prototype của 5 màn hình chính trong MVP, dùng dữ liệu giả.
+
+| Màn hình | Prototype |
+|---|---|
+| SCR-007 Danh sách nhân viên, HR | ![SCR-007](docs/assets/prototypes/01-employees.png) |
+| SCR-008 Chi tiết nhân viên, HR | ![SCR-008](docs/assets/prototypes/02-employee-profile.png) |
+| SCR-019 Nghỉ phép của tôi, Nhân viên | ![SCR-019](docs/assets/prototypes/03-my-leave.png) |
+| SCR-021 Đơn chờ duyệt, Quản lý | ![SCR-021](docs/assets/prototypes/04-leave-approval.png) |
+| SCR-040 Tổng quan báo cáo, HR | ![SCR-040](docs/assets/prototypes/05-report-overview.png) |
+
+### DBML
+
+Schema đầy đủ cho M1 tới M4 ở [schema.dbml](docs/design/schema.dbml); dán vào [dbdiagram.io](https://dbdiagram.io) để
+xem sơ đồ. Sơ đồ dưới đây chỉ gồm bảng của MVP.
+
+```mermaid
+erDiagram
+  employees ||--o| user_accounts : "có"
+  user_accounts ||--o{ role_grants : "được gán"
+  user_accounts ||--o{ refresh_tokens : "có"
+  user_accounts ||--o{ notifications : "nhận"
+  org_units ||--o{ org_unit_versions : "có lịch sử"
+  org_units ||--o{ head_assignments : "có trưởng"
+  employees ||--o{ head_assignments : "làm trưởng"
+  employees ||--o{ employment_periods : "có"
+  employees ||--o{ assignments : "có"
+  org_units ||--o{ assignments : "chứa"
+  positions ||--o{ assignments : "dùng"
+  employees ||--o{ contracts : "ký"
+  employees ||--|| leave_accounts : "có"
+  leave_accounts ||--o{ leave_ledger_entries : "ghi"
+  employees ||--o{ leave_requests : "gửi"
+  leave_types ||--o{ leave_requests : "thuộc loại"
+  leave_requests ||--o{ leave_ledger_entries : "sinh ra"
+```
+
+Luật giữ ở tầng dữ liệu, index, transaction và migration ở [data design](docs/design/data.md).
+
+### OpenAPI Document
+
+Contract [openapi.yaml](contracts/openapi.yaml) có 48 path và 61 operation cho MVP; CI lint contract ở mọi PR.
+
+| Group | Operations | Ví dụ |
+|---|---|---|
+| Auth | 5 | `POST /auth/login`, `GET /me` |
+| Accounts | 7 | `POST /accounts/{accountId}/lock` |
+| Organization | 9 | `GET /org-units/tree`, `POST /org-units/{orgUnitId}/heads` |
+| Employees | 14 | `GET /employees`, `PUT /employees/{employeeId}/termination` |
+| Leave | 16 | `POST /leave-requests`, `POST /leave-requests/{leaveRequestId}/approve` |
+| Notifications | 3 | `GET /notifications` |
+| Reports | 7 | `GET /reports/overview`, `GET /reports/leave-usage/export` |
+
+Lỗi trả về theo RFC 9457 kèm `code` ổn định và mã luật liên quan. Quy ước API ở [API design](docs/design/api.md). Xem
+contract dạng tài liệu ở máy:
+
+```sh
+npx @redocly/cli@1 preview-docs contracts/openapi.yaml
+```
+
+### C4 Documentation
+
+| Level | Nội dung | File |
+|---|---|---|
+| 1 Context | Người dùng, actor Thời gian, máy chấm công và hệ thống ngoài | [ARCHITECTURE.md](ARCHITECTURE.md#context) |
+| 2 Container | web, api, jobs, db và cách chúng nói chuyện | [ARCHITECTURE.md](ARCHITECTURE.md#containers) |
+| 3 Component | Module nghiệp vụ, cấu trúc trong module, dependency rule, frontend | [components](docs/design/components.md) |
+
+Sequence diagram của luồng chính và job ở [flows](docs/design/flows.md). Lý do của từng quyết định ở
+[ADR index](docs/decisions/README.md).
+
+Dự án làm theo [playbook](docs/playbook/README.md) sáu phase; AI agent làm việc theo [AGENTS.md](AGENTS.md).
 
 ## License
 

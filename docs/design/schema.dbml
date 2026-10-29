@@ -1,0 +1,473 @@
+// hr-manager: schema DBML, sinh từ mục Model của docs/design/data.md.
+// data.md là nguồn chính; đổi schema thì sửa data.md trước rồi cập nhật file này.
+// Chỉ ghi cột có trong data.md. Cột created_at, updated_at có ở mọi bảng theo mục Conventions, không lặp lại ở đây.
+// Exclusion constraint và unique index một phần không biểu diễn được bằng DBML; ghi ở Note của bảng.
+// Xem bằng cách dán vào https://dbdiagram.io.
+
+Project hr_manager {
+  database_type: 'PostgreSQL'
+  Note: 'PostgreSQL 16+, extension btree_gist, pg_trgm, unaccent (ADR-0003)'
+}
+
+// identity và shared
+
+Table user_accounts {
+  id uuid [pk]
+  employee_id uuid [not null, unique, note: 'BR-001']
+  password_hash text [not null, note: 'argon2id']
+  status text [not null]
+  failed_logins int [not null]
+  throttled_until timestamptz
+  must_change_password bool [not null]
+  token_version int [not null, note: 'ADR-0004']
+}
+
+Table role_grants {
+  account_id uuid [not null]
+  role text [not null, note: 'Chỉ lưu vai trò HR (BR-006)']
+  indexes {
+    (account_id, role) [pk]
+  }
+}
+
+Table refresh_tokens {
+  id uuid [pk]
+  account_id uuid [not null]
+  family_id uuid [not null]
+  token_hash text [not null]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+}
+
+Table notifications {
+  id uuid [pk]
+  account_id uuid [not null]
+  kind text [not null]
+  payload jsonb
+  read_at timestamptz
+}
+
+Table audit_entries {
+  id uuid [pk]
+  actor_account_id uuid
+  entity text [not null]
+  entity_id uuid [not null]
+  action text [not null]
+  before jsonb
+  after jsonb
+  reason text
+  at timestamptz [not null]
+  Note: 'Role DB của app chỉ có INSERT, SELECT (BR-031)'
+}
+
+Table app_settings {
+  key text [pk]
+  value jsonb [not null]
+}
+
+Table legal_parameters {
+  name text [not null]
+  valid_from date [not null]
+  value jsonb [not null]
+  indexes {
+    (name, valid_from) [pk]
+  }
+  Note: 'Giá trị tại ngày D là dòng có valid_from lớn nhất không quá D (BR-123)'
+}
+
+Table calendar_days {
+  day date [pk]
+  kind text [not null, note: 'Ngày nghỉ lễ hoặc ngày làm bù']
+  name text
+}
+
+Table job_runs {
+  job text [not null]
+  period_key text [not null]
+  status text [not null]
+  finished_at timestamptz
+  indexes {
+    (job, period_key) [pk]
+  }
+}
+
+// organization và employees
+
+Table org_units {
+  id uuid [pk]
+}
+
+Table org_unit_versions {
+  org_unit_id uuid [not null]
+  name text [not null]
+  parent_id uuid
+  valid daterange [not null]
+  Note: '''
+  Exclusion (org_unit_id WITH =, valid WITH &&).
+  Exclusion (valid WITH &&) với parent_id IS NULL: mỗi ngày tối đa một phòng ban gốc (BR-007).
+  '''
+}
+
+Table head_assignments {
+  id uuid [pk]
+  org_unit_id uuid [not null]
+  employee_id uuid [not null]
+  valid daterange [not null]
+  Note: 'Exclusion (org_unit_id WITH =, valid WITH &&) (BR-011)'
+}
+
+Table positions {
+  id uuid [pk]
+  name text [not null, note: 'Unique trên lower(name) (BR-034)']
+  active bool [not null]
+}
+
+Table employees {
+  id uuid [pk]
+  code text [not null, unique, note: 'Mã nhân viên, không dùng lại (BR-015)']
+  full_name text [not null, note: 'GIN pg_trgm trên unaccent(lower(full_name))']
+  national_id text [note: 'Unique khi record_status = normal (BR-022)']
+  record_status text [not null, note: 'normal, cancelled, anonymized']
+  version int [not null]
+}
+
+Table employment_periods {
+  employee_id uuid [not null]
+  valid daterange [not null]
+  termination_reason text
+  Note: 'Exclusion (employee_id WITH =, valid WITH &&) (BR-139)'
+}
+
+Table assignments {
+  employee_id uuid [not null]
+  org_unit_id uuid [not null]
+  position_id uuid [not null]
+  valid daterange [not null]
+  reason text
+  Note: 'Exclusion (employee_id WITH =, valid WITH &&) (BR-016)'
+}
+
+Table contracts {
+  id uuid [pk]
+  employee_id uuid [not null]
+  number text [not null, unique, note: 'BR-037']
+  type text [not null]
+  probation_group text
+  signed_on date
+  valid daterange [not null]
+  status text [not null]
+  Note: 'Exclusion (employee_id WITH =, valid WITH &&) (BR-025)'
+}
+
+// leave
+
+Table leave_accounts {
+  employee_id uuid [pk]
+  annual_base_days numeric(5,1) [not null]
+  Note: 'Khóa FOR UPDATE trước khi gửi, duyệt, hủy đơn hay cộng phép (BR-053)'
+}
+
+Table leave_ledger_entries {
+  id uuid [pk]
+  employee_id uuid [not null]
+  entry_date date [not null]
+  kind text [not null]
+  days numeric(5,1) [not null]
+  leave_year int [not null]
+  is_carryover bool [not null]
+  expires_on date
+  leave_request_id uuid
+  accrual_month date
+  reason text
+  indexes {
+    (employee_id, leave_year)
+  }
+  Note: '''
+  Sổ phép chỉ ghi thêm; role DB của app chỉ có INSERT, SELECT (BR-054).
+  Unique (employee_id, accrual_month) với kind = accrual (EC-038).
+  '''
+}
+
+Table leave_types {
+  id uuid [pk]
+  name text [not null, note: 'Unique trên lower(name) (BR-040)']
+  pay_mode text [not null]
+  deducts_annual bool [not null]
+  max_days numeric(5,1)
+  active bool [not null]
+}
+
+Table leave_requests {
+  id uuid [pk]
+  employee_id uuid [not null]
+  leave_type_id uuid [not null]
+  half_days int4range [not null, note: 'Mỗi buổi một số nguyên']
+  days numeric(5,1) [not null]
+  status text [not null]
+  approver_account_id uuid
+  recorded_by_account_id uuid
+  reason text
+  decision_reason text
+  indexes {
+    (approver_account_id, status)
+  }
+  Note: 'Exclusion (employee_id WITH =, half_days WITH &&) với status pending, approved (BR-045)'
+}
+
+// attendance, M3: ngoài MVP
+
+Table shifts {
+  id uuid [pk]
+  name text [not null]
+  starts_at time [not null]
+  ends_at time [not null]
+  break_minutes int [not null]
+  standard_minutes int [not null]
+  weekdays int [not null]
+}
+
+Table shift_assignments {
+  employee_id uuid [not null]
+  shift_id uuid [not null]
+  valid daterange [not null]
+  Note: 'Exclusion trên (employee_id, valid) (BR-070)'
+}
+
+Table device_codes {
+  employee_id uuid [not null]
+  code text [not null]
+  valid daterange [not null]
+  Note: 'Exclusion (code WITH =, valid WITH &&) (BR-072)'
+}
+
+Table punch_imports {
+  id uuid [pk]
+}
+
+Table punch_records {
+  device_code text [not null]
+  punched_at timestamptz [not null]
+  import_id uuid [not null]
+  indexes {
+    (device_code, punched_at) [unique, note: 'BR-073']
+  }
+}
+
+Table attendance_days {
+  employee_id uuid [not null]
+  work_date date [not null]
+  status text [not null]
+  credit numeric
+  late_minutes int
+  early_minutes int
+  overtime_minutes jsonb
+  night_minutes int
+  flagged bool
+  indexes {
+    (employee_id, work_date) [pk]
+  }
+}
+
+Table overtime_requests {
+  id uuid [pk]
+  employee_id uuid [not null]
+  period tstzrange [not null]
+  status text [not null]
+  Note: 'Exclusion (employee_id WITH =, period WITH &&) với status pending, approved (BR-086)'
+}
+
+Table attendance_adjustments {
+  id uuid [pk]
+  employee_id uuid [not null]
+  work_date date [not null]
+  check_in timestamptz
+  check_out timestamptz
+  status text [not null]
+}
+
+Table attendance_periods {
+  month date [pk]
+  status text [not null]
+  version int [not null]
+}
+
+Table monthly_timesheets {
+  month date [not null]
+  employee_id uuid [not null]
+  totals jsonb [not null]
+  indexes {
+    (month, employee_id) [pk]
+  }
+}
+
+// payroll, M4: ngoài MVP
+
+Table salary_records {
+  id uuid [pk]
+  employee_id uuid [not null]
+  valid daterange [not null]
+  base_salary bigint [not null, note: 'Đồng; CHECK > 0']
+  insurance_salary bigint [not null]
+  reason text
+  Note: 'Exclusion trên (employee_id, valid) (BR-093)'
+}
+
+Table salary_allowances {
+  salary_record_id uuid [not null]
+  allowance_type_id uuid [not null]
+  amount bigint [not null]
+}
+
+Table allowance_types {
+  id uuid [pk]
+  name text [not null, note: 'Unique trên lower(name) (BR-097)']
+  calc_mode text [not null]
+  tax_mode text [not null]
+  exempt_cap bigint
+}
+
+Table dependents {
+  id uuid [pk]
+  employee_id uuid [not null]
+  national_id text [not null]
+  months daterange [not null]
+  Note: 'Exclusion (national_id WITH =, months WITH &&) (BR-099)'
+}
+
+Table tax_profiles {
+  employee_id uuid [pk]
+  tax_code text
+  social_insurance_no text
+  commitment_years "int[]"
+}
+
+Table payroll_runs {
+  month date [pk, note: 'BR-102']
+  status text [not null]
+  version int [not null]
+  closed_at timestamptz
+}
+
+Table payslips {
+  id uuid [pk]
+  month date [not null]
+  employee_id uuid [not null]
+  inputs jsonb [not null, note: 'Bản chụp đầu vào']
+  gross bigint [not null]
+  taxable bigint [not null]
+  pit bigint [not null]
+  net bigint [not null]
+  employer_cost bigint [not null]
+  indexes {
+    (month, employee_id) [unique, note: 'BR-102']
+  }
+}
+
+Table payslip_lines {
+  payslip_id uuid [not null]
+  line_group text [not null]
+  name text [not null]
+  amount bigint [not null]
+  taxable_amount bigint
+  source text [not null, note: 'system hoặc manual (BR-116)']
+  reason text
+}
+
+// Quan hệ
+
+Ref: user_accounts.employee_id - employees.id
+Ref: role_grants.account_id > user_accounts.id
+Ref: refresh_tokens.account_id > user_accounts.id
+Ref: notifications.account_id > user_accounts.id
+Ref: audit_entries.actor_account_id > user_accounts.id
+
+Ref: org_unit_versions.org_unit_id > org_units.id
+Ref: org_unit_versions.parent_id > org_units.id
+Ref: head_assignments.org_unit_id > org_units.id
+Ref: head_assignments.employee_id > employees.id
+Ref: employment_periods.employee_id > employees.id
+Ref: assignments.employee_id > employees.id
+Ref: assignments.org_unit_id > org_units.id
+Ref: assignments.position_id > positions.id
+Ref: contracts.employee_id > employees.id
+
+Ref: leave_accounts.employee_id - employees.id
+Ref: leave_ledger_entries.employee_id > leave_accounts.employee_id
+Ref: leave_ledger_entries.leave_request_id > leave_requests.id
+Ref: leave_requests.employee_id > employees.id
+Ref: leave_requests.leave_type_id > leave_types.id
+Ref: leave_requests.approver_account_id > user_accounts.id
+Ref: leave_requests.recorded_by_account_id > user_accounts.id
+
+Ref: shift_assignments.shift_id > shifts.id
+Ref: shift_assignments.employee_id > employees.id
+Ref: device_codes.employee_id > employees.id
+Ref: punch_records.import_id > punch_imports.id
+Ref: attendance_days.employee_id > employees.id
+Ref: overtime_requests.employee_id > employees.id
+Ref: attendance_adjustments.employee_id > employees.id
+Ref: monthly_timesheets.month > attendance_periods.month
+Ref: monthly_timesheets.employee_id > employees.id
+
+Ref: salary_records.employee_id > employees.id
+Ref: salary_allowances.salary_record_id > salary_records.id
+Ref: salary_allowances.allowance_type_id > allowance_types.id
+Ref: dependents.employee_id > employees.id
+Ref: tax_profiles.employee_id - employees.id
+Ref: payslips.month > payroll_runs.month
+Ref: payslips.employee_id > employees.id
+Ref: payslip_lines.payslip_id > payslips.id
+
+TableGroup identity_shared {
+  user_accounts
+  role_grants
+  refresh_tokens
+  notifications
+  audit_entries
+  app_settings
+  legal_parameters
+  calendar_days
+  job_runs
+}
+
+TableGroup organization_employees {
+  org_units
+  org_unit_versions
+  head_assignments
+  positions
+  employees
+  employment_periods
+  assignments
+  contracts
+}
+
+TableGroup leave {
+  leave_accounts
+  leave_ledger_entries
+  leave_types
+  leave_requests
+}
+
+TableGroup attendance_m3 {
+  shifts
+  shift_assignments
+  device_codes
+  punch_imports
+  punch_records
+  attendance_days
+  overtime_requests
+  attendance_adjustments
+  attendance_periods
+  monthly_timesheets
+}
+
+TableGroup payroll_m4 {
+  salary_records
+  salary_allowances
+  allowance_types
+  dependents
+  tax_profiles
+  payroll_runs
+  payslips
+  payslip_lines
+}
