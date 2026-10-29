@@ -1,0 +1,32 @@
+name: PR title
+
+# Kiểm tiêu đề PR theo Conventional Commits. Repo dùng squash merge nên tiêu đề PR thành commit trên main.
+# type(scope) viết tiếng Anh, mô tả viết tiếng Việt; xem docs/playbook/git-workflow.md.
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            refactor
+            test
+            perf
+            build
+            ci
+            chore
+            revert
+          requireScope: false

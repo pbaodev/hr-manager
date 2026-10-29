@@ -1,0 +1,333 @@
+# Contract HTTP API, nguồn chính cho client và server (contract-first).
+# Quy ước chung và bản đồ story → operation nằm ở docs/design/api.md.
+# VÍ DỤ: các operation dưới dùng chung ví dụ đặt phòng họp của template. Thay bằng operation thật ở Phase 3;
+# bỏ cả thư mục contracts/ khi hệ thống không có API qua mạng. Endpoint vận hành như health check ghi ở runbook.
+# CI (job "contract") lint file này bằng Redocly, cấu hình ở redocly.yaml.
+openapi: 3.0.3
+info:
+  title: "[tên dự án] API"
+  version: 0.1.0
+  description: |
+    Lỗi trả về theo RFC 9457 (Problem Details), thêm field `code` theo nghĩa nghiệp vụ.
+    Mỗi `code` dẫn tới một luật trong docs/domain.md, xem bảng Errors trong docs/design/api.md.
+  license:
+    name: "[license]"
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local
+security:
+  - bearerAuth: []
+tags:
+  - name: Rooms
+    description: "VÍ DỤ: phòng họp"
+  - name: Bookings
+    description: "VÍ DỤ: lịch đặt phòng"
+
+paths:
+  /rooms:
+    get:
+      tags: [Rooms]
+      summary: Danh sách phòng, có phân trang
+      operationId: listRooms
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Một trang phòng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /rooms/{roomId}/bookings:
+    get:
+      tags: [Bookings]
+      summary: Lịch đặt của một phòng trong một khoảng thời gian (US-002)
+      operationId: listRoomBookings
+      parameters:
+        - $ref: '#/components/parameters/RoomId'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          description: Tối đa 7 ngày sau `from`
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Lịch đặt trong khoảng thời gian, sắp theo giờ bắt đầu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /bookings:
+    post:
+      tags: [Bookings]
+      summary: Đặt phòng theo khung giờ (US-001)
+      operationId: createBooking
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '201':
+          description: Lịch đã tạo
+          headers:
+            Location:
+              description: URL của lịch vừa tạo
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /bookings/{bookingId}:
+    delete:
+      tags: [Bookings]
+      summary: Hủy lịch đặt (US-003)
+      operationId: cancelBooking
+      description: Người đặt hoặc quản trị; chỉ trước giờ bắt đầu (BR-004).
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Đã hủy
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    RoomId:
+      name: roomId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Gửi lại cùng key thì nhận lại kết quả lần đầu, không tạo lịch thứ hai
+      schema:
+        type: string
+        maxLength: 64
+
+  schemas:
+    Problem:
+      description: RFC 9457 Problem Details, thêm `code` theo nghĩa nghiệp vụ.
+      type: object
+      required: [type, title, status, code]
+      properties:
+        type:
+          type: string
+          example: about:blank
+        title:
+          type: string
+          example: Booking conflict
+        status:
+          type: integer
+          example: 409
+        detail:
+          type: string
+        code:
+          type: string
+          description: Mã lỗi ổn định cho client, liệt kê ở bảng Errors trong docs/design/api.md
+          example: booking_conflict
+        errors:
+          description: Lỗi theo từng field khi `code` là `validation_failed`
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        traceId:
+          type: string
+
+    PageMeta:
+      type: object
+      required: [page, pageSize, totalItems, totalPages]
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    Room:
+      type: object
+      required: [id, name, capacity]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        capacity:
+          type: integer
+          minimum: 1
+        equipment:
+          type: array
+          items:
+            type: string
+
+    RoomPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Room'
+        meta:
+          $ref: '#/components/schemas/PageMeta'
+
+    Booking:
+      type: object
+      required: [id, roomId, memberId, start, end, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        attendees:
+          type: integer
+          minimum: 1
+        purpose:
+          type: string
+        status:
+          type: string
+          enum: [confirmed, cancelled, completed]
+
+    BookingCreate:
+      type: object
+      required: [roomId, start, end]
+      properties:
+        roomId:
+          type: string
+          format: uuid
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+          description: Sau `start`, dài tối đa `max_booking_hours` (BR-002)
+        attendees:
+          type: integer
+          minimum: 1
+        purpose:
+          type: string
+          maxLength: 200
+
+  responses:
+    ValidationError:
+      description: "Đầu vào không hợp lệ: `validation_failed`, hoặc vi phạm luật như `slot_too_long` (BR-002)"
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Chưa đăng nhập hoặc phiên đã hết hạn
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Đã đăng nhập nhưng không có quyền
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Không tìm thấy tài nguyên, hoặc người gọi không được xem tài nguyên đó
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: "Xung đột với trạng thái hiện tại: `booking_conflict` (BR-001), `booking_started` (BR-004)"
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'

@@ -1,0 +1,37 @@
+name: CI
+
+# Mỗi job là một required status check của branch protection (xem scripts/bootstrap-github.sh).
+# Thêm hoặc bỏ job thì cập nhật danh sách check ở đó, nếu không PR sẽ chờ một check không bao giờ chạy.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  docs:
+    # Kiểm tra link nội bộ trong tài liệu.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --no-progress './**/*.md' '.github/**/*.md'
+          fail: true
+
+  contract:
+    # Lint contract API. Bỏ qua khi dự án không có contracts/openapi.yaml.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        if: hashFiles('contracts/openapi.yaml') != ''
+        with:
+          node-version: 22
+      - name: Lint OpenAPI
+        if: hashFiles('contracts/openapi.yaml') != ''
+        run: npx --yes @redocly/cli@1 lint contracts/openapi.yaml
+
+  # Thêm job ứng dụng (make check, E2E, eval-lite) ở Phase 3, khi dự án đã có lệnh và môi trường thật.

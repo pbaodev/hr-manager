@@ -1,0 +1,6 @@
+# Cấu hình lint contract cho CI (job "contract"). Contract nằm ở contracts/openapi.yaml.
+extends:
+  - recommended
+rules:
+  info-license-strict: off    # license nội bộ có thể không có URL
+  no-server-example.com: off  # cho phép server localhost khi chạy dev
