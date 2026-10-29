@@ -9,7 +9,7 @@
 ## Goal
 
 Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](brief.md#scope) để thiết kế toàn hệ thống trước khi
-code. Tài liệu được điền theo từng milestone; bản hiện tại có phần dùng chung, M1 và M2.
+code. Tài liệu được điền theo từng milestone; bản hiện tại có phần dùng chung và M1 tới M3.
 
 ## Actors
 
@@ -22,6 +22,7 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Quản lý | Người | Nắm thông tin nhân sự trong phạm vi mình phụ trách; từ M2, duyệt yêu cầu của nhân viên trong phạm vi | Tự có khi đang là trưởng của ít nhất một phòng ban, không gán tay (BR-006). Phạm vi gồm phòng ban mình làm trưởng và mọi phòng ban con (BR-013) |
 | HR | Người | Giữ hồ sơ, hợp đồng và cơ cấu tổ chức đúng; quản lý tài khoản và cấu hình | Được gán tay (BR-006). HR kiêm quản trị hệ thống |
 | Thời gian | Lịch | Làm cho thay đổi có ngày hiệu lực tự có tác dụng khi tới ngày | Chỉ thực hiện các chuyển trạng thái do thời gian trong mục Lifecycles của [domain](domain.md#lifecycles) |
+| Máy chấm công | Hệ thống ngoài | Cung cấp lượt chấm công của nhân viên qua file do HR xuất ra và tải lên | Hệ thống không kết nối trực tiếp với máy |
 
 ### Permission matrix
 
@@ -50,6 +51,12 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Xem đơn, số dư phép và lịch nghỉ của người khác (US-027) | ❌ | ✅ phạm vi; lý do nghỉ chỉ khi là người duyệt | ✅ mọi người |
 | Quản lý loại nghỉ và lịch làm việc (US-028, US-029) | ❌ | ❌ | ✅ |
 | Điều chỉnh số dư phép; ghi đơn nghỉ thay nhân viên (US-032, US-033) | ❌ | ❌ | ✅ |
+| Xem bảng công của mình; gửi giải trình chấm công; đăng ký và hủy đơn làm thêm giờ của mình (US-041, US-042, US-044) | ✅ | ✅ | ✅ |
+| Duyệt, từ chối giải trình chấm công và đơn làm thêm giờ (US-043, US-045) | ❌ | ✅ chỉ đơn mình là người duyệt | ✅ mọi đơn, duyệt thay |
+| Xem bảng công của người khác (US-046) | ❌ | ✅ phạm vi | ✅ mọi người |
+| Quản lý ca, gán ca, khai báo mã chấm công (US-036 tới US-038) | ❌ | ❌ | ✅ |
+| Nhập file chấm công; xử lý ngày thiếu chấm công (US-039, US-047) | ❌ | ❌ | ✅ |
+| Chốt, mở lại và xuất bảng công (US-048, US-049) | ❌ | ❌ | ✅ |
 
 ## User stories
 
@@ -76,14 +83,15 @@ flowchart LR
     L1(["M2: Gửi đơn nghỉ, xem số dư phép"])
     L2(["M2: Duyệt đơn nghỉ"])
     L3(["M2: Cấu hình loại nghỉ, ngày lễ"])
-    A1(["M3: Chấm công, xem bảng công"])
-    A2(["M3: Chốt bảng công"])
+    A1(["M3: Xem bảng công, giải trình, đăng ký làm thêm"])
+    A2(["M3: Nhập chấm công, quản lý ca, chốt bảng công"])
+    A3(["M3: Duyệt giải trình, làm thêm"])
     P1(["M4: Xem phiếu lương"])
     P2(["M4: Tính và chốt bảng lương"])
     R1(["M5: Xem báo cáo"])
   end
   NV --- U1 & U2 & U3 & L1 & A1 & P1
-  QL --- U4 & L2 & R1
+  QL --- U4 & L2 & A3 & R1
   HR --- U5 & U6 & U7 & L3 & A2 & P2 & R1
 ```
 
@@ -216,6 +224,66 @@ flowchart LR
 - **Postconditions:** Mỗi tháng đủ điều kiện của mỗi nhân viên được cộng đúng một lần. Số dư phép luôn bằng tổng các biến
   động phép.
 
+### UC-007: Nhập file chấm công và tính công
+
+- **Actor:** HR; Máy chấm công, Thời gian · **Stories:** US-039, US-040
+- **Trigger:** HR xuất file từ máy chấm công, thường mỗi tuần một lần.
+- **Preconditions:** Nhân viên đã có mã chấm công và ca làm việc.
+- **Main flow:**
+  1. HR tải file lên.
+  2. Hệ thống đọc từng dòng, ghép mã chấm công với nhân viên và bỏ qua lượt chấm trùng (BR-073).
+  3. Hệ thống hiện số dòng sẽ lưu, số dòng trùng, và từng dòng bị bỏ qua kèm lý do.
+  4. HR xác nhận. Hệ thống lưu lượt chấm.
+  5. Hệ thống tính lại công cho các ngày có lượt chấm mới: giờ vào, giờ ra, đi muộn, về sớm, giờ làm thêm (BR-074 tới
+     BR-080, BR-085).
+- **Alternative flows:**
+  - `3a`. HR hủy sau khi xem kết quả: không lượt chấm nào được lưu.
+- **Exceptions:**
+  - `2a`. File sai định dạng: từ chối cả file và chỉ ra cột thiếu.
+  - `2b`. Dòng thuộc tháng đã chốt: bỏ qua và liệt kê (BR-090).
+- **Postconditions:** Nhập lại cùng một file không tạo lượt chấm trùng (EC-041). Nhật ký ghi người nhập, file và số dòng.
+
+### UC-008: Đăng ký và duyệt làm thêm giờ
+
+- **Actor:** Nhân viên; Quản lý, HR · **Stories:** US-044, US-045
+- **Trigger:** Nhân viên cần làm thêm ngoài giờ ca.
+- **Preconditions:** Nhân viên đang làm việc; tháng của ngày làm thêm chưa chốt.
+- **Main flow:**
+  1. Nhân viên nhập ngày, giờ bắt đầu, giờ kết thúc và lý do, trước giờ bắt đầu (BR-083).
+  2. Hệ thống kiểm khoảng làm thêm nằm ngoài giờ ca và không chồng đơn khác (BR-086), rồi kiểm giới hạn giờ làm thêm theo
+     ngày, tháng và năm (BR-084).
+  3. Hệ thống gửi đơn cho người duyệt theo cùng luật với đơn nghỉ (BR-056) và thông báo.
+  4. Người duyệt duyệt đơn.
+  5. Sau khi có chấm công, hệ thống tính giờ làm thêm thực tế bằng phần giao giữa khoảng đã duyệt và khoảng có mặt, rồi
+     phân loại theo ngày và ban đêm (BR-085).
+- **Alternative flows:**
+  - `4a`. Người duyệt từ chối kèm lý do (BR-059).
+  - `4b`. HR duyệt thay (BR-058).
+- **Exceptions:**
+  - `1a`. Gửi sau giờ bắt đầu: từ chối (EC-051).
+  - `2a`. Vượt giới hạn giờ làm thêm: từ chối và hiện số giờ còn được làm (BR-084, EC-050).
+  - `5a`. Không có chấm công trong khoảng đã duyệt: giờ làm thêm thực tế bằng 0; nhân viên gửi giải trình nếu quên chấm
+    (BR-081).
+- **Postconditions:** Chỉ giờ làm thêm đã duyệt và có mặt mới vào bảng công. Nhật ký ghi mọi bước.
+
+### UC-009: Chốt bảng công tháng
+
+- **Actor:** HR · **Stories:** US-047, US-048
+- **Trigger:** Hết tháng, trước khi tính lương.
+- **Preconditions:** Đã nhập đủ file chấm công của tháng.
+- **Main flow:**
+  1. HR chọn tháng cần chốt.
+  2. Hệ thống liệt kê việc còn chặn: đơn nghỉ, đơn làm thêm, giải trình đang chờ duyệt; ngày thiếu chấm công hoặc vắng
+     chưa xử lý (BR-089).
+  3. HR xử lý từng việc: nhắc người duyệt, duyệt thay, hoặc ghi công trực tiếp cho ngày thiếu chấm công (BR-082).
+  4. Khi không còn việc chặn, HR chốt. Hệ thống chụp lại bảng công tháng của mọi nhân viên (BR-092).
+- **Alternative flows:**
+  - `4a`. Cần sửa sau khi chốt: HR mở lại kèm lý do nếu bảng lương tháng đó chưa chốt (BR-091), sửa, rồi chốt lại.
+- **Exceptions:**
+  - `4b`. Còn việc chặn: không chốt được (BR-089).
+- **Postconditions:** Tháng đã chốt không nhận thay đổi về đơn, lượt chấm hay lịch làm việc (BR-090). Bảng công đã chốt
+  là đầu vào của bảng lương ở M4.
+
 ## Quality attributes
 
 Thêm ở lần cập nhật cuối của Phase 2, sau khi đủ M1–M5.
@@ -234,3 +302,11 @@ Riêng M2 không làm:
 - Duyệt nhiều cấp: chủ dự án chọn duyệt một cấp.
 - Đính kèm giấy tờ vào đơn nghỉ, như giấy nghỉ ốm: nhân viên nộp bản giấy cho HR.
 - Thông báo qua email hoặc ứng dụng chat: chỉ thông báo trong hệ thống.
+
+Riêng M3 không làm:
+
+- Kết nối trực tiếp với máy chấm công: HR nhập file, theo lựa chọn của chủ dự án.
+- Chấm công trên web hoặc điện thoại: chủ dự án chọn nhập file từ máy.
+- Xếp ca theo lịch và ca xoay: mỗi nhân viên một ca cố định.
+- Quản lý giao làm thêm giờ cho nhân viên: nhân viên tự đăng ký, và việc tự đăng ký cũng là sự đồng ý mà luật yêu cầu.
+- Tính tiền làm thêm giờ và phụ cấp ca đêm: làm ở M4.
