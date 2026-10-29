@@ -1,8 +1,9 @@
 # Stories: hr-manager
 
-- **Status:** Draft
+- **Status:** Accepted
 - **Updated:** 2026-10-30
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
+  người ngoài review
 - **Related:** [requirements](requirements.md) · [domain](domain.md) · [ui-flow](ui-flow.md) · [SPEC](SPEC.md) ·
   [analysis guide](playbook/analysis.md)
 
@@ -10,7 +11,7 @@
 
 - **Priority:** `Must` khi thiếu story đó thì bản phát hành vô nghĩa; `Should`, `Could` cho phần còn lại.
 - **Feature:** Issue Feature trên tracker chứa story; điền khi tạo Issue ở Phase 4.
-- Bản hiện tại có đủ story của M1 tới M5.
+- Bản hiện tại có đủ story của M1 tới M5. US-071 và US-072 thuộc M1 nhưng được thêm ở lần review cuối của Phase 2.
 
 | ID | Story | Priority | Milestone | Feature |
 |---|---|---|---|---|
@@ -84,6 +85,8 @@
 | US-068 | Xem báo cáo chấm công | Must | M5 | |
 | US-069 | Xem báo cáo chi phí lương | Must | M5 | |
 | US-070 | Xuất báo cáo ra bảng tính | Should | M5 | |
+| US-071 | HR tuyển lại nhân viên đã nghỉ việc | Should | M1 | |
+| US-072 | HR xóa và ẩn danh dữ liệu hết hạn lưu | Should | M1 | |
 
 ## Details
 
@@ -387,6 +390,8 @@ nhanh trên đúng người.
 - AC2: Given lọc trạng thái Đã nghỉ việc, then thấy nhân viên đã nghỉ việc.
 - AC3: Given tìm "nguyen van a", then tìm được "Nguyễn Văn A" (EC-019).
 - AC4: Given kết quả dài hơn một trang, then có phân trang và tổng số kết quả.
+- AC5: Given Quản lý mở danh sách, then chỉ thấy nhân viên trong phạm vi; lọc theo phòng ban ngoài phạm vi bằng đường dẫn
+  trực tiếp thì bị từ chối (BR-013).
 
 ### US-021: HR nhập danh sách nhân viên từ bảng tính
 
@@ -417,6 +422,7 @@ công ty bắt đầu dùng hệ thống.
 - AC2: Given danh sách biến động phép, then mỗi dòng có ngày, loại biến động, số ngày và lý do; tổng các dòng bằng số dư
   (BR-054).
 - AC3: Given có đơn phép năm đang chờ duyệt, then số ngày của các đơn đó hiện riêng và chưa bị trừ vào số dư.
+- AC4: Given nhân viên mở số dư phép của người khác bằng đường dẫn trực tiếp, then bị từ chối.
 
 ### US-023: Nhân viên gửi đơn nghỉ
 
@@ -550,6 +556,7 @@ ty.
 - AC2: Given còn 2 ngày phép tồn tới hết ngày `carryover_expiry`, then ngày hôm sau có biến động hủy 2 ngày phép tồn hết
   hạn.
 - AC3: Given nghỉ phép năm vào một ngày trước hạn phép tồn, then số ngày được trừ vào phép tồn trước (BR-052).
+- AC4: Given lần chuyển phép tồn ngày 1/1 chạy hai lần, then lần thứ hai không tạo biến động mới, như EC-038.
 
 ### US-032: HR điều chỉnh số dư phép
 
@@ -696,6 +703,7 @@ chốt.
   thêm.
 - AC2: Given một tháng, then thấy phần tổng hợp theo BR-092.
 - AC3: Given một ngày Thiếu chấm công hoặc Vắng chưa xử lý trong tháng chưa chốt, then ngày đó có nút Giải trình.
+- AC4: Given nhân viên mở bảng công của người khác bằng đường dẫn trực tiếp, then bị từ chối.
 
 ### US-042: Nhân viên gửi giải trình chấm công
 
@@ -839,7 +847,7 @@ vẫn được tính đúng và lịch sử lương được giữ lại.
 - AC4: Given lương đóng bảo hiểm dưới lương tối thiểu vùng, when lưu, then bị từ chối (BR-096, EC-066).
 - AC5: Given ngày hiệu lực thuộc tháng có bảng lương đã chốt, when lưu, then bảng lương đó không đổi và HR thấy chênh lệch
   của từng tháng bị ảnh hưởng (BR-098, EC-063).
-- AC6: Given đã có bản ghi cùng ngày hiệu lực, when lưu, then bị từ chối.
+- AC6: Given đã có bản ghi cùng ngày hiệu lực, when lưu, then bị từ chối (EC-089).
 
 ### US-052: HR ghi thông tin thuế và bảo hiểm của nhân viên
 
@@ -953,6 +961,8 @@ SCR-038
   then thuế là 500.000 đồng (BR-113, EC-069).
 - AC4: Given phụ cấp ăn giữa ca 900.000 đồng, miễn thuế trong mức 730.000 đồng, then 170.000 đồng vào thu nhập chịu thuế
   (BR-111).
+- AC5: Given biểu thuế không có giá trị hiệu lực cho tháng, when tính lương, then phiếu có lỗi và bảng lương không chốt
+  được (BR-117, BR-123).
 
 ### US-059: HR thêm khoản điều chỉnh vào phiếu lương
 
@@ -1042,6 +1052,7 @@ nhờ HR lập báo cáo.
 - AC2: Given HR mở trang tổng quan, then thấy thêm số hợp đồng sắp hết hạn, số ngày chưa xử lý của tháng đang mở và trạng
   thái bảng công, bảng lương của tháng trước.
 - AC3: Given người xem bấm một con số, then mở danh sách chi tiết mà người đó có quyền xem (BR-137).
+- AC4: Given người không phải Quản lý hay HR mở trang tổng quan bằng đường dẫn trực tiếp, then bị từ chối.
 
 ### US-065: Xem báo cáo biến động nhân sự
 
@@ -1131,3 +1142,37 @@ cần thấy lương từng người.
 - AC1: Given người xem đang lọc một báo cáo, when xuất, then file chỉ chứa đúng số liệu đang hiện với bộ lọc đó (BR-136).
 - AC2: Given Quản lý xuất báo cáo chi phí lương, then file áp cùng luật gộp nhóm nhỏ như trên màn hình (BR-129).
 - AC3: Given xuất xong, then nhật ký ghi người xuất, tên báo cáo và bộ lọc (BR-136).
+
+### US-071: HR tuyển lại nhân viên đã nghỉ việc
+
+**Story:** Là HR, tôi muốn tuyển lại một người đã từng làm ở công ty trên hồ sơ cũ, để giữ lịch sử và không có hai hồ sơ
+cho cùng một người.
+
+**Links:** UC-001 · BR-005, BR-015, BR-022, BR-139 · EC-008, EC-090, EC-091 · SCR-008, SCR-009
+
+**Acceptance criteria**
+
+- AC1: Given hồ sơ NV00012 ở trạng thái Đã nghỉ việc, when HR tuyển lại với ngày vào làm mới, then hồ sơ giữ mã NV00012 và
+  có thêm một khoảng làm việc mới; quá trình công tác, hợp đồng và ca được nhập cho khoảng mới (BR-139).
+- AC2: Given ngày vào làm mới không sau ngày làm việc cuối cùng của khoảng trước, when lưu, then bị từ chối.
+- AC3: Given tuyển lại thành công, then HR mở khóa được tài khoản cũ (BR-005); phép năm bắt đầu từ 0 và thâm niên tính từ
+  ngày vào làm mới (BR-139).
+- AC4: Given hồ sơ đã bị ẩn danh, then không có thao tác tuyển lại; HR tiếp nhận như người mới (EC-090).
+
+### US-072: HR xóa và ẩn danh dữ liệu hết hạn lưu
+
+**Story:** Là HR, tôi muốn hệ thống nhắc và giúp xóa dữ liệu cá nhân hết thời hạn lưu, để tuân thủ Luật Bảo vệ dữ liệu cá
+nhân mà không mất chứng từ còn phải giữ.
+
+**Links:** BR-140, BR-141 · EC-091 · SCR-046
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên nghỉ việc đã quá `contact_retention_months` tháng, then người đó có trong danh sách cần xóa thông
+  tin liên hệ; HR xác nhận thì điện thoại, email, địa chỉ cá nhân, người liên hệ khẩn cấp và tài khoản ngân hàng bị xóa
+  (BR-140).
+- AC2: Given nhân viên nghỉ việc đã quá `retention_years` năm, when HR xác nhận ẩn danh, then hồ sơ chỉ còn mã nhân viên;
+  số liệu đã chốt trong bảng công, bảng lương và báo cáo tổng hợp vẫn giữ (BR-141).
+- AC3: Given người đó đã được tuyển lại trước khi tới hạn, then không có trong danh sách (EC-091).
+- AC4: Given HR chưa xác nhận, then hệ thống không tự xóa gì; mỗi lần xóa được ghi nhật ký mà không chép lại giá trị đã
+  xóa (BR-140).

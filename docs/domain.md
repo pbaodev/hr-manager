@@ -1,8 +1,9 @@
 # Domain: hr-manager
 
-- **Status:** Draft
+- **Status:** Accepted
 - **Updated:** 2026-10-30
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
+  người ngoài review
 - **Related:** [requirements](requirements.md) · [questions](questions.md) · [research](research.md) ·
   [data design](design/data.md) · [analysis guide](playbook/analysis.md)
 
@@ -28,6 +29,7 @@ Hệ thống có một bounded context.
 | Khoảng hiệu lực | Từ ngày tới ngày, tính cả hai đầu; ngày kết thúc trống nghĩa là chưa kết thúc | `DateRange` | — |
 | Ngày vào làm | Ngày làm việc đầu tiên của nhân viên | `hireDate` | Ngày ký hợp đồng |
 | Ngày làm việc cuối cùng | Ngày cuối cùng nhân viên làm việc; từ ngày hôm sau nhân viên ở trạng thái Đã nghỉ việc | `lastWorkingDate` | Ngày nộp đơn nghỉ việc |
+| Khoảng làm việc | Từ ngày vào làm tới ngày làm việc cuối cùng, hoặc tới nay nếu chưa nghỉ. Người được tuyển lại có nhiều khoảng làm việc (BR-139) | `EmploymentPeriod` | Quá trình công tác |
 | Hợp đồng lao động | Thỏa thuận lao động giữa công ty và nhân viên, gồm cả hợp đồng thử việc | `EmploymentContract` | Quá trình công tác |
 | Nhật ký thao tác | Bản ghi không sửa được về mọi thay đổi dữ liệu | `AuditEntry` | — |
 | Loại nghỉ | Một kiểu nghỉ có luật riêng, như phép năm, kết hôn, ốm đau | `LeaveType` | — |
@@ -93,7 +95,8 @@ classDiagram
 
 | Name | Kind | Key attributes | Relations |
 |---|---|---|---|
-| Employee | Entity | Mã nhân viên, họ tên, ngày sinh, giới tính, số CCCD, địa chỉ thường trú, địa chỉ hiện tại, điện thoại và email cá nhân, điện thoại và email công việc, tài khoản ngân hàng, người liên hệ khẩn cấp, ngày vào làm, ngày làm việc cuối cùng, lý do nghỉ, trạng thái | Có nhiều Assignment và EmploymentContract; có tối đa một UserAccount |
+| Employee | Entity | Mã nhân viên, họ tên, ngày sinh, giới tính, số CCCD, địa chỉ thường trú, địa chỉ hiện tại, điện thoại và email cá nhân, điện thoại và email công việc, tài khoản ngân hàng, người liên hệ khẩn cấp, trạng thái | Có nhiều EmploymentPeriod, Assignment và EmploymentContract; có tối đa một UserAccount |
+| EmploymentPeriod | Value object | Ngày vào làm, ngày làm việc cuối cùng, lý do nghỉ | Thuộc một Employee; các khoảng không chồng nhau |
 | Assignment | Entity | Khoảng hiệu lực, phòng ban, chức danh, lý do | Thuộc một Employee |
 | OrgUnit | Entity | Mã phòng ban, ngày thành lập, ngày giải thể, trạng thái | Có lịch sử OrgUnitPeriod và nhiều HeadAssignment |
 | OrgUnitPeriod | Value object | Khoảng hiệu lực, tên, phòng ban cha | Thuộc một OrgUnit |
@@ -193,7 +196,7 @@ M5 không thêm entity. Báo cáo đọc từ entity của M1 tới M4 (BR-138);
 
 | Aggregate (root) | Contains | Invariants | Cross-aggregate rules |
 |---|---|---|---|
-| Employee | Employee, Assignment | Mã nhân viên không đổi (BR-015); quá trình công tác không chồng, không hở (BR-016) | Phòng ban của mỗi quá trình công tác phải đang hoạt động (BR-014); số CCCD không trùng (BR-022) |
+| Employee | Employee, EmploymentPeriod, Assignment | Mã nhân viên không đổi (BR-015); khoảng làm việc không chồng (BR-139); quá trình công tác không chồng, không hở trong mỗi khoảng làm việc (BR-016) | Phòng ban của mỗi quá trình công tác phải đang hoạt động (BR-014); số CCCD không trùng (BR-022) |
 | EmploymentContract | EmploymentContract | Thời hạn hợp lệ theo loại hợp đồng (BR-024, BR-028) | Hợp đồng của một nhân viên không chồng thời gian (BR-025); kiểm số hợp đồng xác định thời hạn liên tiếp (BR-026); số hợp đồng không trùng (BR-037) |
 | OrgUnit | OrgUnit, OrgUnitPeriod | Các khoảng lịch sử không chồng; tên không trống | Đúng một phòng ban gốc (BR-007); cây không có vòng (BR-008); điều kiện giải thể (BR-010) |
 | HeadAssignment | HeadAssignment | Khoảng hiệu lực hợp lệ | Mỗi phòng ban có tối đa một trưởng mỗi ngày; người được bổ nhiệm đang làm việc (BR-011) |
@@ -231,7 +234,10 @@ stateDiagram-v2
   upcoming --> active: tới ngày vào làm
   upcoming --> cancelled: HR hủy tiếp nhận
   active --> terminated: qua ngày làm việc cuối cùng
-  terminated --> [*]
+  terminated --> upcoming: HR tuyển lại
+  terminated --> anonymized: HR ẩn danh khi hết hạn lưu
+  state "Đã ẩn danh" as anonymized
+  anonymized --> [*]
   cancelled --> [*]
 ```
 
@@ -242,6 +248,8 @@ stateDiagram-v2
 | `upcoming` | `active` | Thời gian, tới ngày vào làm | — |
 | `upcoming` | `cancelled` | HR hủy tiếp nhận | Trước ngày vào làm |
 | `active` | `terminated` | Thời gian, sang ngày sau ngày làm việc cuối cùng | HR đã ghi nhận nghỉ việc (BR-019) |
+| `terminated` | `upcoming` | HR tuyển lại; tới ngày vào làm mới thì sang `active` như trên | Ngày vào làm mới sau ngày làm việc cuối cùng của khoảng trước (BR-139) |
+| `terminated` | `anonymized` | HR xác nhận ẩn danh | Đã quá `retention_years` năm từ ngày làm việc cuối cùng (BR-141) |
 
 **UserAccount**
 
@@ -416,7 +424,7 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 - **Status:** `Confirmed` khi có nguồn xác nhận; `Assumed` khi dựa trên assumption; `Disputed` khi các nguồn mâu thuẫn và
   chưa ai chốt. Luật `Disputed` không được đưa vào code.
 - **Nguồn A-003:** luật do agent đề xuất theo cách làm phổ biến ở doanh nghiệp nhỏ, chưa được HR công ty xác nhận.
-- **Nguồn là văn bản pháp luật:** luật giữ `Assumed` cho tới khi đối chiếu văn bản gốc (Q-013).
+- **Nguồn là văn bản pháp luật:** luật giữ `Assumed` cho tới khi đối chiếu văn bản gốc (A-013).
 
 **Tài khoản và vai trò**
 
@@ -426,7 +434,7 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 | BR-002 | Tài khoản vừa được tạo hoặc vừa được HR đặt lại mật khẩu | Người dùng phải đặt mật khẩu mới ở lần đăng nhập kế tiếp, trước khi dùng chức năng khác | A-003 | Assumed |
 | BR-003 | Nhập sai mật khẩu `max_failed_logins` lần liên tiếp | Tài khoản bị khóa tạm `lockout_minutes` phút | A-003 | Assumed |
 | BR-004 | Thu hồi vai trò HR, khóa tài khoản hoặc ghi nhận nghỉ việc của HR đang hoạt động cuối cùng | Từ chối | A-003 | Assumed |
-| BR-005 | Nhân viên qua ngày làm việc cuối cùng | Tài khoản tự bị khóa và không mở khóa được nữa | A-003 | Assumed |
+| BR-005 | Nhân viên qua ngày làm việc cuối cùng | Tài khoản tự bị khóa và không mở khóa được nữa, trừ khi nhân viên được tuyển lại (BR-139) | A-003 | Assumed |
 | BR-006 | Xác định vai trò của một người tại ngày D | Nhân viên: có tài khoản đang hoạt động. Quản lý: đang là trưởng của ít nhất một phòng ban tại D; không gán tay. HR: được gán tay | Chủ dự án, 2026-10-30 | Confirmed |
 | BR-036 | Đặt mật khẩu mới | Mật khẩu dài tối thiểu `min_password_length` ký tự và khác mật khẩu hiện tại | A-003 | Assumed |
 
@@ -450,13 +458,16 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 | ID | When | Then | Source | Status |
 |---|---|---|---|---|
 | BR-015 | Cấp mã nhân viên | Mã duy nhất trong toàn hệ thống, không đổi, không dùng lại kể cả sau khi nhân viên nghỉ việc. Hệ thống tự cấp theo `employee_code_format` khi tiếp nhận; khi nhập từ bảng tính thì giữ mã trong file | A-003 | Assumed |
-| BR-016 | Lưu quá trình công tác của một nhân viên | Từ ngày vào làm tới ngày làm việc cuối cùng, mỗi ngày nhân viên có đúng một quá trình công tác; các quá trình không chồng, không hở | A-003 | Assumed |
+| BR-016 | Lưu quá trình công tác của một nhân viên | Trong mỗi khoảng làm việc, mỗi ngày nhân viên có đúng một quá trình công tác; các quá trình không chồng, không hở. Ngoài khoảng làm việc thì không có quá trình công tác | A-003 | Assumed |
 | BR-017 | Ghi nhận thay đổi công tác với ngày hiệu lực D | D phải nằm trong khoảng làm việc. Quá trình chứa D kết thúc ở D−1. Quá trình mới bắt đầu từ D và kéo dài tới ngày trước thay đổi kế tiếp đã có, hoặc tới ngày làm việc cuối cùng | A-003 | Assumed |
 | BR-018 | Ghi nhận thay đổi công tác với ngày hiệu lực trước hôm nay | Lý do là bắt buộc | A-003 | Assumed |
 | BR-019 | Ghi nhận nghỉ việc với ngày làm việc cuối cùng L | Quá trình công tác, bổ nhiệm trưởng và hợp đồng đang hiệu lực kết thúc ở L. Từ ngày sau L, nhân viên ở trạng thái Đã nghỉ việc và tài khoản bị khóa | A-003 | Assumed |
 | BR-020 | Hủy ghi nhận nghỉ việc | Chỉ được khi L chưa qua | A-003 | Assumed |
 | BR-021 | Nhân viên tự sửa hồ sơ của mình | Chỉ sửa được điện thoại cá nhân, email cá nhân, địa chỉ hiện tại và người liên hệ khẩn cấp; thay đổi có hiệu lực ngay. Thông tin còn lại chỉ HR sửa | A-003 | Assumed |
 | BR-022 | Lưu số CCCD | Số CCCD không trùng giữa các hồ sơ chưa bị hủy tiếp nhận | A-003 | Assumed |
+| BR-139 | HR tuyển lại nhân viên ở trạng thái Đã nghỉ việc | Dùng lại hồ sơ và mã nhân viên cũ, thêm một khoảng làm việc mới với ngày vào làm sau ngày làm việc cuối cùng của khoảng trước. Quá trình công tác, hợp đồng, ca và bản ghi lương được nhập mới cho khoảng đó. Tài khoản cũ được mở khóa lại. Phép năm bắt đầu từ 0 vì phép chưa nghỉ đã được trả khi nghỉ việc (BR-120); thâm niên ở BR-048 chỉ tính từ ngày vào làm mới | Chủ dự án, 2026-10-30 | Confirmed |
+| BR-140 | Nhân viên đã nghỉ việc quá `contact_retention_months` tháng | Hệ thống đưa người đó vào danh sách cần xóa thông tin liên hệ. HR xác nhận thì xóa điện thoại, email, địa chỉ cá nhân, người liên hệ khẩn cấp và tài khoản ngân hàng. Hệ thống không tự xóa khi chưa có xác nhận. Nhật ký ghi việc xóa nhưng không chép lại giá trị đã xóa | Chủ dự án, 2026-10-30; Luật Bảo vệ dữ liệu cá nhân 2025 | Confirmed |
+| BR-141 | Nhân viên đã nghỉ việc quá `retention_years` năm | Hệ thống đưa người đó vào danh sách cần ẩn danh. HR xác nhận thì xóa mọi thông tin cá nhân, người phụ thuộc, lý do nghỉ và nội dung các đơn; hồ sơ chỉ còn mã nhân viên. Số liệu đã chốt trong bảng công, bảng lương và báo cáo tổng hợp được giữ | Chủ dự án, 2026-10-30; Luật Kế toán về thời hạn lưu tài liệu kế toán | Assumed |
 
 **Hợp đồng lao động**
 
@@ -687,6 +698,8 @@ chiếu theo Q-008 và Q-023.
 | `ot_night_extra` | Phần trả thêm cho giờ làm thêm ban đêm, theo hệ số ban ngày | 20%. Hệ số làm thêm ban đêm vì thế là 210% ngày làm việc, 270% ngày nghỉ hằng tuần, 390% ngày nghỉ lễ | BR-108 |
 | `unused_leave_avg_months` | Số tháng liền trước tháng nghỉ việc để tính lương ngày trả phép chưa nghỉ | 6 | BR-120 |
 | `report_min_group_size` | Số người tối thiểu của một nhóm để Quản lý thấy số liệu tổng hợp nhạy cảm | 3 | BR-129 |
+| `contact_retention_months` | Số tháng sau ngày làm việc cuối cùng để xóa thông tin liên hệ và tài khoản ngân hàng | 12 | BR-140 |
+| `retention_years` | Số năm sau ngày làm việc cuối cùng để ẩn danh hồ sơ; theo thời hạn lưu tài liệu kế toán, chờ đối chiếu | 10 | BR-141 |
 
 ### Default leave types
 
@@ -718,17 +731,17 @@ ngừng dùng theo quy chế công ty.
 
 | Data | Purpose | Who may see | Retention |
 |---|---|---|---|
-| Số CCCD, ngày sinh, giới tính, địa chỉ thường trú | Hồ sơ lao động, hợp đồng; từ M4 dùng cho BHXH và thuế | HR; chính nhân viên | Undecided (Q-012) |
-| Tài khoản ngân hàng | Trả lương, từ M4 | HR; chính nhân viên | Undecided (Q-012) |
-| Điện thoại, email và địa chỉ cá nhân; người liên hệ khẩn cấp | Liên lạc | HR; chính nhân viên | Undecided (Q-012) |
-| Hợp đồng lao động | Quản lý quan hệ lao động | HR; chính nhân viên | Undecided (Q-012) |
+| Số CCCD, ngày sinh, giới tính, địa chỉ thường trú | Hồ sơ lao động, hợp đồng; từ M4 dùng cho BHXH và thuế | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
+| Tài khoản ngân hàng | Trả lương, từ M4 | HR; chính nhân viên | `contact_retention_months` tháng sau nghỉ việc (BR-140) |
+| Điện thoại, email và địa chỉ cá nhân; người liên hệ khẩn cấp | Liên lạc | HR; chính nhân viên | `contact_retention_months` tháng sau nghỉ việc (BR-140) |
+| Hợp đồng lao động | Quản lý quan hệ lao động | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
 | Mật khẩu | Đăng nhập | Không ai, kể cả HR; HR chỉ đặt lại được | Tới khi tài khoản bị xóa |
-| Nhật ký thao tác | Truy vết thay đổi | HR | Undecided (Q-012) |
-| Lý do nghỉ; đơn nghỉ ốm đau và thai sản | Duyệt đơn, chấm công, BHXH | Chính nhân viên, người duyệt, HR. Quản lý khác trong phạm vi chỉ thấy loại nghỉ (BR-067) | Undecided (Q-012) |
-| Lương, phụ cấp, phiếu lương, bảng lương | Trả lương | HR; chính nhân viên, chỉ phiếu đã chốt (BR-122) | Undecided (Q-012) |
-| Mã số thuế, mã số BHXH, cam kết thu nhập | Khấu trừ thuế, đóng bảo hiểm | HR; chính nhân viên | Undecided (Q-012) |
-| Người phụ thuộc: họ tên, ngày sinh, số định danh, quan hệ | Giảm trừ gia cảnh | HR; chính nhân viên | Undecided (Q-012) |
-| File báo cáo xuất ra | Trình ký, lưu trữ | Người xuất; nằm ngoài hệ thống sau khi tải về, nên chỉ ghi nhật ký được (BR-136) | Undecided (Q-012) |
+| Nhật ký thao tác | Truy vết thay đổi | HR | `retention_years` năm; nhật ký về người đã ẩn danh chỉ còn mã nhân viên (BR-141) |
+| Lý do nghỉ; đơn nghỉ ốm đau và thai sản | Duyệt đơn, chấm công, BHXH | Chính nhân viên, người duyệt, HR. Quản lý khác trong phạm vi chỉ thấy loại nghỉ (BR-067) | `retention_years` năm sau nghỉ việc (BR-141) |
+| Lương, phụ cấp, phiếu lương, bảng lương | Trả lương | HR; chính nhân viên, chỉ phiếu đã chốt (BR-122) | `retention_years` năm sau nghỉ việc; số liệu tổng hợp giữ lâu hơn (BR-141) |
+| Mã số thuế, mã số BHXH, cam kết thu nhập | Khấu trừ thuế, đóng bảo hiểm | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
+| Người phụ thuộc: họ tên, ngày sinh, số định danh, quan hệ | Giảm trừ gia cảnh | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
+| File báo cáo xuất ra | Trình ký, lưu trữ | Người xuất; nằm ngoài hệ thống sau khi tải về, nên chỉ ghi nhật ký được (BR-136) | Ngoài kiểm soát của hệ thống |
 
 ## Edge cases
 
@@ -741,7 +754,7 @@ ngừng dùng theo quy chế công ty.
 | EC-005 | Trưởng phòng ban nghỉ việc | Bổ nhiệm kết thúc ở ngày làm việc cuối cùng. Quản lý trực tiếp của nhân viên trong phòng ban chuyển lên phòng ban cha gần nhất có trưởng | BR-012, BR-019 | — |
 | EC-006 | Chuyển một phòng ban sang nhánh khác | Từ ngày hiệu lực, nhân viên trong nhánh đó có quản lý gián tiếp mới; quản lý cũ không còn thấy nhánh đó | BR-012, BR-013 | — |
 | EC-007 | Giải thể phòng ban còn nhân viên | Từ chối và liệt kê nhân viên cần chuyển đi | BR-010 | — |
-| EC-008 | Nhân viên đã nghỉ việc được tuyển lại | Undecided (Q-011) | BR-015, BR-022 | — |
+| EC-008 | Nhân viên đã nghỉ việc được tuyển lại | HR tuyển lại trên hồ sơ cũ, giữ mã nhân viên; không tạo hồ sơ mới | BR-015, BR-022, BR-139 | — |
 | EC-009 | Ghi nhận nghỉ việc khi còn thay đổi công tác có hiệu lực sau ngày làm việc cuối cùng | Từ chối và liệt kê thay đổi cần hủy | BR-019 | — |
 | EC-010 | HR thu hồi vai trò HR của chính mình | Cho phép khi còn HR khác đang hoạt động; từ chối khi là HR cuối cùng | BR-004 | — |
 | EC-011 | Phòng ban gốc không có trưởng | Nhân viên không tìm được trưởng nào ở các cấp trên thì không có quản lý trực tiếp; đơn nghỉ của người đó do HR duyệt | BR-012, BR-056 | — |
@@ -820,3 +833,8 @@ ngừng dùng theo quy chế công ty.
 | EC-084 | Quản lý xem kỳ trước khi phạm vi của mình đã đổi | Dùng phạm vi tại ngày cuối của kỳ báo cáo | BR-127 | — |
 | EC-085 | Tháng chưa chốt lương | Quản lý không thấy tháng đó; HR thấy kèm nhãn tạm tính | BR-130 | — |
 | EC-086 | Quản lý mở báo cáo của phòng ban ngoài phạm vi bằng đường dẫn trực tiếp | Từ chối | BR-127 | — |
+| EC-087 | HR ghi ngày làm việc cuối cùng trước ngày vào làm của khoảng làm việc hiện tại | Từ chối | BR-019 | — |
+| EC-088 | File chấm công thiếu cột bắt buộc hoặc không đọc được | Từ chối cả file, không lưu dòng nào, chỉ ra cột thiếu | BR-073 | — |
+| EC-089 | HR ghi bản ghi lương trùng ngày hiệu lực với bản ghi đã có | Từ chối; HR sửa bản ghi đã có | BR-093 | — |
+| EC-090 | Người có hồ sơ đã bị ẩn danh xin vào làm lại | Không tuyển lại được vì hồ sơ không còn thông tin; HR tiếp nhận như người mới với mã mới | BR-139, BR-141 | — |
+| EC-091 | Nhân viên được tuyển lại trước khi tới hạn xóa thông tin liên hệ | Không còn trong danh sách cần xóa; hạn được tính lại từ lần nghỉ việc sau | BR-140 | — |
