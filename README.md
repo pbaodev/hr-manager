@@ -172,7 +172,9 @@ scripts/               Script dựng GitHub
 
 **Use case diagram**
 
-![Use case diagram](docs/assets/use-case.png)
+![Use case diagram](docs/assets/use-case.drawio.png)
+
+Ảnh có nhúng sơ đồ draw.io; mở `use-case.drawio.png` bằng draw.io để sửa.
 
 **User stories INVEST**
 
