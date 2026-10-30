@@ -4,7 +4,7 @@
 - **Updated:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
   người ngoài review
-- **Related:** [requirements](requirements.md) · [stories](stories.md) · [domain](domain.md) · [UI design](design/ui.md)
+- **Related:** [requirements](requirements.md) · [stories](stories.md) · [domain](domain.md) · [UI design](../design/ui.md)
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
 được kiểm ở backend theo Permission matrix trong [requirements](requirements.md#permission-matrix). Bản hiện tại có

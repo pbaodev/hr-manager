@@ -2,8 +2,8 @@
 
 - **Status:** [Draft | Accepted | Superseded]
 - **Updated:** [YYYY-MM-DD]
-- **Related:** [ARCHITECTURE](../ARCHITECTURE.md#deployment) · [setup](setup.md) · [testing](testing.md) ·
-  [phases](playbook/phases.md)
+- **Related:** [ARCHITECTURE](../../ARCHITECTURE.md#deployment) · [setup](../build/setup.md) · [testing](../build/testing.md) ·
+  [phases](../playbook/phases.md)
 
 > Chuẩn bị từ Phase 3, hoàn thiện trước bản production đầu tiên (Phase 5). Mỗi thủ tục ghi từng bước kèm lệnh cụ thể,
 > đủ để làm theo lúc đang có sự cố. Không ghi secret; chỉ ghi nơi lưu secret. Thủ tục nào chưa thử thì ghi rõ ở cột
@@ -37,7 +37,7 @@
 
 ### Restore backup
 
-- **Schedule and retention:** [theo mục Retention and backup trong [data design](design/data.md)]
+- **Schedule and retention:** [theo mục Retention and backup trong [data design](../design/data.md)]
 
 1. [bước, kèm lệnh]
 

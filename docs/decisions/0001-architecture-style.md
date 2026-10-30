@@ -4,7 +4,7 @@
 - **Date:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án chọn phương án
 - **Drivers:** QA-001, QA-003, QA-004; một người làm cùng coding agent; ngân sách hạ tầng $10–25 mỗi tháng (Q-009)
-- **Related:** [requirements](../requirements.md#quality-attributes), [research](../research.md#decomposition), A-011
+- **Related:** [requirements](../analysis/requirements.md#quality-attributes), [research](../project/research.md#decomposition), A-011
 
 ## Context
 

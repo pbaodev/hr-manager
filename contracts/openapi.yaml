@@ -5,7 +5,7 @@ openapi: "3.0.3"
 info:
   title: "hr-manager API"
   version: "0.1.0"
-  description: "Contract cho MVP: các story có ✅ ở cột MVP trong docs/stories.md. Quy ước, bảng mã lỗi và bản đồ story tới operation nằm ở docs/design/api.md.\n\nLỗi trả về theo RFC 9457 (Problem Details), thêm `code` ổn định và `rule` là mã luật trong docs/domain.md."
+  description: "Contract cho MVP: các story có ✅ ở cột MVP trong docs/analysis/stories.md. Quy ước, bảng mã lỗi và bản đồ story tới operation nằm ở docs/design/api.md.\n\nLỗi trả về theo RFC 9457 (Problem Details), thêm `code` ổn định và `rule` là mã luật trong docs/analysis/domain.md."
   license:
     name: "Proprietary"
 servers:
@@ -1818,7 +1818,7 @@ components:
           example: "leave_insufficient_balance"
         rule:
           type: "string"
-          description: "Mã luật trong docs/domain.md, nếu có"
+          description: "Mã luật trong docs/analysis/domain.md, nếu có"
           example: "BR-053"
         errors:
           description: "Lỗi theo từng field khi `code` là `validation_failed`"

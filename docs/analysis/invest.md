@@ -3,7 +3,7 @@
 - **Status:** Draft
 - **Updated:** 2026-10-30
 - **Reviewed:** [YYYY-MM-DD: chủ dự án đọc lại kết quả chấm]
-- **Related:** [stories](stories.md) · [requirements](requirements.md) · [README](../README.md)
+- **Related:** [stories](stories.md) · [requirements](requirements.md) · [README](../../README.md)
 
 > Kết quả chấm 32 story có ✅ ở cột MVP của [stories](stories.md#summary) theo sáu tiêu chí INVEST. Agent chấm dựa trên
 > câu story và acceptance criteria; chủ dự án đọc lại trước khi chuyển `Accepted`. Story `Fail` được ghi lý do và cách
@@ -16,7 +16,7 @@
 | **I**ndependent | Làm và kiểm được trong MVP mà không cần story ngoài MVP. Cần dữ liệu do story làm trước tạo ra vẫn tính là Pass | Có acceptance criterion cần dữ liệu hay chức năng của story ngoài MVP |
 | **N**egotiable | Story nói người dùng cần gì, không áp đặt cách làm như màn hình, công nghệ hay thuật toán | Story hoặc AC mô tả cách cài đặt |
 | **V**aluable | Có vai trò rõ và vế "để ..." nói lợi ích cho vai trò đó | Không thấy ai được lợi, hoặc chỉ là việc kỹ thuật |
-| **E**stimable | Luật liên quan đã có mã `BR-xxx`, edge case đã có mã `EC-xxx`; không còn câu hỏi mở trong [questions](questions.md) chặn story | Còn chỗ mơ hồ làm không ước lượng được |
+| **E**stimable | Luật liên quan đã có mã `BR-xxx`, edge case đã có mã `EC-xxx`; không còn câu hỏi mở trong [questions](../project/questions.md) chặn story | Còn chỗ mơ hồ làm không ước lượng được |
 | **S**mall | Agent ước lượng làm xong backend, frontend và test trong một PR, khoảng 3 ngày công trở xuống | Có từ hai phần việc độc lập trở lên, nên tách |
 | **T**estable | Mỗi AC viết dạng Given, When, Then với kết quả kiểm được | Có AC không kiểm được, hoặc kết quả không đo được |
 

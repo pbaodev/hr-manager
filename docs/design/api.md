@@ -3,12 +3,12 @@
 - **Status:** Draft
 - **Updated:** 2026-10-30
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
-- **Related:** [requirements](../requirements.md) · [SPEC](../SPEC.md) · [design guide](../playbook/design.md) ·
+- **Related:** [requirements](../analysis/requirements.md) · [SPEC](../build/SPEC.md) · [design guide](../playbook/design.md) ·
   [ARCHITECTURE](../../ARCHITECTURE.md) · ADR-0002, ADR-0004
 
 > Contract là nguồn chính: [`contracts/openapi.yaml`](../../contracts/openapi.yaml). File này ghi quy ước chung, bảng mã
 > lỗi và bản đồ từ user story tới operation. Phạm vi là MVP: các story có ✅ ở cột MVP trong
-> [stories](../stories.md#summary). Operation của phần ngoài MVP thêm vào contract ở Feature loop.
+> [stories](../analysis/stories.md#summary). Operation của phần ngoài MVP thêm vào contract ở Feature loop.
 
 ## Style
 

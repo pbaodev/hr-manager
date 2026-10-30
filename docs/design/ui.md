@@ -3,7 +3,7 @@
 - **Status:** Draft
 - **Updated:** 2026-10-30
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
-- **Related:** [UI flow](../ui-flow.md) · [components](components.md) · [api](api.md) ·
+- **Related:** [UI flow](../analysis/ui-flow.md) · [components](components.md) · [api](api.md) ·
   [design guide](../playbook/design.md) · ADR-0006
 
 > Quy tắc giao diện chung cho mọi màn hình: design system, trạng thái, định dạng, accessibility và câu thông báo. Người
@@ -13,7 +13,7 @@
 
 | Kind | Link | Version or date |
 |---|---|---|
-| Wireframe | Nội dung và trạng thái từng màn hình ở [UI flow](../ui-flow.md); chưa có bản vẽ riêng | 2026-10-30 |
+| Wireframe | Nội dung và trạng thái từng màn hình ở [UI flow](../analysis/ui-flow.md); chưa có bản vẽ riêng | 2026-10-30 |
 | Mockup | Chưa có. Màn hình được dựng thẳng bằng component của Mantine theo quy tắc ở file này | — |
 | Component library | Mantine, theo ADR-0006 | Bản ổn định mới nhất lúc dựng project, ghi trong lockfile |
 
@@ -90,7 +90,7 @@ Màu trạng thái luôn đi kèm chữ hoặc biểu tượng, ví dụ nhãn "
   - Thông báo thành công và lỗi gửi được tới screen reader qua vùng `aria-live`.
 - **Checked by:**
   - `axe` chạy trong test E2E trên các màn hình của MVP.
-  - Thử bằng bàn phím cho luồng đăng nhập, gửi đơn và duyệt đơn, ghi kết quả vào [testing](../testing.md).
+  - Thử bằng bàn phím cho luồng đăng nhập, gửi đơn và duyệt đơn, ghi kết quả vào [testing](../build/testing.md).
 
 ## Messages
 

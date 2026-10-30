@@ -3,7 +3,7 @@
 - **Status:** Draft
 - **Updated:** 2026-10-30
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
-- **Related:** [domain](../domain.md) · [ARCHITECTURE](../../ARCHITECTURE.md) · [design guide](../playbook/design.md) ·
+- **Related:** [domain](../analysis/domain.md) · [ARCHITECTURE](../../ARCHITECTURE.md) · [design guide](../playbook/design.md) ·
   ADR-0003
 
 > File này ghi cách lưu dữ liệu và luật nào được giữ ở tầng dữ liệu. Entity và luật nằm ở domain; schema thật nằm trong
@@ -471,6 +471,6 @@ Luật không có ở đây được giữ ở domain, ghi trong [components](co
 
 | Data | Retention | Backup | Restore tested |
 |---|---|---|---|
-| db, production | Theo mục Sensitive data của [domain](../domain.md#sensitive-data); xóa và ẩn danh theo BR-140, BR-141 | Point-in-time recovery của Render Postgres, 3 ngày; logical backup tải về hằng tuần, giữ 8 tuần (ADR-0005) | Chưa; diễn tập lần đầu trước khi công ty dùng thử |
+| db, production | Theo mục Sensitive data của [domain](../analysis/domain.md#sensitive-data); xóa và ẩn danh theo BR-140, BR-141 | Point-in-time recovery của Render Postgres, 3 ngày; logical backup tải về hằng tuần, giữ 8 tuần (ADR-0005) | Chưa; diễn tập lần đầu trước khi công ty dùng thử |
 | db, staging | Dữ liệu giả, có thể xóa bất cứ lúc nào | Point-in-time recovery 6 giờ của gói miễn phí Neon | Không cần |
 | refresh_tokens | Xóa khi hết hạn quá 7 ngày | Như db | — |

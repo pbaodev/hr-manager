@@ -3,11 +3,11 @@
 - **Status:** Draft
 - **Updated:** 2026-10-30
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
-- **Related:** [ARCHITECTURE](../../ARCHITECTURE.md) · [SPEC](../SPEC.md) · [design guide](../playbook/design.md) ·
+- **Related:** [ARCHITECTURE](../../ARCHITECTURE.md) · [SPEC](../build/SPEC.md) · [design guide](../playbook/design.md) ·
   ADR-0001, ADR-0002
 
 > C4 Level 3 của container `api`, cùng phần frontend và cấu hình. Danh sách module kèm path nằm ở SPEC; file này ghi cấu
-> trúc và quy tắc. Quy tắc cách viết code nằm ở [conventions](../conventions/README.md).
+> trúc và quy tắc. Quy tắc cách viết code nằm ở [conventions](../build/conventions/README.md).
 
 ## api: structure
 
@@ -72,7 +72,7 @@ kiểm ở `domain` hoặc `service` của module ghi trong cột Enforces.
 
 ## Frontend
 
-Người dùng thấy gì nằm ở [UI flow](../ui-flow.md); mục này ghi cách xây.
+Người dùng thấy gì nằm ở [UI flow](../analysis/ui-flow.md); mục này ghi cách xây.
 
 - **Code layout:**
   - `routes/` là một file cho mỗi màn hình `SCR-xxx`, theo React Router (ADR-0006).
@@ -105,5 +105,5 @@ Người dùng thấy gì nằm ở [UI flow](../ui-flow.md); mục này ghi cá
 | `MIGRATION_DATABASE_URL` | Kết nối dùng để chạy migration, có quyền tạo bảng | Biến môi trường, secret | Alembic |
 | `JWT_SIGNING_KEY` | Khóa ký access token, khác nhau giữa các môi trường | Biến môi trường, secret | core |
 | `PUBLIC_ORIGIN` | Domain của hệ thống, để kiểm header `Origin` | Biến môi trường | core |
-| Tham số trong mục Parameters của [domain](../domain.md#parameters), không phải tham số lương | Ví dụ `max_failed_logins`, `carryover_max_days`, `report_min_group_size`, `login_rate_limit_per_ip` | Bảng `app_settings`, seed theo giá trị trong domain | Module ghi ở cột Used by của domain |
+| Tham số trong mục Parameters của [domain](../analysis/domain.md#parameters), không phải tham số lương | Ví dụ `max_failed_logins`, `carryover_max_days`, `report_min_group_size`, `login_rate_limit_per_ip` | Bảng `app_settings`, seed theo giá trị trong domain | Module ghi ở cột Used by của domain |
 | Tham số lương | Ví dụ `pit_brackets`, `regional_min_wage` | Bảng `legal_parameters` có `valid_from` (BR-123) | payroll |

@@ -4,7 +4,7 @@ Playbook chia dự án thành sáu phase và dùng bốn mũ cho một người.
 tài liệu theo loại dự án.
 
 Các file trong `docs/playbook/` là hướng dẫn và default, dùng chung cho mọi dự án. Dự án làm khác default ở đâu thì ghi
-vào [project.md](../project.md), không sửa ở đây. Các mẫu cần điền nằm ở phần còn lại của `docs/` và ở
+vào [project.md](../project/project.md), không sửa ở đây. Các mẫu cần điền nằm ở phần còn lại của `docs/` và ở
 [ARCHITECTURE.md](../../ARCHITECTURE.md).
 
 ## Principles
@@ -80,5 +80,5 @@ nghiệm thu và bàn giao.
 | [working-agreement.md](working-agreement.md) | Default về task, board, label, Definition of Ready và Definition of Done |
 | [git-workflow.md](git-workflow.md) | Nhánh, commit, PR, review, CI, branch protection, phát hành |
 | [change-control.md](change-control.md) | Cách đổi những gì đã chốt sau baseline |
-| [documents.md](documents.md) | Tài liệu nào trả lời câu hỏi nào, mã ID, quy ước mẫu, sơ đồ, cách viết |
+| [documents.md](documents.md) | Mã ID, quy ước mẫu, sơ đồ, cách viết; danh mục tài liệu ở [index](../README.md) |
 | [ai-components.md](ai-components.md) | Thiết kế và eval-lite cho tính năng AI của sản phẩm |

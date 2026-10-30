@@ -2,7 +2,7 @@
 
 Design trả lời ba câu: hệ thống gồm những phần nào, dữ liệu được lưu và đi qua các phần đó thế nào, mỗi quyết định khó
 đảo ngược được chọn vì sao. Đầu vào là output của Analysis. Kết quả ghi ở [ARCHITECTURE.md](../../ARCHITECTURE.md),
-[`docs/design/`](../design/components.md), [ADR](../decisions/README.md) và [SPEC](../SPEC.md).
+[`docs/design/`](../design/components.md), [ADR](../decisions/README.md) và [SPEC](../build/SPEC.md).
 
 ## Workflow
 

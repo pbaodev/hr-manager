@@ -2,8 +2,8 @@
 
 - **Status:** [Draft | Accepted | Superseded]
 - **Updated:** [YYYY-MM-DD]
-- **Related:** [SPEC](SPEC.md#test-strategy) · [stories](stories.md) · [requirements](requirements.md) ·
-  [phases](playbook/phases.md)
+- **Related:** [SPEC](SPEC.md#test-strategy) · [stories](../analysis/stories.md) · [requirements](../analysis/requirements.md) ·
+  [phases](../playbook/phases.md)
 
 > Tạo ở Phase 3; cập nhật ở mỗi Feature loop và mỗi lần đóng milestone. Test strategy (tầng nào kiểm gì, chạy ở đâu)
 > nằm ở SPEC; file này ghi phần không nằm trong code: test case thủ công, mức lỗi và kết quả test của từng bản phát
@@ -27,7 +27,7 @@ mà nó kiểm.
 
 ## Defect severity
 
-Mỗi Bug ghi một mức. S1 là sự cố Severe theo mục Incident ở Phase 5 trong [phases.md](playbook/phases.md).
+Mỗi Bug ghi một mức. S1 là sự cố Severe theo mục Incident ở Phase 5 trong [phases.md](../playbook/phases.md).
 
 | Severity | Meaning | Handling |
 |---|---|---|

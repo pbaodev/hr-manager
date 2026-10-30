@@ -29,4 +29,4 @@ assignees: ""
 
 ## Next step
 
-[Adopt | Iterate | Stop], kèm link ADR, Feature, Task hoặc câu trả lời trong `docs/questions.md`.
+[Adopt | Iterate | Stop], kèm link ADR, Feature, Task hoặc câu trả lời trong `docs/project/questions.md`.

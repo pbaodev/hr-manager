@@ -1,39 +1,11 @@
 # Documents
 
-Danh mục tài liệu của dự án, quy ước chung của các mẫu và cách viết. Người và agent tra trang này để biết một thông
-tin nằm ở đâu.
+Quy ước chung của các mẫu, mã ID, sơ đồ và cách viết tài liệu.
 
 ## Map
 
-Mỗi thông tin có một nơi chính. Nơi khác cần thì dẫn link hoặc mã, không chép lại.
-
-| Document | Answers | Hat | Phase |
-|---|---|---|---|
-| [project.md](../project.md) | Mục tiêu, quỹ thời gian, công cụ, làm khác default ở đâu | Ops | 0 |
-| [brief.md](../brief.md) | Có nên làm không, làm theo hướng nào | Analyst | 1 |
-| [questions.md](../questions.md) | Điều chưa biết, assumption và câu trả lời | Analyst | 1 trở đi |
-| [decisions/](../decisions/README.md) | Vì sao chọn phương án này, đã cân nhắc phương án nào | Architect | 1 trở đi |
-| [requirements.md](../requirements.md) | Ai dùng, được làm gì, tốt tới mức nào | Analyst | 2 |
-| [stories.md](../stories.md) | Người dùng cần gì, thế nào là đạt | Analyst | 2 |
-| [domain.md](../domain.md) | Thuật ngữ, entity, vòng đời, luật nghiệp vụ, edge case | Analyst | 2 |
-| [ui-flow.md](../ui-flow.md) | Người dùng thấy và làm gì trên từng màn hình | Analyst | 2 |
-| [ARCHITECTURE.md](../../ARCHITECTURE.md) | Hệ thống gồm gì, kiến trúc được chọn vì quality attribute nào | Architect | 3 |
-| [design/components.md](../design/components.md) | Bên trong container gồm module nào, phụ thuộc thế nào | Architect | 3 |
-| [design/data.md](../design/data.md) | Dữ liệu lưu thế nào, luật nào được giữ ở tầng dữ liệu | Architect | 3 |
-| [design/api.md](../design/api.md) | Client gọi hệ thống thế nào, lỗi trả về ra sao | Architect | 3 |
-| [design/flows.md](../design/flows.md) | Mỗi luồng chính chạy qua những thành phần nào | Architect | 3 |
-| [design/ui.md](../design/ui.md) | Quy tắc giao diện chung: design system, trạng thái, định dạng, accessibility | Architect | 3 |
-| [design/ai.md](../design/ai.md) | Component AI làm gì, khi lỗi thì sao, đo bằng gì | Architect | 3 |
-| `contracts/openapi.yaml` | Contract chính xác của API | Architect | 3 |
-| [conventions/](../conventions/README.md) | Quy tắc code mà máy không tự kiểm được | Architect | 3 trở đi |
-| [SPEC.md](../SPEC.md) | Module nào làm gì, yêu cầu nằm ở đâu, kiểm bằng gì, đã tới trạng thái nào | Architect | 3 |
-| [setup.md](../setup.md) | Chạy dự án trên máy sạch thế nào | Ops | 3 |
-| [testing.md](../testing.md) | Ca thử tay, mức lỗi, kết quả test của từng bản phát hành | Developer | 3 trở đi |
-| [CHANGELOG.md](../../CHANGELOG.md) | Mỗi bản phát hành đổi gì cho người dùng | Ops | 4 |
-| [runbook.md](../runbook.md) | Deploy, rollback, khôi phục và xử lý sự cố thế nào | Ops | 5 |
-| [user-guide.md](../user-guide.md) | Người dùng cuối làm từng việc thế nào | Analyst | 5 |
-| [handover.md](../handover.md) | Đã bàn giao gì, còn lại gì; chỉ cho Client delivery | Ops | 5 |
-| [Feature](../../.github/ISSUE_TEMPLATE/feature.md), [Task](../../.github/ISSUE_TEMPLATE/task.md), [Bug](../../.github/ISSUE_TEMPLATE/bug.md), [Spike](../../.github/ISSUE_TEMPLATE/spike.md), [CR](../../.github/ISSUE_TEMPLATE/change_request.md), [PR](../../.github/PULL_REQUEST_TEMPLATE.md) | Công việc, thay đổi và bằng chứng | Developer | 1 trở đi |
+Danh mục tài liệu của dự án, gồm thư mục, câu hỏi mỗi file trả lời, mũ phụ trách, phase và trạng thái, nằm ở
+[docs/README.md](../README.md). Mỗi thông tin có một nơi chính. Nơi khác cần thì dẫn link hoặc mã, không chép lại.
 
 `docs/playbook/` là hướng dẫn của template. Mọi file khác trong `docs/`, cùng `ARCHITECTURE.md`, là tài liệu của dự
 án. Bảng Project types trong [README](README.md) cho biết loại dự án nào cần tài liệu nào.
@@ -41,7 +13,7 @@ Mỗi thông tin có một nơi chính. Nơi khác cần thì dẫn link hoặc 
 ## Template conventions
 
 - **Header:** Status, Updated, Reviewed, Related, nằm ngay dưới tiêu đề. Không có dòng Owner vì một người giữ mọi tài
-  liệu; mũ phụ trách ghi ở bảng Map.
+  liệu; mũ phụ trách ghi ở cột Hat của [index](../README.md).
 - **Status:** tài liệu dùng `Draft`, `Accepted`, `Superseded`; ADR dùng thêm `Proposed` và `Rejected`. Chỉ `Accepted`
   là đã chốt. Mục còn trống, dòng ví dụ, tài liệu `Draft` hoặc `Proposed` đều chưa phải quyết định.
 - **Reviewed:** ngày review nguội, cộng AI hay người nào đã review. Tài liệu chỉ chuyển sang `Accepted` khi dòng này đã

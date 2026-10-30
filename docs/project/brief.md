@@ -3,8 +3,8 @@
 - **Status:** Accepted
 - **Updated:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án đọc lại; không có AI review
-- **Related:** [questions](questions.md) · [research](research.md) · [requirements](requirements.md) ·
-  [decisions](decisions/README.md)
+- **Related:** [questions](questions.md) · [research](research.md) · [requirements](../analysis/requirements.md) ·
+  [decisions](../decisions/README.md)
 
 ## Origin
 
@@ -59,7 +59,7 @@ cáo nhân sự và chi phí lương. Hệ thống tự tính số ngày phép, 
     [research](research.md#decomposition).
   - Thiết kế kiến trúc và dữ liệu cho cả năm milestone; thiết kế API và giao diện chi tiết cho MVP.
   - MVP, bản phát hành đầu tiên: M1, M2 và các báo cáo của M5 không cần dữ liệu chấm công hay lương. Danh sách story ở cột
-    MVP của [stories](stories.md#summary). Chủ dự án chọn ngày 2026-10-30, để công ty dùng thử sớm phần giải chỗ đau xin
+    MVP của [stories](../analysis/stories.md#summary). Chủ dự án chọn ngày 2026-10-30, để công ty dùng thử sớm phần giải chỗ đau xin
     nghỉ trước hai milestone có nhiều rủi ro về luật là M3 và M4.
   - M1: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức.
   - M2: nghỉ phép.

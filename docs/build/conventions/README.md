@@ -8,7 +8,7 @@
 
 Thêm convention khi tự sửa cùng một lỗi nhiều lần, hoặc agent sai cùng một kiểu nhiều lần. Ví dụ: cách xử lý lỗi, cách
 đặt tên migration, cách viết test cho business rule. Dependency rule giữa các module nằm ở
-[components](../design/components.md), không ghi lại ở đây.
+[components](../../design/components.md), không ghi lại ở đây.
 
 ## How
 
@@ -22,5 +22,5 @@ Thêm convention khi tự sửa cùng một lỗi nhiều lần, hoặc agent sa
 |---|---|---|
 | | | |
 
-Thiết kế hệ thống nằm ở [ARCHITECTURE.md](../../ARCHITECTURE.md). Cách thiết kế và đo tính năng AI nằm ở
-[AI components guide](../playbook/ai-components.md).
+Thiết kế hệ thống nằm ở [ARCHITECTURE.md](../../../ARCHITECTURE.md). Cách thiết kế và đo tính năng AI nằm ở
+[AI components guide](../../playbook/ai-components.md).
