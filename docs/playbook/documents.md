@@ -1,11 +1,10 @@
 # Documents
 
-Danh mục tài liệu của dự án, quy ước chung của các mẫu và cách viết. Người và agent tra trang này để biết một thông
-tin nằm ở đâu.
+Quy ước chung của các mẫu, mã ID, sơ đồ và cách viết tài liệu.
 
 ## Map
 
-Danh mục tài liệu của dự án, gồm thư mục, câu hỏi mỗi file trả lời, phase và trạng thái, nằm ở
+Danh mục tài liệu của dự án, gồm thư mục, câu hỏi mỗi file trả lời, mũ phụ trách, phase và trạng thái, nằm ở
 [docs/README.md](../README.md). Mỗi thông tin có một nơi chính. Nơi khác cần thì dẫn link hoặc mã, không chép lại.
 
 `docs/playbook/` là hướng dẫn của template. Mọi file khác trong `docs/`, cùng `ARCHITECTURE.md`, là tài liệu của dự
@@ -14,7 +13,7 @@ Danh mục tài liệu của dự án, gồm thư mục, câu hỏi mỗi file t
 ## Template conventions
 
 - **Header:** Status, Updated, Reviewed, Related, nằm ngay dưới tiêu đề. Không có dòng Owner vì một người giữ mọi tài
-  liệu; mũ phụ trách ghi ở bảng Map.
+  liệu; mũ phụ trách ghi ở cột Hat của [index](../README.md).
 - **Status:** tài liệu dùng `Draft`, `Accepted`, `Superseded`; ADR dùng thêm `Proposed` và `Rejected`. Chỉ `Accepted`
   là đã chốt. Mục còn trống, dòng ví dụ, tài liệu `Draft` hoặc `Proposed` đều chưa phải quyết định.
 - **Reviewed:** ngày review nguội, cộng AI hay người nào đã review. Tài liệu chỉ chuyển sang `Accepted` khi dòng này đã

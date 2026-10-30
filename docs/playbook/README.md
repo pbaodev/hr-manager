@@ -80,5 +80,5 @@ nghiệm thu và bàn giao.
 | [working-agreement.md](working-agreement.md) | Default về task, board, label, Definition of Ready và Definition of Done |
 | [git-workflow.md](git-workflow.md) | Nhánh, commit, PR, review, CI, branch protection, phát hành |
 | [change-control.md](change-control.md) | Cách đổi những gì đã chốt sau baseline |
-| [documents.md](documents.md) | Tài liệu nào trả lời câu hỏi nào, mã ID, quy ước mẫu, sơ đồ, cách viết |
+| [documents.md](documents.md) | Mã ID, quy ước mẫu, sơ đồ, cách viết; danh mục tài liệu ở [index](../README.md) |
 | [ai-components.md](ai-components.md) | Thiết kế và eval-lite cho tính năng AI của sản phẩm |

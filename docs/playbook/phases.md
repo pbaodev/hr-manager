@@ -293,8 +293,8 @@ ADR nếu cần) trong cùng PR và ghi rõ trong mục Design impact. Không đ
 **Goal:** Giữ hệ thống chạy, phát hiện lỗi sớm, giữ thiết kế khớp với code và rút kinh nghiệm.
 
 - **Input:** Bản production đầu tiên. Phase này chạy song song với Phase 4; phần setup chuẩn bị từ Phase 3.
-- **Output:** Error tracking, uptime check, backup, [runbook](../operations/runbook.md), [user guide](../user-guide.md) khi có
-  người dùng khác, [handover](../handover.md) khi Client delivery, ADR mới hoặc `Superseded`, retro.
+- **Output:** Error tracking, uptime check, backup, [runbook](../operations/runbook.md), [user guide](../operations/user-guide.md) khi có
+  người dùng khác, [handover](../operations/handover.md) khi Client delivery, ADR mới hoặc `Superseded`, retro.
 - **Hat:** Ops; Architect cho việc kiểm design drift.
 
 **Exit criteria**
@@ -336,6 +336,6 @@ Không có, đây là vòng lặp. Trước bản production đầu tiên:
 
 - Personal tool: chỉ cần backup và runbook rollback.
 - Experiment: bỏ qua phase này.
-- Client delivery: sau bản phát hành cuối, làm Handover theo [handover.md](../handover.md). Xong khi bên nhận tự
+- Client delivery: sau bản phát hành cuối, làm Handover theo [handover.md](../operations/handover.md). Xong khi bên nhận tự
   deploy được một lần chỉ bằng tài liệu; mọi tài liệu `Accepted` và khớp code tại tag; việc còn lại đều là Issue có
   `priority:*`; hai bên đã xác nhận Sign-off.
