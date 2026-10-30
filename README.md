@@ -22,11 +22,18 @@ phép.
 
 ### Solution
 
+Các ý dưới đây có trong MVP, trừ hai ý ghi "Sau MVP".
+
 - Nhân viên tự gửi đơn nghỉ và xem số ngày phép còn lại, kể cả trên điện thoại.
 - Quản lý duyệt đơn ngay trên hệ thống và thấy lịch nghỉ của nhóm.
 - Hệ thống tự cộng phép hằng tháng, chuyển phép tồn, và tính số ngày nghỉ theo lịch làm việc và ngày lễ.
 - HR quản lý hồ sơ, hợp đồng và cơ cấu tổ chức ở một nơi, có lịch sử theo ngày hiệu lực.
+- Mỗi người chỉ thấy dữ liệu theo vai trò của mình; Quản lý chỉ thấy nhân viên của các phòng ban mình phụ trách.
 - Quản lý và HR xem báo cáo nhân sự, nghỉ phép và xuất ra bảng tính.
+- Sau MVP, chấm công: HR nhập file từ máy chấm công; hệ thống tính công, đi muộn, về sớm, làm thêm giờ, rồi HR chốt
+  bảng công tháng. Nhân viên xem bảng công, gửi giải trình và đăng ký làm thêm trên hệ thống.
+- Sau MVP, lương: hệ thống tính lương từ bảng công đã chốt, gồm phụ cấp, làm thêm, BHXH và thuế TNCN; nhân viên xem
+  phiếu lương. Báo cáo có thêm chấm công và chi phí lương.
 - Mọi tỷ lệ và mức theo luật lao động, BHXH, thuế là tham số có ngày hiệu lực; HR cập nhật khi luật đổi mà không cần
   sửa code.
 
@@ -34,9 +41,9 @@ phép.
 
 | Vai trò | Ai | Dùng hệ thống để |
 |---|---|---|
-| Nhân viên | Mọi người có tài khoản | Xem và sửa thông tin liên hệ của mình, gửi và hủy đơn nghỉ, xem số dư phép |
-| Quản lý | Trưởng phòng ban, tự có khi được bổ nhiệm; giám đốc là trưởng phòng ban gốc | Duyệt đơn của nhóm, xem hồ sơ và lịch nghỉ trong phạm vi, xem báo cáo |
-| HR | Người làm nhân sự, được gán vai trò | Quản lý hồ sơ, hợp đồng, cơ cấu, tài khoản, loại nghỉ, lịch làm việc; duyệt thay |
+| Nhân viên | Mọi người có tài khoản | Xem và sửa thông tin liên hệ của mình, gửi và hủy đơn nghỉ, xem số dư phép. Sau MVP: xem bảng công, gửi giải trình, đăng ký làm thêm, xem phiếu lương |
+| Quản lý | Trưởng phòng ban, tự có khi được bổ nhiệm; giám đốc là trưởng phòng ban gốc | Duyệt đơn của nhóm, xem hồ sơ và lịch nghỉ trong phạm vi, xem báo cáo. Sau MVP: duyệt giải trình và làm thêm, xem bảng công của nhóm, xem chi phí lương ở mức tổng hợp |
+| HR | Người làm nhân sự, được gán vai trò | Quản lý hồ sơ, hợp đồng, cơ cấu, tài khoản, loại nghỉ, lịch làm việc; duyệt thay. Sau MVP: nhập chấm công, chốt bảng công, tính và chốt bảng lương |
 
 Quyền chi tiết của từng thao tác nằm ở [permission matrix](docs/analysis/requirements.md#permission-matrix).
 
@@ -44,7 +51,8 @@ Quyền chi tiết của từng thao tác nằm ở [permission matrix](docs/ana
 
 ![Product mind map](docs/assets/mind-map.png)
 
-Sáu nhóm chức năng thuộc phạm vi M1 tới M5. Ngôi sao là thuộc MVP, nửa vòng tròn là một phần thuộc MVP.
+Bảy nhóm chức năng thuộc phạm vi M1 tới M5; nhãn ở góc mỗi nhóm là milestone. Ngôi sao là thuộc MVP, nửa vòng tròn là
+một phần thuộc MVP, không ký hiệu là làm sau MVP.
 
 ## Tech Stack
 
@@ -101,7 +109,7 @@ flowchart LR
 |---|---|
 | web | Giao diện; không giữ luật nghiệp vụ. Build thành file tĩnh, do `api` phục vụ cùng domain |
 | api | Xác thực, kiểm quyền, giữ luật nghiệp vụ, đọc ghi DB, xuất bảng tính |
-| jobs | Việc theo lịch: cộng phép tháng, chuyển và hủy phép tồn, khóa tài khoản sau ngày làm việc cuối |
+| jobs | Việc theo lịch: cộng phép tháng, chuyển và hủy phép tồn, khóa tài khoản sau ngày làm việc cuối; từ M3 thêm mở kỳ công |
 | db | Toàn bộ dữ liệu, nhật ký thao tác, refresh token, thông báo |
 
 Module backend chỉ phụ thuộc theo một chiều. Module bên trái được dùng module bên phải; chiều ngược lại đi qua interface
