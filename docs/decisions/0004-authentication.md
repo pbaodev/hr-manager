@@ -4,7 +4,7 @@
 - **Date:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án chọn JWT
 - **Drivers:** QA-003; BR-001 tới BR-006, BR-036; A-004
-- **Related:** ADR-0002, ADR-0003, ADR-0005, [requirements](../requirements.md#permission-matrix)
+- **Related:** ADR-0002, ADR-0003, ADR-0005, [requirements](../analysis/requirements.md#permission-matrix)
 
 ## Context
 

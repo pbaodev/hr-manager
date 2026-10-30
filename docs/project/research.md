@@ -3,10 +3,10 @@
 - **Status:** Accepted
 - **Updated:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án đọc lại; không có AI review
-- **Related:** [brief](brief.md) · [questions](questions.md) · [domain](domain.md)
+- **Related:** [brief](brief.md) · [questions](questions.md) · [domain](../analysis/domain.md)
 
 > Phase 1. Trang này phân rã bài toán quản lý nhân sự từ trên xuống thành module và năng lực, và liệt kê nguồn luật cho
-> Phase 2. Luật chi tiết như số ngày, tỷ lệ và công thức được ghi thành business rule ở [domain](domain.md), không ghi ở
+> Phase 2. Luật chi tiết như số ngày, tỷ lệ và công thức được ghi thành business rule ở [domain](../analysis/domain.md), không ghi ở
 > đây.
 
 ## Decomposition

@@ -15,7 +15,7 @@ assignees: ""
 
 ## Analysis delta
 
-- **Stories:** [US-xxx mới hoặc sửa trong `docs/stories.md`; đạt INVEST]
+- **Stories:** [US-xxx mới hoặc sửa trong `docs/analysis/stories.md`; đạt INVEST]
 - **Use cases:** [UC-xxx; bỏ nếu không có]
 - **Rules and edge cases:** [BR-xxx, EC-xxx mới hoặc sửa]
 - **Quality attributes:** [QA-xxx bị ảnh hưởng; bỏ nếu không có]
@@ -39,7 +39,7 @@ assignees: ""
 - [ ] Đã chạy phần liên quan của Design review checklist trong `docs/playbook/design.md`
 - [ ] Đã review nguội, khi feature đụng data, API hoặc kiến trúc
 - [ ] Traceability trong SPEC đã cập nhật, Status `Designed`
-- [ ] Ca thử tay `TC-xxx` đã thêm vào `docs/testing.md`, nếu story cần
+- [ ] Ca thử tay `TC-xxx` đã thêm vào `docs/build/testing.md`, nếu story cần
 
 ## Tasks
 

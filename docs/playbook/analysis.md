@@ -1,8 +1,8 @@
 # Analysis
 
 Analysis trả lời ba câu: ai dùng hệ thống và cần làm gì, luật nào phải luôn đúng, hệ thống cần tốt tới mức nào. Đây chưa
-phải lúc trả lời câu "làm bằng gì". Kết quả ghi ở [requirements](../requirements.md), [stories](../stories.md),
-[domain](../domain.md) và [UI flow](../ui-flow.md). Phase 2 làm phần này cho baseline; Feature loop ở Phase 4 làm lại
+phải lúc trả lời câu "làm bằng gì". Kết quả ghi ở [requirements](../analysis/requirements.md), [stories](../analysis/stories.md),
+[domain](../analysis/domain.md) và [UI flow](../analysis/ui-flow.md). Phase 2 làm phần này cho baseline; Feature loop ở Phase 4 làm lại
 cho từng feature, ở quy mô nhỏ hơn.
 
 ## Workflow

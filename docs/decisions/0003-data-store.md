@@ -4,7 +4,7 @@
 - **Date:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án đồng ý
 - **Drivers:** QA-001, QA-002, QA-005; luật dữ liệu có khoảng hiệu lực (BR-011, BR-016, BR-025, BR-093)
-- **Related:** ADR-0001, [domain](../domain.md#aggregates-and-invariants), [data design](../design/data.md)
+- **Related:** ADR-0001, [domain](../analysis/domain.md#aggregates-and-invariants), [data design](../design/data.md)
 
 ## Context
 

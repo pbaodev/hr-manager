@@ -4,7 +4,7 @@ Playbook chia dự án thành sáu phase và dùng bốn mũ cho một người.
 tài liệu theo loại dự án.
 
 Các file trong `docs/playbook/` là hướng dẫn và default, dùng chung cho mọi dự án. Dự án làm khác default ở đâu thì ghi
-vào [project.md](../project.md), không sửa ở đây. Các mẫu cần điền nằm ở phần còn lại của `docs/` và ở
+vào [project.md](../project/project.md), không sửa ở đây. Các mẫu cần điền nằm ở phần còn lại của `docs/` và ở
 [ARCHITECTURE.md](../../ARCHITECTURE.md).
 
 ## Principles

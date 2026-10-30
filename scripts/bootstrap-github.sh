@@ -76,20 +76,20 @@ if $WITH_BASELINE; then
 
   # Tiêu đề|phase|file hoặc kết quả
   DELIVERABLES=(
-    "Project setup|0 Setup|docs/project.md, board, branch protection"
-    "Brief và quyết định Go/Pivot/Stop|1 Discovery|docs/brief.md, docs/questions.md"
-    "Requirements: actor, phân quyền, use case, quality attribute|2 Analysis|docs/requirements.md"
-    "User stories và acceptance criteria|2 Analysis|docs/stories.md"
-    "Domain: glossary, entity, vòng đời, luật, edge case|2 Analysis|docs/domain.md"
-    "UI flow|2 Analysis|docs/ui-flow.md"
+    "Project setup|0 Setup|docs/project/project.md, board, branch protection"
+    "Brief và quyết định Go/Pivot/Stop|1 Discovery|docs/project/brief.md, docs/project/questions.md"
+    "Requirements: actor, phân quyền, use case, quality attribute|2 Analysis|docs/analysis/requirements.md"
+    "User stories và acceptance criteria|2 Analysis|docs/analysis/stories.md"
+    "Domain: glossary, entity, vòng đời, luật, edge case|2 Analysis|docs/analysis/domain.md"
+    "UI flow|2 Analysis|docs/analysis/ui-flow.md"
     "ADR: architecture style, stack, lưu trữ dữ liệu, auth, hosting|3 Design|docs/decisions/"
     "Architecture: Context, Container, drivers, cross-cutting|3 Design|ARCHITECTURE.md"
     "Data design và migration đầu tiên|3 Design|docs/design/data.md"
     "API design và contract|3 Design|docs/design/api.md, contracts/openapi.yaml"
     "Components và flows|3 Design|docs/design/components.md, docs/design/flows.md"
     "UI design|3 Design|docs/design/ui.md"
-    "SPEC v1.0 và conventions|3 Design|docs/SPEC.md, docs/conventions/"
-    "Setup, make check, CI và staging|3 Design|Makefile, .github/workflows/, docs/setup.md"
+    "SPEC v1.0 và conventions|3 Design|docs/build/SPEC.md, docs/build/conventions/"
+    "Setup, make check, CI và staging|3 Design|Makefile, .github/workflows/, docs/build/setup.md"
   )
   existing_titles=$(gh issue list --repo "$REPO" --state all --limit 1000 --json title --jq '.[].title')
   for row in "${DELIVERABLES[@]}"; do

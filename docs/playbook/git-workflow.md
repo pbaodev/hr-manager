@@ -2,7 +2,7 @@
 
 Chi tiết về nhánh, commit, PR, CI và phát hành. Tóm tắt và Definition of Done nằm ở
 [working-agreement.md](working-agreement.md). Áp dụng cho mọi thay đổi: code, tài liệu, cấu hình. Làm khác chỗ nào thì
-ghi vào [project.md](../project.md), không sửa file này.
+ghi vào [project.md](../project/project.md), không sửa file này.
 
 ## Strategy
 
@@ -159,6 +159,6 @@ Version theo [Semantic Versioning](https://semver.org/): `vMAJOR.MINOR.PATCH`.
    gh release create vX.Y.Z --generate-notes
    ```
 
-3. Ghi kết quả release gate vào Release test log trong [testing.md](../testing.md).
+3. Ghi kết quả release gate vào Release test log trong [testing.md](../build/testing.md).
 
 **Hotfix:** nhánh `fix/<issue>-...` từ `main`, đi đúng luồng PR, rồi phát hành với PATCH tăng một.

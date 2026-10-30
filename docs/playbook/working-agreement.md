@@ -1,7 +1,7 @@
 # Working agreement
 
 Cách làm việc mặc định cho một người cùng AI agent. Chi tiết về nhánh, commit, CI và phát hành nằm ở
-[git-workflow.md](git-workflow.md). Làm khác chỗ nào thì ghi vào [project.md](../project.md), không sửa file này. Các
+[git-workflow.md](git-workflow.md). Làm khác chỗ nào thì ghi vào [project.md](../project/project.md), không sửa file này. Các
 default nhẹ về thủ tục nhưng chặt về bằng chứng: khi agent viết code nhanh, chỗ dễ hỏng là thiết kế bị bỏ qua và kết quả
 không được thử thật.
 
@@ -15,7 +15,7 @@ không được thử thật.
 - **Baseline:** tài liệu Phase 0–3 là Issue trong milestone `Baseline`, tạo bằng `scripts/bootstrap-github.sh
   --baseline`. Một Issue tài liệu có thể đi qua nhiều PR.
 - **Labels:** `type:*` theo mẫu Issue; `priority:must`, `priority:should`, `priority:could` theo priority của story
-  trong [stories](../stories.md). Script bootstrap tạo sẵn các label này.
+  trong [stories](../analysis/stories.md). Script bootstrap tạo sẵn các label này.
 - Mỗi Task vừa một PR và xong trong một hoặc hai phiên làm việc.
 - Tối đa một Feature và hai Task ở trạng thái `In progress`. Nhánh sống tối đa vài ngày.
 - Cuối mỗi phiên làm việc, ghi điểm dừng và bước tiếp theo vào Issue đang làm. Thời gian làm dự án cá nhân thường rời
@@ -35,7 +35,7 @@ không được thử thật.
 - **Feature:** các story đạt DoR; Analysis delta và Design delta đã merge, hoặc Issue ghi "Không đổi thiết kế" kèm lý
   do.
 - **Task:** có mục tiêu, acceptance criteria kiểm được, link tới Feature và mục SPEC hoặc tài liệu thiết kế, non-goals.
-- **Bug:** có bước tái hiện, kết quả mong đợi, kết quả thực tế và mức S1–S4 theo [testing.md](../testing.md).
+- **Bug:** có bước tái hiện, kết quả mong đợi, kết quả thực tế và mức S1–S4 theo [testing.md](../build/testing.md).
 
 ## Branches and commits
 
@@ -80,7 +80,7 @@ không được thử thật.
 | Tài liệu | Link dùng được, sơ đồ render được, nội dung khớp với code |
 
 **Story** xong khi mọi Task đã merge, acceptance criteria đạt khi thử trên staging (hoặc local khi không có staging),
-và dòng của story trong Traceability của [SPEC](../SPEC.md) đã sang `Implemented`. Story chuyển sang `Tested` và
+và dòng của story trong Traceability của [SPEC](../build/SPEC.md) đã sang `Implemented`. Story chuyển sang `Tested` và
 `Accepted` ở release gate, theo [phases.md](phases.md).
 
 ## Other defaults
@@ -89,7 +89,7 @@ và dòng của story trong Traceability của [SPEC](../SPEC.md) đã sang `Imp
 - **Dependencies:** ghi lý do trong PR và khóa phiên bản. Thư viện ảnh hưởng tới kiến trúc, như framework, ORM, auth
   hay hosting, cần ADR.
 - **Flaky tests:** tính là bug; sửa trong ngày hoặc tách khỏi bộ test chính. Mỗi test dùng dữ liệu riêng.
-- **Production bugs:** mở Issue trong ngày, ghi mức S1–S4 theo [testing.md](../testing.md).
+- **Production bugs:** mở Issue trong ngày, ghi mức S1–S4 theo [testing.md](../build/testing.md).
 - **Releases:** mỗi milestone đóng bằng một tag SemVer và một mục trong [CHANGELOG](../../CHANGELOG.md), theo mục
   Releases trong [git-workflow.md](git-workflow.md).
 - **Changing this agreement:** sửa mục Deviations trong `project.md`, ghi lý do và ngày có hiệu lực.

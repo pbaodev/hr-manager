@@ -3,8 +3,8 @@
 - **Status:** Accepted
 - **Updated:** 2026-10-30
 
-> Điền ở Phase 0. Default nằm ở [working-agreement.md](playbook/working-agreement.md), [hats.md](playbook/hats.md) và
-> [phases.md](playbook/phases.md); file này chỉ ghi mục tiêu, nhịp làm việc, công cụ và những chỗ làm khác default.
+> Điền ở Phase 0. Default nằm ở [working-agreement.md](../playbook/working-agreement.md), [hats.md](../playbook/hats.md) và
+> [phases.md](../playbook/phases.md); file này chỉ ghi mục tiêu, nhịp làm việc, công cụ và những chỗ làm khác default.
 > Sửa qua PR, ghi lý do và ngày.
 
 ## Goals
@@ -12,7 +12,7 @@
 - **Product goal:** Giúp HR và quản lý ở doanh nghiệp nhỏ và vừa tại Việt Nam quản lý nhân viên, cơ cấu tổ chức, chấm
   công, nghỉ phép và lương trên một hệ thống, để nhân viên tự xem thông tin và gửi yêu cầu thay vì hỏi HR qua tin nhắn
   hay bảng tính.
-- **Project type:** Product, theo bảng Project types trong [playbook](playbook/README.md)
+- **Project type:** Product, theo bảng Project types trong [playbook](../playbook/README.md)
 - **Learning goals:**
   - Phân tích một domain có luật nghiệp vụ thật: phép năm, chấm công và lương, đối chiếu với Bộ luật Lao động; lập ma
     trận phân quyền cho nhiều vai trò.
@@ -30,7 +30,7 @@
 | Milestone | Target date | Scope |
 |---|---|---|
 | Baseline | 2026-11-12 | Phase 1–3: phân tích chi tiết M1–M5; thiết kế kiến trúc và dữ liệu cho M1–M5, API và giao diện chi tiết cho MVP |
-| MVP | — | Bản phát hành đầu tiên: 32 story có ✅ ở cột MVP trong [stories](stories.md#summary), gồm M1, M2 và phần báo cáo của M5 |
+| MVP | — | Bản phát hành đầu tiên: 32 story có ✅ ở cột MVP trong [stories](../analysis/stories.md#summary), gồm M1, M2 và phần báo cáo của M5 |
 | M1 | — | Walking skeleton: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; chạy trên staging |
 | M2 | — | Nghỉ phép |
 | M3 | — | Chấm công |
@@ -47,15 +47,15 @@
 | Agent access to tracker | `gh` CLI |
 | AI agent | Claude Code, Codex |
 | Diagrams | Mermaid trong Markdown |
-| Hosting | Render cho production, gói miễn phí cho staging ([ADR-0005](decisions/0005-hosting.md)) |
-| Secrets | `.env` ở local; biến môi trường của từng service trên Render ([ADR-0005](decisions/0005-hosting.md)) |
+| Hosting | Render cho production, gói miễn phí cho staging ([ADR-0005](../decisions/0005-hosting.md)) |
+| Secrets | `.env` ở local; biến môi trường của từng service trên Render ([ADR-0005](../decisions/0005-hosting.md)) |
 
 ## Deviations from default
 
 | Topic | Default | My choice | Reason | Effective |
 |---|---|---|---|---|
-| Phạm vi baseline | Baseline chỉ phân tích đủ cho các milestone đầu; module sau phân tích ở Feature loop ([phases.md](playbook/phases.md)) | Baseline phân tích chi tiết M1–M5. Thiết kế kiến trúc và dữ liệu cho M1–M5; API và giao diện chi tiết chỉ cho MVP | Muốn luyện phân tích và thiết kế toàn hệ thống trước khi code. Ngày 2026-10-30 thu hẹp phần thiết kế chi tiết về MVP, vì phạm vi đủ M1–M5 quá lớn cho mốc 2026-11-12 và cho bản phát hành đầu tiên | 2026-10-29; đổi 2026-10-30 |
-| Agent đọc secret | Agent không đọc, không sửa secret ([hats.md](playbook/hats.md)) | Agent được đọc `.env` ở local; vẫn không sửa secret và không chép giá trị secret vào code, test, log, prompt hay PR | Secret hiện chỉ là giá trị dev ở local; xem lại khi có production | 2026-10-29 |
+| Phạm vi baseline | Baseline chỉ phân tích đủ cho các milestone đầu; module sau phân tích ở Feature loop ([phases.md](../playbook/phases.md)) | Baseline phân tích chi tiết M1–M5. Thiết kế kiến trúc và dữ liệu cho M1–M5; API và giao diện chi tiết chỉ cho MVP | Muốn luyện phân tích và thiết kế toàn hệ thống trước khi code. Ngày 2026-10-30 thu hẹp phần thiết kế chi tiết về MVP, vì phạm vi đủ M1–M5 quá lớn cho mốc 2026-11-12 và cho bản phát hành đầu tiên | 2026-10-29; đổi 2026-10-30 |
+| Agent đọc secret | Agent không đọc, không sửa secret ([hats.md](../playbook/hats.md)) | Agent được đọc `.env` ở local; vẫn không sửa secret và không chép giá trị secret vào code, test, log, prompt hay PR | Secret hiện chỉ là giá trị dev ở local; xem lại khi có production | 2026-10-29 |
 
 ## Retro log
 

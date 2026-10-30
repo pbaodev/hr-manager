@@ -3,7 +3,7 @@
 - **Status:** Draft
 - **Updated:** 2026-10-30
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
-- **Related:** [requirements](../requirements.md) · [api](api.md) · [data](data.md) · [components](components.md) ·
+- **Related:** [requirements](../analysis/requirements.md) · [api](api.md) · [data](data.md) · [components](components.md) ·
   [design guide](../playbook/design.md)
 
 > Mỗi luồng chính và mỗi use case của MVP có một sequence diagram. Use case của M3, M4 có sơ đồ khi làm milestone đó,

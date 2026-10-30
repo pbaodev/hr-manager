@@ -4,12 +4,12 @@
 - **Updated:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
   người ngoài review
-- **Related:** [brief](brief.md) · [stories](stories.md) · [domain](domain.md) · [ui-flow](ui-flow.md) · [SPEC](SPEC.md) ·
-  [analysis guide](playbook/analysis.md)
+- **Related:** [brief](../project/brief.md) · [stories](stories.md) · [domain](domain.md) · [ui-flow](ui-flow.md) · [SPEC](../build/SPEC.md) ·
+  [analysis guide](../playbook/analysis.md)
 
 ## Goal
 
-Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](brief.md#scope) để thiết kế toàn hệ thống trước khi
+Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](../project/brief.md#scope) để thiết kế toàn hệ thống trước khi
 code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung cùng M1 tới M5. Bản phát hành đầu tiên là MVP,
 gồm các story có ✅ ở cột MVP trong [stories](stories.md#summary).
 
@@ -369,10 +369,10 @@ flowchart LR
 ## Quality attributes
 
 Mỗi dòng là một scenario có số đo. Importance và Difficulty xếp theo `H`, `M`, `L`; các dòng `H/H` và `H/M` là
-architecture driver trong [ARCHITECTURE.md](../ARCHITECTURE.md). Số đo phỏng đoán thì ghi `(assumption)`. Quy mô thiết kế
+architecture driver trong [ARCHITECTURE.md](../../ARCHITECTURE.md). Số đo phỏng đoán thì ghi `(assumption)`. Quy mô thiết kế
 là công ty tới 300 nhân viên (A-011).
 
-Cột Verify by ghi cách đo dự kiến. Test hay lần đo cụ thể ghi ở Traceability trong [SPEC](SPEC.md).
+Cột Verify by ghi cách đo dự kiến. Test hay lần đo cụ thể ghi ở Traceability trong [SPEC](../build/SPEC.md).
 
 | ID | Attribute | Scenario | Measure | Verify by | Importance / Difficulty |
 |---|---|---|---|---|---|
@@ -384,7 +384,7 @@ Cột Verify by ghi cách đo dự kiến. Test hay lần đo cụ thể ghi ở
 
 ## Non-goals
 
-Phạm vi ngoài baseline nằm ở mục Scope của [brief](brief.md#scope). Riêng M1 không làm:
+Phạm vi ngoài baseline nằm ở mục Scope của [brief](../project/brief.md#scope). Riêng M1 không làm:
 
 - Đăng nhập bằng tài khoản Google hoặc Microsoft: một công ty nhỏ chưa cần.
 - Tự đặt lại mật khẩu qua email: HR đặt lại mật khẩu, vì chưa chắc mọi nhân viên có email công việc.

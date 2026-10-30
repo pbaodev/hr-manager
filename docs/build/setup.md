@@ -2,7 +2,7 @@
 
 - **Status:** [Draft | Accepted | Superseded]
 - **Updated:** [YYYY-MM-DD]
-- **Related:** [SPEC](SPEC.md#commands) · [ARCHITECTURE](../ARCHITECTURE.md#deployment) · [runbook](runbook.md)
+- **Related:** [SPEC](SPEC.md#commands) · [ARCHITECTURE](../../ARCHITECTURE.md#deployment) · [runbook](../operations/runbook.md)
 
 > Điền ở Phase 3, khi cấu hình `make setup` và `make check`; cập nhật trong cùng PR với thay đổi môi trường. File này
 > giúp người mới, kể cả chính mình sau vài tháng, chạy được dự án trên máy sạch trong 30 phút. Lệnh hằng ngày nằm ở mục
@@ -28,7 +28,7 @@
 ## Environment variables
 
 Mỗi biến trong `.env.example` có một dòng. Secret không ghi giá trị ở đây; nơi lưu secret ghi ở mục Tools của
-[project.md](project.md).
+[project.md](../project/project.md).
 
 | Variable | Meaning | Example | Required |
 |---|---|---|---|

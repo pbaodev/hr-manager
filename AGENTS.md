@@ -8,15 +8,15 @@ các file được dẫn tới.
 
 | Task | Read |
 |---|---|
-| Mọi task | Task và Feature trên tracker; mục liên quan và Boundaries trong [SPEC](docs/SPEC.md); [project.md](docs/project.md); [setup](docs/setup.md) khi chưa chạy được dự án |
-| Sửa code | Modules và Traceability trong SPEC; tài liệu liên quan trong `docs/design/`; [conventions](docs/conventions/README.md); ADR liên quan trong [decisions](docs/decisions/README.md) |
-| Đụng luật nghiệp vụ hoặc dữ liệu | [domain.md](docs/domain.md), [data design](docs/design/data.md) |
+| Mọi task | [Index tài liệu](docs/README.md) khi chưa biết thông tin nằm ở đâu; Task và Feature trên tracker; mục liên quan và Boundaries trong [SPEC](docs/build/SPEC.md); [project.md](docs/project/project.md); [setup](docs/build/setup.md) khi chưa chạy được dự án |
+| Sửa code | Modules và Traceability trong SPEC; tài liệu liên quan trong `docs/design/`; [conventions](docs/build/conventions/README.md); ADR liên quan trong [decisions](docs/decisions/README.md) |
+| Đụng luật nghiệp vụ hoặc dữ liệu | [domain.md](docs/analysis/domain.md), [data design](docs/design/data.md) |
 | Đụng API hoặc contract | [API design](docs/design/api.md), `contracts/openapi.yaml` |
-| Đụng giao diện | [UI flow](docs/ui-flow.md), [UI design](docs/design/ui.md) |
-| Viết hoặc sửa test | Test strategy và Traceability trong SPEC; [testing](docs/testing.md) |
-| Deploy, phát hành hoặc sự cố | [runbook](docs/runbook.md), mục Releases trong [git-workflow.md](docs/playbook/git-workflow.md) |
+| Đụng giao diện | [UI flow](docs/analysis/ui-flow.md), [UI design](docs/design/ui.md) |
+| Viết hoặc sửa test | Test strategy và Traceability trong SPEC; [testing](docs/build/testing.md) |
+| Deploy, phát hành hoặc sự cố | [runbook](docs/operations/runbook.md), mục Releases trong [git-workflow.md](docs/playbook/git-workflow.md) |
 | Đụng prompt, model hoặc tính năng AI | [AI component](docs/design/ai.md), [AI components guide](docs/playbook/ai-components.md) |
-| Phân tích yêu cầu | [analysis guide](docs/playbook/analysis.md), [requirements](docs/requirements.md), [stories](docs/stories.md), [domain](docs/domain.md) |
+| Phân tích yêu cầu | [analysis guide](docs/playbook/analysis.md), [requirements](docs/analysis/requirements.md), [stories](docs/analysis/stories.md), [domain](docs/analysis/domain.md) |
 | Thiết kế | [design guide](docs/playbook/design.md), [ARCHITECTURE.md](ARCHITECTURE.md), [decisions](docs/decisions/README.md) |
 | Viết hoặc sửa tài liệu | [documents.md](docs/playbook/documents.md) |
 | Đổi hành vi đã chốt | [change-control.md](docs/playbook/change-control.md) |
@@ -37,12 +37,12 @@ Người giữ cả bốn mũ trong [hats.md](docs/playbook/hats.md); agent hỗ
 
 ## Commands
 
-Lệnh của dự án nằm ở mục Commands trong [SPEC](docs/SPEC.md#commands). Khi chưa cấu hình, `make setup` và `make check`
+Lệnh của dự án nằm ở mục Commands trong [SPEC](docs/build/SPEC.md#commands). Khi chưa cấu hình, `make setup` và `make check`
 in thông báo "chưa được cấu hình" và trả lỗi. Lúc đó repo chưa có lệnh nào kiểm được ứng dụng.
 
 ## Tasks
 
-Feature, Task, Bug, Spike và CR nằm trên tracker ghi ở mục Tools của [project.md](docs/project.md); default là GitHub
+Feature, Task, Bug, Spike và CR nằm trên tracker ghi ở mục Tools của [project.md](docs/project/project.md); default là GitHub
 Issues kèm board GitHub Projects. Việc chỉ nằm ở tracker: không tạo `tasks/todo.md` hay danh sách việc khác trong repo.
 Chỉ nhận Issue ở cột `Ready`. PR ghi `Closes #123` để task tự đóng khi merge; PR trung gian của Issue tài liệu ghi
 `Refs #123`. Tạo Issue thì gắn label `type:*` và `priority:*` theo
@@ -69,12 +69,12 @@ Skill của agent-skills có nơi lưu mặc định riêng. Trong repo này, th
 
 | Skill | Default của skill | Trong repo này |
 |---|---|---|
-| `/spec` | `SPEC.md` theo cấu trúc của skill | Story vào [stories](docs/stories.md); actor và quality attribute vào [requirements](docs/requirements.md); luật vào [domain](docs/domain.md); module và traceability vào [docs/SPEC.md](docs/SPEC.md), theo mẫu sẵn có |
+| `/spec` | `SPEC.md` theo cấu trúc của skill | Story vào [stories](docs/analysis/stories.md); actor và quality attribute vào [requirements](docs/analysis/requirements.md); luật vào [domain](docs/analysis/domain.md); module và traceability vào [docs/build/SPEC.md](docs/build/SPEC.md), theo mẫu sẵn có |
 | `/plan` | `tasks/plan.md`, `tasks/todo.md` | Issue Feature và Task trên tracker. Quyết định ghi ADR, câu hỏi ghi `questions.md`, thứ tự theo milestone |
 | `/build` | Lấy task kế tiếp trong `tasks/todo.md` | Làm task được giao, hoặc Task ở cột `Ready` trên tracker |
 | `/review` | Theo skill | Sửa hết phát hiện mức Critical và Required trước khi merge, theo [git-workflow.md](docs/playbook/git-workflow.md) |
 | `/ship` | Checklist của skill | Release gate ở Phase 4 trong [phases.md](docs/playbook/phases.md) và mục Releases trong git-workflow |
-| `/constraints` | `CONSTRAINTS.md` | Boundaries trong SPEC, quality attribute trong requirements, quy tắc code trong `docs/conventions/` |
+| `/constraints` | `CONSTRAINTS.md` | Boundaries trong SPEC, quality attribute trong requirements, quy tắc code trong `docs/build/conventions/` |
 | API and interface design | Theo skill | Kết quả ghi vào [API design](docs/design/api.md) và file contract |
 | Git workflow | Nhánh `feature/<desc>`, không squash | Nhánh `<type>/<issue>-<desc>`, squash merge, theo [git-workflow.md](docs/playbook/git-workflow.md) |
 | ADR | `docs/decisions/` | Theo [_template.md](docs/decisions/_template.md), thêm một dòng vào [index](docs/decisions/README.md) |

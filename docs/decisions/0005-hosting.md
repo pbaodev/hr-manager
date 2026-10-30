@@ -4,7 +4,7 @@
 - **Date:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án chọn PaaS kèm PostgreSQL managed, ngân sách $10–25 mỗi tháng
 - **Drivers:** QA-004, QA-005; ngân sách $10–25 mỗi tháng (Q-009); một người vận hành
-- **Related:** ADR-0001, ADR-0003, ADR-0004, Q-009, [research](../research.md#legal-sources)
+- **Related:** ADR-0001, ADR-0003, ADR-0004, Q-009, [research](../project/research.md#legal-sources)
 
 ## Context
 

@@ -10,7 +10,7 @@ assignees: ""
 
 ## Impact
 
-- **Severity:** [S1 | S2 | S3 | S4], theo Defect severity trong `docs/testing.md`. S1 là sự cố Severe ở Phase 5
+- **Severity:** [S1 | S2 | S3 | S4], theo Defect severity trong `docs/build/testing.md`. S1 là sự cố Severe ở Phase 5
 - **Who and what:** [ai gặp lỗi, việc gì bị ảnh hưởng]
 
 ## Steps to reproduce

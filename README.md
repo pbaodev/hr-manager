@@ -18,7 +18,7 @@ ngày phép đã dùng, nên cả nhân viên lẫn HR đều không biết mỗ
 phép.
 
 Đây là nhận định của chủ dự án, chưa được công ty xác nhận. Các câu cần hỏi công ty nằm ở
-[questions](docs/questions.md).
+[questions](docs/project/questions.md).
 
 ### Solution
 
@@ -38,7 +38,7 @@ phép.
 | Quản lý | Trưởng phòng ban, tự có khi được bổ nhiệm; giám đốc là trưởng phòng ban gốc | Duyệt đơn của nhóm, xem hồ sơ và lịch nghỉ trong phạm vi, xem báo cáo |
 | HR | Người làm nhân sự, được gán vai trò | Quản lý hồ sơ, hợp đồng, cơ cấu, tài khoản, loại nghỉ, lịch làm việc; duyệt thay |
 
-Quyền chi tiết của từng thao tác nằm ở [permission matrix](docs/requirements.md#permission-matrix).
+Quyền chi tiết của từng thao tác nằm ở [permission matrix](docs/analysis/requirements.md#permission-matrix).
 
 ## Product Mind Map
 
@@ -80,7 +80,7 @@ hai milestone có nhiều rủi ro về luật là chấm công và lương.
 | | Cơ cấu nhân sự, chấm công, chi phí lương | Sau |
 | M6 AI | Hướng mở rộng sau M1 tới M5 | Sau |
 
-Danh sách story đầy đủ ở [stories](docs/stories.md#summary).
+Danh sách story đầy đủ ở [stories](docs/analysis/stories.md#summary).
 
 ## System Architecture
 
@@ -125,7 +125,7 @@ flowchart LR
 
 | Môi trường | Hạ tầng | Deploy |
 |---|---|---|
-| local | Máy cá nhân | `make setup` theo [setup](docs/setup.md) |
+| local | Máy cá nhân | `make setup` theo [setup](docs/build/setup.md) |
 | staging | Render gói miễn phí, Neon PostgreSQL gói miễn phí, dữ liệu giả | Tự động khi merge vào `main` |
 | production | Render web service Starter, Render Postgres, Render cron, vùng Singapore | Chạy tay sau release gate |
 
@@ -133,7 +133,8 @@ Chi tiết ở [ARCHITECTURE.md](ARCHITECTURE.md): driver, cross-cutting, trust 
 
 ## Project Structure
 
-Code backend và frontend sẽ được thêm khi dựng khung dự án (Issue #14).
+Code backend và frontend sẽ được thêm khi dựng khung dự án (Issue #14). Danh mục đầy đủ của tài liệu ở
+[docs/README.md](docs/README.md).
 
 ```text
 ARCHITECTURE.md        C4 Context và Container, driver, cross-cutting, threat, deployment
@@ -141,15 +142,13 @@ AGENTS.md              Hướng dẫn cho AI agent
 contracts/
   openapi.yaml         Contract API của MVP
 docs/
-  brief.md             Bài toán, giải pháp, phạm vi, rủi ro
-  requirements.md      Actor, ma trận quyền, use case, quality attribute
-  stories.md           User story và acceptance criteria
-  invest.md            Rubric INVEST cho story MVP
-  domain.md            Thuật ngữ, entity, vòng đời, luật nghiệp vụ, edge case
-  ui-flow.md           Màn hình và luồng
-  questions.md         Câu hỏi và giả định chờ công ty xác nhận
-  decisions/           ADR
+  README.md            Index: tài liệu nào trả lời câu hỏi nào, trạng thái ra sao
+  project/             Dự án, bài toán, nghiên cứu, câu hỏi chờ công ty xác nhận
+  analysis/            Requirements, user story, INVEST, luật nghiệp vụ, màn hình
   design/              Component, data, schema DBML, API, flow, UI
+  decisions/           ADR
+  build/               SPEC, setup, testing, conventions
+  operations/          Runbook
   assets/              Ảnh: mind map, use case, information architecture, prototype
   playbook/            Quy trình làm việc của dự án
 scripts/               Script dựng GitHub
@@ -160,8 +159,8 @@ scripts/               Script dựng GitHub
 
 ### Requirements
 
-[Requirements](docs/requirements.md) có 3 actor người, ma trận quyền, 12 use case và 5 quality attribute.
-[Domain](docs/domain.md) có 141 luật nghiệp vụ và 91 edge case, mỗi luật có mã `BR-xxx` để truy tới story và test.
+[Requirements](docs/analysis/requirements.md) có 3 actor người, ma trận quyền, 12 use case và 5 quality attribute.
+[Domain](docs/analysis/domain.md) có 141 luật nghiệp vụ và 91 edge case, mỗi luật có mã `BR-xxx` để truy tới story và test.
 
 **Use case diagram**
 
@@ -180,7 +179,7 @@ Có 72 story, mỗi story kèm acceptance criteria dạng Given, When, Then. 32 
 | Small | Làm xong backend, frontend và test trong một PR, khoảng 3 ngày công | 29 / 32 |
 | Testable | Mọi AC kiểm được | 32 / 32 |
 
-27 story đạt đủ sáu tiêu chí. Năm story còn lại và cách sửa đề xuất nằm ở [INVEST review](docs/invest.md).
+27 story đạt đủ sáu tiêu chí. Năm story còn lại và cách sửa đề xuất nằm ở [INVEST review](docs/analysis/invest.md).
 
 ### Information Architecture
 
@@ -188,7 +187,7 @@ Có 72 story, mỗi story kèm acceptance criteria dạng Given, When, Then. 32 
 
 ![Information architecture](docs/assets/information-architecture.png)
 
-Luồng giữa các màn hình ở [UI flow](docs/ui-flow.md); design system, trạng thái màn hình và accessibility ở
+Luồng giữa các màn hình ở [UI flow](docs/analysis/ui-flow.md); design system, trạng thái màn hình và accessibility ở
 [UI design](docs/design/ui.md).
 
 ### UI/UX Prototype

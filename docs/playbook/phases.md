@@ -4,7 +4,7 @@ Sáu phase từ setup tới vận hành, dùng chung một khung: Goal, Input, O
 Variations. Bảng tóm tắt nằm ở [playbook/README.md](README.md).
 
 - **Default:** con số và thứ tự trên trang này là mặc định cho một người làm dự án vừa để học vừa để chạy thật. Dự án
-  chỉ ghi vào [project.md](../project.md) những chỗ làm khác.
+  chỉ ghi vào [project.md](../project/project.md) những chỗ làm khác.
 - **Hat** là mũ trong [hats.md](hats.md): Analyst, Architect, Developer, Ops. Mỗi lúc chỉ đội một mũ.
 - **Baseline:** Phase 0–3 làm một lần để có yêu cầu, domain và thiết kế đã `Accepted`. Từ Phase 4, feature mới đi
   theo Feature loop; thay đổi những gì đã chốt đi theo [change-control.md](change-control.md).
@@ -18,7 +18,7 @@ Variations. Bảng tóm tắt nằm ở [playbook/README.md](README.md).
 **Goal:** Có repo, tracker và nhịp làm việc dùng được trước khi viết tài liệu đầu tiên.
 
 - **Input:** Template này, ý tưởng ban đầu.
-- **Output:** [project.md](../project.md), label và branch protection cho `main`, milestone `Baseline` cùng Issue cho
+- **Output:** [project.md](../project/project.md), label và branch protection cho `main`, milestone `Baseline` cùng Issue cho
   deliverable Phase 0–3, board trên GitHub Projects.
 - **Hat:** Ops.
 
@@ -49,7 +49,7 @@ Variations. Bảng tóm tắt nằm ở [playbook/README.md](README.md).
 **Goal:** Hiểu đúng bài toán, thử phần rủi ro nhất và quyết định có đáng làm không.
 
 - **Input:** Ý tưởng; người dùng tiềm năng, kể cả chính mình.
-- **Output:** [brief](../brief.md), [questions](../questions.md), Issue Spike cho rủi ro lớn, ADR khi spike dẫn tới
+- **Output:** [brief](../project/brief.md), [questions](../project/questions.md), Issue Spike cho rủi ro lớn, ADR khi spike dẫn tới
   quyết định khó đảo ngược.
 - **Hat:** Analyst.
 
@@ -87,8 +87,8 @@ Variations. Bảng tóm tắt nằm ở [playbook/README.md](README.md).
 **Goal:** Mô tả hệ thống phải làm gì, theo luật nào và tốt tới mức nào, đủ rõ để thiết kế mà chưa chọn công nghệ.
 
 - **Input:** Brief, questions, kết quả spike.
-- **Output:** [requirements](../requirements.md), [stories](../stories.md), [domain](../domain.md),
-  [UI flow](../ui-flow.md) khi có giao diện, `questions.md` đã cập nhật.
+- **Output:** [requirements](../analysis/requirements.md), [stories](../analysis/stories.md), [domain](../analysis/domain.md),
+  [UI flow](../analysis/ui-flow.md) khi có giao diện, `questions.md` đã cập nhật.
 - **Hat:** Analyst.
 
 **Exit criteria**
@@ -143,8 +143,8 @@ ngược, và chuẩn bị đủ để code theo slice.
 - **Output:** [ARCHITECTURE.md](../../ARCHITECTURE.md); [components](../design/components.md),
   [data](../design/data.md), [api](../design/api.md) và `contracts/openapi.yaml`, [flows](../design/flows.md),
   [ui](../design/ui.md) khi có giao diện, [ai](../design/ai.md) khi có tính năng AI; [ADR](../decisions/README.md);
-  [SPEC](../SPEC.md); [conventions](../conventions/README.md); `make setup`, `make check`, CI, staging;
-  [setup](../setup.md); khung [testing](../testing.md).
+  [SPEC](../build/SPEC.md); [conventions](../build/conventions/README.md); `make setup`, `make check`, CI, staging;
+  [setup](../build/setup.md); khung [testing](../build/testing.md).
 - **Hat:** Architect.
 
 **Exit criteria**
@@ -155,7 +155,7 @@ ngược, và chuẩn bị đủ để code theo slice.
 - [ ] Migration đầu tiên chạy được trên DB trống; seed chạy được.
 - [ ] SPEC v1.0 `Accepted`; Traceability phủ mọi story `Must` và mọi architecture driver, các dòng ở Status `Designed`.
 - [ ] `make check` chạy được và là một job trong CI.
-- [ ] Clone mới trên máy sạch hoặc container, chạy được theo [setup](../setup.md) trong 30 phút; ghi vào mục Verified.
+- [ ] Clone mới trên máy sạch hoặc container, chạy được theo [setup](../build/setup.md) trong 30 phút; ghi vào mục Verified.
 - [ ] Staging deploy được một bản rỗng.
 
 **Activities**
@@ -179,10 +179,10 @@ Cách làm từng bước nằm ở [design.md](design.md).
     chính vào mục Threats của ARCHITECTURE.
 11. Có tính năng AI: thiết kế như một component theo [ai-components.md](ai-components.md).
 12. Viết SPEC: module map, Traceability, lệnh, test strategy và boundaries cho agent.
-13. Cấu hình `make setup`, `make check` và CI theo stack; viết [setup.md](../setup.md) và thử trên máy sạch. Thêm job
+13. Cấu hình `make setup`, `make check` và CI theo stack; viết [setup.md](../build/setup.md) và thử trên máy sạch. Thêm job
     CI mới vào required status checks bằng `scripts/bootstrap-github.sh --protect`, và bỏ check của job đã xóa; nếu
     không, PR sẽ chờ một check không bao giờ chạy. Dựng staging và pipeline deploy.
-14. Tạo khung [testing.md](../testing.md): môi trường và dữ liệu test. Ca thủ công thêm dần ở Feature loop.
+14. Tạo khung [testing.md](../build/testing.md): môi trường và dữ liệu test. Ca thủ công thêm dần ở Feature loop.
 15. Ghi vào conventions những quy tắc mà linter và formatter không tự kiểm được.
 16. Review nguội và AI phản biện theo Design review checklist; sửa xong thì chuyển sang `Accepted`.
 
@@ -209,7 +209,7 @@ bằng một bản phát hành.
 
 - **Input:** Baseline: requirements, stories, domain, tài liệu thiết kế và SPEC v1.0.
 - **Output:** Code đã merge, tài liệu cập nhật cùng code, ca thủ công và Release test log trong
-  [testing](../testing.md), bản phát hành có tag, [CHANGELOG](../../CHANGELOG.md).
+  [testing](../build/testing.md), bản phát hành có tag, [CHANGELOG](../../CHANGELOG.md).
 - **Hat:** Developer; đổi sang Analyst hoặc Architect ở Feature loop, sang Ops khi phát hành.
 
 **Exit criteria (release gate)**
@@ -239,7 +239,7 @@ bằng một bản phát hành.
 3. **Review delta:** chạy phần liên quan của Analysis checklist và Design review checklist. Feature đụng data, API hoặc
    kiến trúc thì review nguội.
 4. Cập nhật Traceability trong SPEC với Status `Designed`; story cần thử tay thì thêm ca `TC-xxx` vào
-   [testing.md](../testing.md). Chia Task.
+   [testing.md](../build/testing.md). Chia Task.
 5. Làm từng Task theo Task loop. Tài liệu ở bước 1–2 merge trong PR đầu tiên của feature hoặc một PR riêng trước đó.
 
 Feature chỉ đụng một module và không đổi data, API hay luật thì ghi "Không đổi thiết kế" kèm lý do trong Issue, rồi
@@ -262,14 +262,14 @@ ADR nếu cần) trong cùng PR và ghi rõ trong mục Design impact. Không đ
 **Milestone close**
 
 1. Mọi task đã merge; staging chạy bản mới nhất.
-2. Chạy test tự động và ca thủ công trong [testing.md](../testing.md) trên staging; story pass chuyển Traceability
+2. Chạy test tự động và ca thủ công trong [testing.md](../build/testing.md) trên staging; story pass chuyển Traceability
    sang `Tested`.
 3. Nghiệm thu với mũ Analyst theo acceptance criteria; story đạt chuyển sang `Accepted`. Lỗi mở
    [Issue Bug](../../.github/ISSUE_TEMPLATE/bug.md) kèm mức S1–S4.
 4. Khi có người dùng khác: cho 1–3 người thử theo kịch bản; góp ý ghi thành Issue.
 5. Release gate theo Exit criteria ở trên; ghi kết quả vào Release test log.
 6. Phát hành theo mục Releases trong [git-workflow.md](git-workflow.md): backup, cập nhật CHANGELOG, deploy, smoke
-   test, gắn tag. Có sự cố thì rollback theo [runbook](../runbook.md).
+   test, gắn tag. Có sự cố thì rollback theo [runbook](../operations/runbook.md).
 7. Retro: ghi vào Retro log của `project.md` điều nên giữ, nên bỏ, nên thử và điều học được về thiết kế.
 
 **Guidelines**
@@ -285,7 +285,7 @@ ADR nếu cần) trong cùng PR và ghi rõ trong mục Design impact. Không đ
 - Có deadline cố định: chia milestone thành iteration 1–2 tuần, ước lượng Task trên tracker. Giữ tỷ lệ gợi ý: phân
   tích và thiết kế khoảng 1/3 thời gian, code 1/3, test và phát hành phần còn lại.
 - Client delivery: milestone cuối phát hành `vX.Y.Z-rc.N` lên staging để bên nhận chạy ca nghiệm thu. Story chỉ sang
-  `Accepted` khi bên nhận xác nhận Acceptance sign-off trong [testing.md](../testing.md). Sau bản chính thức, làm
+  `Accepted` khi bên nhận xác nhận Acceptance sign-off trong [testing.md](../build/testing.md). Sau bản chính thức, làm
   Handover ở Phase 5.
 
 ## Phase 5 — Operate & Evolve
@@ -293,7 +293,7 @@ ADR nếu cần) trong cùng PR và ghi rõ trong mục Design impact. Không đ
 **Goal:** Giữ hệ thống chạy, phát hiện lỗi sớm, giữ thiết kế khớp với code và rút kinh nghiệm.
 
 - **Input:** Bản production đầu tiên. Phase này chạy song song với Phase 4; phần setup chuẩn bị từ Phase 3.
-- **Output:** Error tracking, uptime check, backup, [runbook](../runbook.md), [user guide](../user-guide.md) khi có
+- **Output:** Error tracking, uptime check, backup, [runbook](../operations/runbook.md), [user guide](../user-guide.md) khi có
   người dùng khác, [handover](../handover.md) khi Client delivery, ADR mới hoặc `Superseded`, retro.
 - **Hat:** Ops; Architect cho việc kiểm design drift.
 
@@ -311,7 +311,7 @@ Không có, đây là vòng lặp. Trước bản production đầu tiên:
 1. Error tracking và log. Log không chứa dữ liệu nhạy cảm hay secret.
 2. Uptime check, cảnh báo về email hoặc điện thoại.
 3. Backup tự động cho dữ liệu; theo dõi chi phí hạ tầng và dịch vụ trả phí.
-4. Runbook ngắn theo [mẫu](../runbook.md): deploy, rollback, khôi phục backup, rotate key.
+4. Runbook ngắn theo [mẫu](../operations/runbook.md): deploy, rollback, khôi phục backup, rotate key.
 
 **Recurring**
 
@@ -326,7 +326,7 @@ Không có, đây là vòng lặp. Trước bản production đầu tiên:
 
 **Incident**
 
-- Severe, tức S1 trong [testing.md](../testing.md) (production sập, mất hoặc lộ dữ liệu, sai tiền hoặc sai quyền):
+- Severe, tức S1 trong [testing.md](../build/testing.md) (production sập, mất hoặc lộ dữ liệu, sai tiền hoặc sai quyền):
   giảm ảnh hưởng trước bằng rollback, tắt tính năng hoặc thu hồi key; tìm nguyên nhân sau. Trong 48 giờ, viết
   postmortem ngắn vào Issue: chuyện gì xảy ra, vì sao, sửa gì để không lặp lại. Nguyên nhân nằm ở thiết kế thì cập
   nhật thiết kế hoặc viết ADR.

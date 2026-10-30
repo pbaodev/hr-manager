@@ -4,8 +4,8 @@
 - **Updated:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
   người ngoài review
-- **Related:** [requirements](requirements.md) · [questions](questions.md) · [research](research.md) ·
-  [data design](design/data.md) · [analysis guide](playbook/analysis.md)
+- **Related:** [requirements](requirements.md) · [questions](../project/questions.md) · [research](../project/research.md) ·
+  [data design](../design/data.md) · [analysis guide](../playbook/analysis.md)
 
 Bản hiện tại có đủ phần dùng chung và M1 tới M5.
 
@@ -444,7 +444,7 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 |---|---|---|---|---|
 | BR-007 | Tạo hoặc sửa cơ cấu tổ chức | Cơ cấu là một cây nhiều cấp có đúng một phòng ban gốc. Phòng ban gốc không có phòng ban cha, không bị chuyển, không bị giải thể; chỉ đổi tên được | Chủ dự án, 2026-10-30 | Confirmed |
 | BR-008 | Đổi phòng ban cha của P thành Q từ ngày D | Từ chối nếu tại D, Q là P hoặc Q nằm trong nhánh con của P | Hệ quả của BR-007 | Confirmed |
-| BR-009 | Đổi tên hoặc phòng ban cha của một phòng ban với ngày hiệu lực D | Thay đổi có tác dụng từ D; cơ cấu tại một ngày bất kỳ dùng giá trị có hiệu lực tại ngày đó | Chủ dự án, mục tiêu học trong [project](project.md) | Confirmed |
+| BR-009 | Đổi tên hoặc phòng ban cha của một phòng ban với ngày hiệu lực D | Thay đổi có tác dụng từ D; cơ cấu tại một ngày bất kỳ dùng giá trị có hiệu lực tại ngày đó | Chủ dự án, mục tiêu học trong [project](../project/project.md) | Confirmed |
 | BR-010 | Giải thể phòng ban P từ ngày D | Từ chối nếu từ D trở đi còn nhân viên thuộc P, kể cả do thay đổi công tác đã ghi cho tương lai, hoặc còn phòng ban con của P đang hoạt động | A-003 | Assumed |
 | BR-011 | Bổ nhiệm trưởng cho phòng ban P trong một khoảng hiệu lực | Mỗi ngày P có tối đa một trưởng. Người được bổ nhiệm phải đang làm việc trong suốt khoảng đó. Một người được làm trưởng nhiều phòng ban; trưởng không bắt buộc thuộc P | A-003 | Assumed |
 | BR-012 | Xác định quản lý trực tiếp của nhân viên X tại ngày D | Lấy trưởng của phòng ban X thuộc tại D. Nếu phòng ban đó không có trưởng, hoặc trưởng chính là X, thì đi lên phòng ban cha gần nhất có trưởng khác X. Không tìm được ai thì X không có quản lý trực tiếp | Chủ dự án, 2026-10-30 | Confirmed |
@@ -645,7 +645,7 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 ### Parameters
 
 Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP chưa được đối chiếu văn bản gốc, xem
-[questions](questions.md). Giá trị không có nguồn luật là đề xuất của agent, chờ HR công ty xác nhận. Từ M4, các giá trị
+[questions](../project/questions.md). Giá trị không có nguồn luật là đề xuất của agent, chờ HR công ty xác nhận. Từ M4, các giá trị
 đánh dấu "tham số lương" có ngày hiệu lực và HR cập nhật được (BR-123); giá trị ghi ở đây là giá trị ban đầu, chờ đối
 chiếu theo Q-008 và Q-023.
 

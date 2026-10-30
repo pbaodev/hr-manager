@@ -4,8 +4,8 @@
 - **Updated:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
   người ngoài review
-- **Related:** [requirements](requirements.md) · [domain](domain.md) · [ui-flow](ui-flow.md) · [SPEC](SPEC.md) ·
-  [analysis guide](playbook/analysis.md)
+- **Related:** [requirements](requirements.md) · [domain](domain.md) · [ui-flow](ui-flow.md) · [SPEC](../build/SPEC.md) ·
+  [analysis guide](../playbook/analysis.md)
 
 ## Summary
 

@@ -4,13 +4,13 @@
 - **Version:** [v1.0]
 - **Updated:** [YYYY-MM-DD]
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
-- **Related:** [requirements](requirements.md) · [stories](stories.md) · [ARCHITECTURE](../ARCHITECTURE.md) ·
-  [components](design/components.md) · [testing](testing.md)
+- **Related:** [requirements](../analysis/requirements.md) · [stories](../analysis/stories.md) · [ARCHITECTURE](../../ARCHITECTURE.md) ·
+  [components](../design/components.md) · [testing](testing.md)
 
 > SPEC là tài liệu chính khi làm task: người và agent đọc mục liên quan trước khi sửa code. SPEC nối yêu cầu với thiết
 > kế và code: module nào làm gì, mỗi yêu cầu được thiết kế ở đâu, hiện thực ở đâu và kiểm bằng gì. Hành vi nằm ở
 > stories, requirements và domain; thiết kế nằm ở ARCHITECTURE và `design/`; lý do nằm ở ADR. Sau khi `Accepted`, thay
-> đổi đi theo [change-control.md](playbook/change-control.md) và được ghi vào Changelog. Dòng in nghiêng là ví dụ, xóa
+> đổi đi theo [change-control.md](../playbook/change-control.md) và được ghi vào Changelog. Dòng in nghiêng là ví dụ, xóa
 > khi điền.
 
 ## Overview
@@ -19,7 +19,7 @@
 
 ## Modules
 
-Cấu trúc và dependency rule nằm ở [components](design/components.md).
+Cấu trúc và dependency rule nằm ở [components](../design/components.md).
 
 | Module | Responsibility | Path | Container | Depends on |
 |---|---|---|---|---|
@@ -28,7 +28,7 @@ Cấu trúc và dependency rule nằm ở [components](design/components.md).
 
 ## Interfaces
 
-Ghi nơi lưu contract thay vì chép lại nội dung. Quy ước chung nằm ở [api](design/api.md).
+Ghi nơi lưu contract thay vì chép lại nội dung. Quy ước chung nằm ở [api](../design/api.md).
 
 | Interface | Provider → Consumer | Contract |
 |---|---|---|
@@ -38,8 +38,8 @@ Ghi nơi lưu contract thay vì chép lại nội dung. Quy ước chung nằm �
 ## Traceability
 
 Mỗi story `Must` và mỗi architecture driver có một dòng. Bảng này tổng hợp liên kết; nguồn của từng liên kết nằm ở
-tài liệu tương ứng: màn hình ở [UI flow](ui-flow.md), operation ở [api](design/api.md), luật giữ ở tầng dữ liệu ở
-[data](design/data.md). Hai nơi nói khác nhau thì sửa nguồn trước, rồi sửa bảng. Dòng có link tới test chưa có nghĩa
+tài liệu tương ứng: màn hình ở [UI flow](../analysis/ui-flow.md), operation ở [api](../design/api.md), luật giữ ở tầng dữ liệu ở
+[data](../design/data.md). Hai nơi nói khác nhau thì sửa nguồn trước, rồi sửa bảng. Dòng có link tới test chưa có nghĩa
 là test đó đã chạy trên bản hiện tại; Status mới nói điều đó.
 
 | Requirement | Screens | API | Data | Modules | Automated tests | Manual tests | Status |
@@ -49,7 +49,7 @@ là test đó đã chạy trên bản hiện tại; Status mới nói điều đ
 
 **Status:** `Designed` (Phase 3 hoặc Design delta) → `Implemented` (code đã merge, theo Definition of Done của story)
 → `Tested` (test liên quan pass trên staging khi đóng milestone) → `Accepted` (đã nghiệm thu; Client delivery: bên
-nhận đã xác nhận). Mốc chuyển trạng thái nằm ở [phases.md](playbook/phases.md). Cập nhật Status và cột test là việc
+nhận đã xác nhận). Mốc chuyển trạng thái nằm ở [phases.md](../playbook/phases.md). Cập nhật Status và cột test là việc
 thường ngày, không cần CR hay tăng version của SPEC.
 
 ## Commands
@@ -70,7 +70,7 @@ thường ngày, không cần CR hay tăng version của SPEC.
 - **Contract:** [cách kiểm API khớp với contract]
 - **E2E:** [luồng chính chạy trên staging]
 - **Manual:** ca không tự động hóa được và ca nghiệm thu, ghi ở [testing](testing.md)
-- **Eval-lite:** [khi có tính năng AI, theo [ai](design/ai.md)]
+- **Eval-lite:** [khi có tính năng AI, theo [ai](../design/ai.md)]
 
 ## Boundaries
 

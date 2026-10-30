@@ -3,7 +3,7 @@
 - **Status:** [Draft | Accepted | Superseded]
 - **Updated:** [YYYY-MM-DD]
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
-- **Related:** [ARCHITECTURE](../../ARCHITECTURE.md) · [requirements](../requirements.md) ·
+- **Related:** [ARCHITECTURE](../../ARCHITECTURE.md) · [requirements](../analysis/requirements.md) ·
   [AI components guide](../playbook/ai-components.md)
 
 > Điền khi sản phẩm có tính năng AI; nếu không thì bỏ file. Component AI được thiết kế như mọi component khác: có

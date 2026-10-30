@@ -4,7 +4,7 @@
 - **Date:** 2026-10-30
 - **Reviewed:** 2026-10-30: chủ dự án chọn phương án
 - **Drivers:** QA-002, QA-003, QA-004; một người làm cùng coding agent; M6 có tính năng AI
-- **Related:** ADR-0001, [project](../project.md#goals)
+- **Related:** ADR-0001, [project](../project/project.md#goals)
 
 ## Context
 
