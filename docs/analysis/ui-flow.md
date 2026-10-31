@@ -1,14 +1,15 @@
 # UI flow: hr-manager
 
 - **Status:** Accepted
-- **Updated:** 2026-10-30
+- **Updated:** 2026-10-31
 - **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
   người ngoài review
 - **Related:** [requirements](requirements.md) · [stories](stories.md) · [domain](domain.md) · [UI design](../design/ui.md)
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
 được kiểm ở backend theo Permission matrix trong [requirements](requirements.md#permission-matrix). Bản hiện tại có
-information architecture và các màn hình của M1 tới M5.
+information architecture và các màn hình của M1 tới M5, cùng phần AI Leave Coordinator của M6. Phần AI của một màn
+hình ghi trong dòng **AI (M6)**; khi AI không dùng được, màn hình chạy như không có dòng đó (BR-162).
 
 ## Information architecture
 
@@ -37,6 +38,7 @@ flowchart TD
   ADM --> ALW["Loại phụ cấp<br/>SCR-033"]
   ADM --> PPAR["Tham số lương<br/>SCR-034"]
   ADM --> RET["Dữ liệu hết hạn lưu<br/>SCR-046"]
+  ADM --> LRS["Lý do nghỉ<br/>SCR-047"]
   HOME --> APR["Đơn chờ duyệt<br/>SCR-021"]
   HOME --> LV["Nghỉ phép"]
   LV --> LVME["Nghỉ phép của tôi<br/>SCR-019"]
@@ -73,7 +75,7 @@ flowchart TD
 | Chấm công | ✅ chỉ bảng công của mình | ✅ thêm bảng công của nhóm | ✅ thêm nhập file và chốt bảng công | SCR-027 tới SCR-032 |
 | Lương | ✅ chỉ phiếu lương của mình | ✅ chỉ phiếu lương của mình | ✅ thêm bảng lương | SCR-037 tới SCR-039 |
 | Báo cáo | ❌ | ✅ chỉ phạm vi; chi phí lương chỉ số tổng hợp | ✅ | SCR-040 tới SCR-045 |
-| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034, SCR-046 |
+| Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034, SCR-046, SCR-047 |
 
 Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem không có quyền thì không hiện.
 
@@ -121,17 +123,24 @@ flowchart LR
   mine["SCR-019 Nghỉ phép của tôi"] --> form["SCR-020 Gửi đơn nghỉ"]
   form -->|"gửi"| mine
   form -->|"thiếu phép, chồng đơn"| form
-  home["SCR-003 Trang chủ"] -->|"thông báo đơn mới"| queue["SCR-021 Đơn chờ duyệt"]
+  home["SCR-003 Trang chủ"] -->|"thông báo đơn mới, nhắc"| queue["SCR-021 Đơn chờ duyệt"]
   queue -->|"duyệt hoặc từ chối"| queue
+  queue -->|"đề nghị đổi ngày"| mine
+  mine -->|"không đồng ý"| queue
   queue --> team["SCR-022 Lịch nghỉ của nhóm"]
+  home -->|"giải thích, thẻ đề xuất của AI"| mine
 ```
 
-- **Gửi đơn:** nhân viên mở SCR-019, bấm Gửi đơn để mở SCR-020. Trong lúc nhập, màn hình tính ngay số ngày nghỉ và số
-  phép còn lại. Gửi thành công thì quay về SCR-019 với đơn ở trạng thái Chờ duyệt. Lỗi như thiếu phép hay chồng đơn thì
+- **Gửi đơn:** nhân viên mở SCR-019, bấm Gửi đơn để mở SCR-020. Nhân viên chọn lý do rồi loại nghỉ hợp lệ, hoặc gõ một
+  câu mô tả để AI điền form (M6). Trong lúc nhập, màn hình tính ngay số ngày nghỉ, số phép còn lại và cảnh báo nhóm
+  thiếu người. Gửi thành công thì quay về SCR-019 với đơn ở trạng thái Chờ duyệt. Lỗi như thiếu phép hay chồng đơn thì
   ở lại SCR-020 kèm thông báo.
-- **Duyệt đơn:** người duyệt thấy thông báo trên SCR-003, mở SCR-021, chọn một đơn để xem chi tiết, rồi duyệt hoặc từ
-  chối kèm lý do. Từ SCR-021 có thể mở SCR-022 để xem lịch nghỉ của nhóm. SCR-021 nhận cả đơn nghỉ, đơn làm thêm giờ và
-  giải trình chấm công.
+- **Duyệt đơn:** người duyệt thấy thông báo hoặc lời nhắc trên SCR-003, mở SCR-021, chọn một đơn để xem chi tiết, rồi
+  duyệt, từ chối kèm lý do, hoặc đề nghị đổi ngày. Từ SCR-021 có thể mở SCR-022 để xem lịch nghỉ của nhóm. SCR-021 nhận
+  cả đơn nghỉ, đơn làm thêm giờ và giải trình chấm công.
+- **Đề nghị đổi ngày:** nhân viên nhận thông báo, mở đơn ở SCR-019 và chọn Chấp nhận hoặc Không đồng ý (BR-151).
+- **Tình huống (M6):** giải thích và thẻ đề xuất của AI hiện trong thông báo ở SCR-003 và trên đơn ở SCR-019. Thẻ mở
+  form điền sẵn hoặc có nút xác nhận; không có gì xảy ra nếu người nhận không bấm (BR-157).
 
 ```mermaid
 flowchart LR
@@ -319,10 +328,12 @@ flowchart LR
 
 ### SCR-014: Quản lý phòng ban
 
-- **Purpose:** sửa cơ cấu tổ chức và trưởng phòng ban · **Stories:** US-006, US-007, US-008 · **Use case:** UC-004
+- **Purpose:** sửa cơ cấu tổ chức và trưởng phòng ban · **Stories:** US-006, US-007, US-008, US-075 · **Use case:**
+  UC-004
 - **Content and actions:** cây phòng ban bên trái, chi tiết phòng ban đang chọn bên phải. Thao tác: thêm phòng ban con,
   đổi tên, chuyển nhánh, giải thể, bổ nhiệm trưởng, thay trưởng, thôi bổ nhiệm. Mỗi thao tác có ô ngày hiệu lực và bước
-  xem trước. Với phòng ban gốc, chỉ thao tác đổi tên và các thao tác về trưởng được hiện.
+  xem trước. Với phòng ban gốc, chỉ thao tác đổi tên và các thao tác về trưởng được hiện. Chi tiết phòng ban có ô ngưỡng
+  nhân sự; để trống thì dùng `min_staff_ratio` (BR-146).
 
 ### SCR-015: Danh mục chức danh
 
@@ -351,47 +362,73 @@ flowchart LR
 
 ### SCR-019: Nghỉ phép của tôi
 
-- **Purpose:** biết mình còn bao nhiêu phép và theo dõi đơn của mình · **Stories:** US-022, US-024, US-030, US-031
+- **Purpose:** biết mình còn bao nhiêu phép và theo dõi đơn của mình · **Stories:** US-022, US-024, US-030, US-031,
+  US-079, US-080, US-085, US-086
 - **Content and actions:** ba khối. Khối số dư: số phép hiện tại, phép tồn kèm hạn dùng, số ngày của các đơn đang chờ.
-  Khối đơn của tôi: danh sách đơn với loại, ngày, số ngày, trạng thái; nút Hủy với đơn được hủy theo BR-061. Khối biến
-  động phép: ngày, loại biến động, số ngày, lý do. Nút Gửi đơn mở SCR-020.
+  Khối đơn của tôi: danh sách đơn với loại, ngày, số ngày, trạng thái; nút Hủy với đơn được hủy theo BR-061; nút Đổi
+  đơn mở SCR-020 với dữ liệu của đơn (BR-152). Đơn ở trạng thái Chờ phản hồi hiện khoảng ngày và lời nhắn của người
+  duyệt, kèm nút Chấp nhận và Không đồng ý (BR-151). Khối biến động phép: ngày, loại biến động, số ngày, lý do. Nút Gửi
+  đơn mở SCR-020.
+- **AI (M6):** đơn gặp tình huống có giải thích và thẻ đề xuất của AI, gắn nhãn AI (BR-169). Trước hạn phép tồn, khối
+  số dư hiện các khoảng ngày gợi ý dùng phép tồn; chọn một khoảng thì mở SCR-020 điền sẵn (BR-170).
 - **States:** chưa có đơn nào: "Bạn chưa có đơn nghỉ nào."
 
 ### SCR-020: Gửi đơn nghỉ
 
-- **Purpose:** tạo đơn nghỉ · **Stories:** US-023, US-033 · **Use case:** UC-005
+- **Purpose:** tạo hoặc đổi đơn nghỉ · **Stories:** US-023, US-033, US-074, US-075, US-076, US-080, US-081, US-082,
+  US-083, US-084 · **Use case:** UC-005, UC-013
 - **Content and actions:** form gồm các trường dưới. Khi nhập, form hiện ngay số ngày nghỉ, người duyệt, và với phép năm
-  thì hiện số phép còn lại sau đơn. HR mở form từ hồ sơ của nhân viên thì có thêm ô chọn nhân viên, và đơn được duyệt
-  ngay khi lưu (BR-063).
+  thì hiện số phép còn lại sau đơn. Form hiện cảnh báo khi đơn làm nhóm thiếu người (BR-146) hoặc thuộc giai đoạn hạn
+  chế (BR-147). Nút Thêm đơn liền kề để gửi nhiều đơn trong một lần (BR-153). HR mở form từ hồ sơ của nhân viên thì có
+  thêm ô chọn nhân viên, và đơn được duyệt ngay khi lưu (BR-063).
+- **AI (M6):** ô "Mô tả nhu cầu nghỉ" ở đầu form; AI điền các trường, mỗi trường AI điền có nhãn AI gợi ý (BR-166).
+  Khối Gợi ý của AI hiện câu hỏi làm rõ, cảnh báo mô tả không khớp lý do (BR-167), và tối đa `leave_option_count`
+  phương án kèm hệ quả (BR-168). Chọn một phương án thì form điền theo phương án đó. Đơn chỉ được gửi khi nhân viên bấm
+  Gửi.
 - **Inputs:**
 
   | Field | Required | Rule | Message when invalid |
   |---|---|---|---|
-  | Loại nghỉ | Có | Đang dùng (BR-042) | Chọn loại nghỉ. |
+  | Lý do nghỉ | Có | Đang dùng trong danh mục (BR-142) | Chọn lý do nghỉ. |
+  | Loại nghỉ | Có | Đang dùng (BR-042) và thuộc các loại hợp lệ của lý do (BR-142) | Chọn loại nghỉ hợp lệ cho lý do này. |
   | Từ ngày, buổi | Có | Trong khoảng làm việc (BR-046); không sớm hơn hôm nay quá `leave_backdate_days` ngày, trừ khi HR ghi (BR-062) | Không gửi được đơn cho ngày quá 7 ngày trước. |
   | Đến ngày, buổi | Có | Không trước Từ ngày; có ít nhất một buổi làm việc (BR-044) | Khoảng nghỉ không có ngày làm việc nào. |
-  | Lý do | Có | Không trống | Nhập lý do nghỉ. |
+  | Mô tả thêm | Khi lý do là Khác | Không trống khi lý do là Khác (BR-144) | Mô tả lý do nghỉ. |
+  | Người nhận bàn giao | Không | Nhân viên đang làm trong cùng phòng ban (BR-154) | Chọn đồng nghiệp trong phòng ban của bạn. |
 
 - **States:** thiếu phép: "Không đủ phép năm. Còn thiếu [số ngày] ngày vào ngày [ngày]." Chồng đơn: "Đã có đơn khác vào
-  [ngày, buổi]." Vượt tối đa của loại: "Loại nghỉ này tối đa [số ngày] ngày mỗi đơn."
+  [ngày, buổi]." Vượt tối đa của loại: "Loại nghỉ này tối đa [số ngày] ngày mỗi đơn." Nhóm thiếu người: "[Buổi, ngày]:
+  nhóm thiếu người." AI không dùng được: "Gợi ý của AI tạm không dùng được. Bạn vẫn điền và gửi đơn như thường."; chữ
+  đã gõ được giữ.
 
 ### SCR-021: Đơn chờ duyệt
 
-- **Purpose:** duyệt mọi loại đơn · **Stories:** US-025, US-026, US-043, US-045 · **Use case:** UC-005, UC-008
+- **Purpose:** duyệt mọi loại đơn · **Stories:** US-025, US-026, US-043, US-045, US-075, US-076, US-077, US-078, US-079,
+  US-088, US-089 · **Use case:** UC-005, UC-008, UC-015
 - **Content and actions:** danh sách đơn đang chờ, có bộ lọc theo loại đơn: đơn nghỉ, đơn làm thêm giờ, giải trình chấm
   công. Mỗi dòng có người gửi, loại đơn, ngày, số ngày hoặc số giờ, ngày gửi; đơn đã qua ngày bắt đầu được đánh dấu quá
-  hạn. Quản lý chỉ thấy đơn mình là người duyệt; HR thấy mọi đơn và lọc được theo người duyệt. Chi tiết theo loại đơn:
-  đơn nghỉ hiện lý do, số phép trước và sau đơn, các đơn đã duyệt khác của nhóm trong cùng khoảng ngày; đơn làm thêm hiện
-  số giờ làm thêm đã dùng và còn lại trong tháng và năm; giải trình hiện giờ từ máy và giờ đề nghị. Nút Duyệt và Từ chối;
-  Từ chối mở ô lý do bắt buộc.
+  hạn, đơn chờ quá `approval_reminder_days` ngày làm việc được đánh dấu chờ lâu (BR-148). Quản lý thấy đơn mình là người
+  duyệt, và đơn được giao thêm khi là người duyệt thay, kèm nhãn Người duyệt thay (BR-149); HR thấy mọi đơn và lọc được
+  theo người duyệt. Chi tiết theo loại đơn: đơn nghỉ hiện lý do và mô tả thêm, số phép trước và sau đơn, các đơn đã duyệt
+  khác của nhóm trong cùng khoảng ngày, các buổi dưới ngưỡng kèm mức phủ và tên người nghỉ (BR-146), cờ giai đoạn hạn
+  chế (BR-147); đơn làm thêm hiện số giờ làm thêm đã dùng và còn lại trong tháng và năm; giải trình hiện giờ từ máy và giờ
+  đề nghị. Nút Duyệt, Từ chối và, với đơn nghỉ, Đề nghị đổi ngày. Từ chối mở ô lý do bắt buộc; Đề nghị đổi ngày mở ô
+  khoảng ngày, buổi và lời nhắn (BR-150).
+- **AI (M6):** đơn nghỉ có khối Tóm tắt của AI: tác động của đơn và khoảng ngày thay thế giữ nhóm trên ngưỡng; không có
+  gợi ý duyệt hay từ chối (BR-164). Ô lý do từ chối và ô lời nhắn có nút Soạn bằng AI; bản nháp chỉ được gửi khi người
+  duyệt bấm (BR-157).
 - **States:** không còn đơn chờ: "Không có đơn nào chờ bạn duyệt."
 
 ### SCR-022: Lịch nghỉ của nhóm
 
-- **Purpose:** biết ai nghỉ ngày nào · **Stories:** US-027
+- **Purpose:** biết ai nghỉ ngày nào · **Stories:** US-027, US-087
 - **Content and actions:** lịch theo tháng, mỗi dòng một nhân viên trong phạm vi, mỗi cột một ngày. Ô có đơn đã duyệt và
-  đơn đang chờ được tô khác nhau, ghi loại nghỉ và buổi. Ngày nghỉ lễ và cuối tuần được tô xám. Có bộ lọc phòng ban
-  trong phạm vi và nút chuyển tháng.
+  đơn đang chờ được tô khác nhau, ghi loại nghỉ và buổi. Ngày nghỉ lễ và cuối tuần được tô xám; buổi dưới ngưỡng và
+  ngày thuộc giai đoạn hạn chế có đánh dấu riêng (BR-146, BR-147). Có bộ lọc phòng ban trong phạm vi và nút chuyển
+  tháng.
+- **AI (M6):** trước giai đoạn hạn chế, khối Tổng hợp giai đoạn hạn chế liệt kê các buổi dưới ngưỡng và tối đa
+  `leave_option_count` cách xử lý các đơn chờ (BR-171). Mỗi cách có đường dẫn tới đơn ở SCR-021; quản lý quyết từng
+  đơn.
 
 ### SCR-023: Loại nghỉ
 
@@ -402,10 +439,11 @@ flowchart LR
 
 ### SCR-024: Lịch làm việc
 
-- **Purpose:** khai báo ngày nghỉ lễ và ngày làm bù · **Stories:** US-029
+- **Purpose:** khai báo ngày nghỉ lễ, ngày làm bù và giai đoạn hạn chế nghỉ · **Stories:** US-029, US-076
 - **Content and actions:** ô chọn năm; danh sách ngày nghỉ lễ và ngày làm bù của năm đó với ngày, loại, tên. Thao tác
   thêm, sửa, xóa ngày; ngày thuộc tháng đã chốt không sửa được (BR-090). Trước khi lưu một thay đổi, màn hình hiện các đơn
-  bị tính lại và các đơn sẽ làm số phép bị âm (BR-064, EC-032). Ngày làm việc trong tuần khai báo ở SCR-025.
+  bị tính lại và các đơn sẽ làm số phép bị âm (BR-064, EC-032). Ngày làm việc trong tuần khai báo ở SCR-025. Khối Giai
+  đoạn hạn chế nghỉ liệt kê các giai đoạn với khoảng ngày, phạm vi, ghi chú; thao tác thêm, sửa, xóa (BR-147).
 - **Inputs:**
 
   | Field | Required | Rule | Message when invalid |
@@ -651,3 +689,18 @@ tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đ�
   cuối cùng và các trường sẽ bị xóa; HR chọn nhiều dòng rồi bấm Xác nhận. Hộp thoại xác nhận ghi rõ thao tác không hoàn
   tác được.
 - **States:** danh sách trống: "Không có dữ liệu nào hết hạn lưu."
+
+### SCR-047: Lý do nghỉ
+
+- **Purpose:** quản lý danh mục lý do nghỉ · **Stories:** US-073
+- **Content and actions:** bảng lý do nghỉ với loại nghỉ hợp lệ, số ngày theo luật, nguồn, trạng thái và số đơn đã
+  dùng. Thao tác thêm, sửa, ngừng dùng, dùng lại; nút Xóa chỉ hiện với lý do chưa có đơn nào (BR-143). Đầu trang hiện số
+  đơn dùng lý do Khác trong 3 tháng gần nhất, để HR cân nhắc thêm lý do (EC-094).
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Tên | Có | Không trùng (BR-143) | Lý do này đã có. |
+  | Loại nghỉ hợp lệ | Có | Ít nhất một loại nghỉ đang dùng (BR-143) | Chọn ít nhất một loại nghỉ. |
+  | Số ngày theo luật | Không | Bội số của 0,5 | Nhập số ngày theo bội số của 0,5. |
+  | Nguồn | Không | — | — |
