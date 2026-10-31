@@ -1,13 +1,13 @@
 # Domain: hr-manager
 
 - **Status:** Accepted
-- **Updated:** 2026-10-30
+- **Updated:** 2026-10-31
 - **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
   người ngoài review
 - **Related:** [requirements](requirements.md) · [questions](../project/questions.md) · [research](../project/research.md) ·
   [data design](../design/data.md) · [analysis guide](../playbook/analysis.md)
 
-Bản hiện tại có đủ phần dùng chung và M1 tới M5.
+Bản hiện tại có đủ phần dùng chung, M1 tới M5 và phần AI Leave Coordinator của M6.
 
 ## Glossary
 
@@ -44,6 +44,12 @@ Hệ thống có một bounded context.
 | Ngày làm bù | Ngày cuối tuần được đổi thành ngày làm việc, thường để bù cho kỳ nghỉ lễ dài | `makeupWorkday` | — |
 | Buổi | Nửa ngày làm việc: sáng hoặc chiều | `HalfDay` | — |
 | Người duyệt | Người được giao duyệt một đơn nghỉ, đơn làm thêm giờ hoặc giải trình chấm công | `approver` | Quản lý trực tiếp: người duyệt mặc định |
+| Lý do nghỉ | Một mục trong danh mục do HR quản lý, như Bản thân kết hôn hay Ông bà mất; quyết định loại nghỉ nào hợp lệ (BR-142) | `LeaveReason` | Loại nghỉ; mô tả thêm: chữ nhân viên tự ghi cho đơn |
+| Mức phủ | Tỷ lệ nhân viên có mặt của một phòng ban ở một buổi (BR-145) | `coverage` | — |
+| Ngưỡng nhân sự | Mức phủ tối thiểu của một phòng ban (BR-146) | `minStaffRatio` | — |
+| Giai đoạn hạn chế nghỉ | Khoảng ngày công ty hạn chế nghỉ, như mùa cao điểm (BR-147) | `LeaveRestrictionPeriod` | Ngày nghỉ lễ |
+| Người duyệt thay | Người được giao thêm một đơn khi người duyệt đang nghỉ (BR-149) | `delegateApprover` | HR duyệt thay (BR-058): HR chủ động duyệt bất kỳ đơn nào |
+| Đề nghị đổi ngày | Khoảng ngày khác mà người duyệt đề nghị cho một đơn đang chờ (BR-150) | `ChangeProposal` | Đổi đơn: nhân viên tự đổi đơn của mình (BR-152) |
 | Ca làm việc | Khung giờ làm việc lặp lại theo tuần, gồm giờ bắt đầu, giờ kết thúc, nghỉ giữa ca và các ngày làm việc trong tuần | `Shift` | — |
 | Giờ làm chuẩn | Số giờ làm việc bình thường của một ca trong một ngày | `standardHours` | Giờ làm thực tế |
 | Mã chấm công | Số định danh của nhân viên trên máy chấm công | `deviceUserId` | Mã nhân viên |
@@ -77,6 +83,10 @@ Hệ thống có một bounded context.
 | Biến động nhân sự | Số người đầu kỳ, vào mới, nghỉ việc, chuyển đến, chuyển đi và cuối kỳ trong một kỳ báo cáo (BR-132) | `headcountMovement` | — |
 | Tỷ lệ nghỉ việc | Số người nghỉ việc trong kỳ chia số người bình quân của kỳ (BR-132) | `turnoverRate` | — |
 | Kỳ báo cáo | Khoảng tháng hoặc khoảng ngày người xem chọn cho một báo cáo | `reportPeriod` | Kỳ công, kỳ lương |
+| AI Leave Coordinator | Phần AI tham gia quy trình nghỉ phép: hiểu yêu cầu, đề xuất phương án, điều phối tình huống, hỗ trợ người duyệt | `LeaveCoordinator` | Rule tự động: phần không dùng AI, như nhắc hay chuyển đơn |
+| Tầng hành động của AI | Ba mức quyền của AI: tự làm, đề xuất chờ người xác nhận, chỉ người làm (BR-156 tới BR-158) | `aiActionTier` | — |
+| Thẻ đề xuất | Một thao tác AI đề xuất, chỉ thực hiện khi người có quyền bấm xác nhận (BR-157) | `ActionProposal` | — |
+| Phương án nghỉ | Một cách nghỉ hợp lệ do core sinh và AI chọn, kèm hệ quả (BR-168) | `LeaveOption` | — |
 
 ## Entities
 
@@ -117,13 +127,21 @@ classDiagram
   Employee "1" --> "*" LeaveLedgerEntry : biến động phép
   LeaveLedgerEntry "*" --> "0..1" LeaveRequest : phát sinh từ
   WorkCalendar "1" *-- "*" CalendarDay : ngày lễ, ngày làm bù
+  LeaveRequest "*" --> "1" LeaveReason : theo lý do
+  LeaveReason "*" --> "1..*" LeaveType : loại hợp lệ
+  LeaveRequest "1" *-- "0..1" ChangeProposal : đề nghị đổi ngày
+  LeaveRequest "*" --> "0..1" Employee : người nhận bàn giao
 ```
 
 | Name | Kind | Key attributes | Relations |
 |---|---|---|---|
 | Employee | Entity, bổ sung ở M2 | Phép năm cơ bản không tính thâm niên: 12, 14 hoặc 16 ngày | — |
+| OrgUnit | Entity, bổ sung ở M2 | Ngưỡng nhân sự riêng; để trống thì dùng `min_staff_ratio` (BR-146) | — |
 | LeaveType | Entity | Tên, chế độ hưởng (công ty trả lương, BHXH chi trả, không hưởng lương), có trừ phép năm không, số ngày tối đa mỗi đơn, đang dùng hay ngừng | Có nhiều LeaveRequest |
-| LeaveRequest | Entity | Loại nghỉ, ngày và buổi bắt đầu, ngày và buổi kết thúc, số ngày, lý do, người duyệt, người ghi nếu HR ghi thay, trạng thái, lý do từ chối hoặc hủy | Thuộc một Employee |
+| LeaveReason | Entity | Tên, các loại nghỉ hợp lệ, số ngày theo luật, nguồn, đang dùng hay ngừng | Được nhiều LeaveRequest dùng |
+| LeaveRequest | Entity | Loại nghỉ, lý do nghỉ, mô tả thêm, ngày và buổi bắt đầu, ngày và buổi kết thúc, số ngày, người duyệt, người duyệt thay nếu có, người ghi nếu HR ghi thay, người nhận bàn giao, có hỗ trợ AI hay không, trạng thái, lý do từ chối hoặc hủy | Thuộc một Employee |
+| ChangeProposal | Value object | Khoảng ngày và buổi đề nghị, lời nhắn, người đề nghị, thời điểm, phản hồi của nhân viên | Thuộc một LeaveRequest |
+| LeaveRestrictionPeriod | Entity | Khoảng ngày, phạm vi (toàn công ty hoặc danh sách phòng ban), ghi chú | — |
 | LeaveLedgerEntry | Entity | Ngày, loại biến động, số ngày có dấu, năm phép, là phép tồn hay không, hạn dùng nếu là phép tồn, lý do | Thuộc một Employee; có thể phát sinh từ một LeaveRequest |
 | WorkCalendar | Entity | Ngày nghỉ lễ và ngày làm bù của công ty; ngày làm việc trong tuần thuộc về ca từ M3 | Một lịch cho cả công ty; chứa nhiều CalendarDay |
 | CalendarDay | Value object | Ngày, loại (nghỉ lễ hoặc làm bù), tên | Thuộc WorkCalendar |
@@ -192,6 +210,13 @@ Phiếu lương lưu lại mọi số liệu đầu vào đã dùng, để đọ
 
 M5 không thêm entity. Báo cáo đọc từ entity của M1 tới M4 (BR-138); việc xuất báo cáo được ghi bằng AuditEntry.
 
+**M6: AI**
+
+| Name | Kind | Key attributes | Relations |
+|---|---|---|---|
+| AiOutput | Entity | Thời điểm, tính năng, tình huống, người nhận, dữ liệu đã gửi tới dịch vụ AI, đầu ra, kết quả kiểm (BR-163), lựa chọn cuối của người dùng | Có thể gắn với một LeaveRequest hoặc một ActionProposal |
+| ActionProposal | Entity | Thao tác đề xuất, người được xác nhận, trạng thái (chờ, đã xác nhận, bỏ qua, hết hiệu lực) | Có thể gắn với một LeaveRequest |
+
 ## Aggregates and invariants
 
 | Aggregate (root) | Contains | Invariants | Cross-aggregate rules |
@@ -201,9 +226,10 @@ M5 không thêm entity. Báo cáo đọc từ entity của M1 tới M4 (BR-138);
 | OrgUnit | OrgUnit, OrgUnitPeriod | Các khoảng lịch sử không chồng; tên không trống | Đúng một phòng ban gốc (BR-007); cây không có vòng (BR-008); điều kiện giải thể (BR-010) |
 | HeadAssignment | HeadAssignment | Khoảng hiệu lực hợp lệ | Mỗi phòng ban có tối đa một trưởng mỗi ngày; người được bổ nhiệm đang làm việc (BR-011) |
 | UserAccount | UserAccount | BR-001, BR-002, BR-003 | Luôn còn ít nhất một HR đang hoạt động (BR-004) |
-| LeaveRequest | LeaveRequest | Số ngày khớp lịch làm việc (BR-044); không vượt tối đa của loại nghỉ (BR-047) | Không chồng buổi với đơn khác (BR-045); nằm trong khoảng làm việc (BR-046); hai đơn phép năm gửi hoặc duyệt cùng lúc không được làm thiếu phép (BR-053, EC-024) |
+| LeaveRequest | LeaveRequest, ChangeProposal | Số ngày khớp lịch làm việc (BR-044); không vượt tối đa của loại nghỉ (BR-047); loại nghỉ thuộc lý do nghỉ (BR-142) | Không chồng buổi với đơn khác (BR-045); nằm trong khoảng làm việc (BR-046); hai đơn phép năm gửi hoặc duyệt cùng lúc không được làm thiếu phép (BR-053, EC-024); gửi nhiều đơn một lần thì tạo cả hoặc không đơn nào (BR-153) |
 | LeaveLedgerEntry | LeaveLedgerEntry | Không sửa, không xóa (BR-054) | Số dư phép bằng tổng các biến động (BR-054); mỗi tháng chỉ được cộng một lần (EC-038) |
 | LeaveType | LeaveType | BR-040 | Có đúng một loại Phép năm (BR-041) |
+| LeaveReason | LeaveReason | BR-143 | Lý do đã có đơn không xóa được (BR-143) |
 | WorkCalendar | WorkCalendar, CalendarDay | Một ngày không vừa là ngày nghỉ lễ vừa là ngày làm bù | Đổi lịch thì tính lại các đơn chưa bắt đầu (BR-064); không đổi lịch trong tháng đã chốt (BR-090) |
 | Shift | Shift | Giờ làm chuẩn và hai buổi tính được (BR-068, BR-069) | — |
 | Employee (M3) | ShiftAssignment | Mỗi ngày từ ngày vào làm có đúng một ca (BR-070) | Mã chấm công không trùng giữa nhân viên đang làm (BR-072) |
@@ -323,6 +349,7 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
   state "Chờ duyệt" as pending
+  state "Chờ phản hồi" as awaiting
   state "Đã duyệt" as approved
   state "Bị từ chối" as rejected
   state "Đã hủy" as cancelled
@@ -330,8 +357,13 @@ stateDiagram-v2
   [*] --> approved: HR ghi đơn thay
   pending --> approved: người duyệt hoặc HR duyệt
   pending --> rejected: người duyệt hoặc HR từ chối
-  pending --> cancelled: nhân viên hủy, hoặc nhân viên nghỉ việc
-  approved --> cancelled: nhân viên hoặc HR hủy, hoặc nhân viên nghỉ việc
+  pending --> awaiting: người duyệt hoặc HR đề nghị đổi ngày
+  pending --> cancelled: nhân viên hủy hoặc đổi đơn, hoặc nhân viên nghỉ việc
+  awaiting --> approved: nhân viên chấp nhận đề nghị
+  awaiting --> pending: nhân viên không đồng ý
+  awaiting --> rejected: người duyệt hoặc HR từ chối
+  awaiting --> cancelled: nhân viên hủy, hoặc nhân viên nghỉ việc
+  approved --> cancelled: nhân viên hoặc HR hủy, nhân viên đổi đơn, hoặc nhân viên nghỉ việc
   approved --> [*]
   rejected --> [*]
   cancelled --> [*]
@@ -339,12 +371,17 @@ stateDiagram-v2
 
 | From | To | Trigger and actor | Guard |
 |---|---|---|---|
-| — | `pending` | Nhân viên gửi đơn | BR-043 tới BR-047, BR-053, BR-062 |
+| — | `pending` | Nhân viên gửi đơn | BR-043 tới BR-047, BR-053, BR-062, BR-142 |
 | — | `approved` | HR ghi đơn thay | Như trên, trừ giới hạn ghi bù (BR-062, BR-063) |
-| `pending` | `approved` | Người duyệt hoặc HR duyệt | Người duyệt không phải người gửi (BR-060); vẫn đủ phép (BR-053) |
-| `pending` | `rejected` | Người duyệt hoặc HR từ chối | Có lý do (BR-059) |
-| `pending` | `cancelled` | Nhân viên hủy; hoặc Thời gian, khi việc nghỉ việc có hiệu lực | — |
-| `approved` | `cancelled` | Nhân viên hủy; HR hủy; hoặc Thời gian, khi việc nghỉ việc có hiệu lực | Nhân viên chỉ hủy được trước ngày bắt đầu; HR phải nhập lý do (BR-061, BR-065) |
+| `pending` | `approved` | Người duyệt, người duyệt thay hoặc HR duyệt | Người duyệt không phải người gửi (BR-060); vẫn đủ phép (BR-053) |
+| `pending` | `rejected` | Người duyệt, người duyệt thay hoặc HR từ chối | Có lý do (BR-059) |
+| `pending` | `awaiting` | Người duyệt, người duyệt thay hoặc HR đề nghị đổi ngày | Khoảng đề nghị qua BR-044 tới BR-047 và BR-053 (BR-150) |
+| `pending` | `cancelled` | Nhân viên hủy hoặc đổi đơn; hoặc Thời gian, khi việc nghỉ việc có hiệu lực | Đổi đơn: đơn mới phải qua mọi luật, nếu không thì đơn cũ giữ nguyên (BR-152) |
+| `awaiting` | `approved` | Nhân viên chấp nhận đề nghị | Vẫn không chồng đơn và đủ phép (BR-045, BR-053, BR-151) |
+| `awaiting` | `pending` | Nhân viên không đồng ý | — |
+| `awaiting` | `rejected` | Người duyệt, người duyệt thay hoặc HR từ chối | Có lý do (BR-059) |
+| `awaiting` | `cancelled` | Nhân viên hủy; hoặc Thời gian, khi việc nghỉ việc có hiệu lực | — |
+| `approved` | `cancelled` | Nhân viên hủy hoặc đổi đơn; HR hủy; hoặc Thời gian, khi việc nghỉ việc có hiệu lực | Nhân viên chỉ hủy hoặc đổi được trước ngày bắt đầu; HR phải nhập lý do (BR-061, BR-065, BR-152) |
 | `approved` | `approved` | HR rút ngắn đơn đã bắt đầu | Có lý do; phép năm được hoàn phần rút ngắn (BR-061) |
 
 Mọi chuyển trạng thái của LeaveRequest bị chặn khi đơn có ngày thuộc tháng đã chốt (BR-090).
@@ -536,6 +573,26 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 | BR-064 | HR thêm hoặc bỏ ngày nghỉ lễ hoặc ngày làm bù | Số ngày của các đơn đã duyệt hoặc đang chờ mà chưa bắt đầu được tính lại; chênh lệch phép năm được trừ hoặc hoàn; nhân viên được thông báo. Đơn đã bắt đầu không tự đổi | A-003 | Assumed |
 | BR-065 | Việc nghỉ việc có hiệu lực | Các đơn có ngày sau ngày làm việc cuối cùng bị hủy. Số ngày phép năm chưa nghỉ tính tới ngày làm việc cuối cùng được chốt để thanh toán ở M4 | Bộ luật Lao động 2019, Điều 113 | Assumed |
 
+**Lý do nghỉ, mức phủ và điều phối đơn**
+
+Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. AI Leave Coordinator ở M6 dùng chúng làm dữ kiện.
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-142 | Gửi hoặc ghi một đơn | Đơn có đúng một lý do nghỉ đang dùng trong danh mục; loại nghỉ phải thuộc các loại hợp lệ của lý do đó | A-003 | Assumed |
+| BR-143 | Tạo, sửa hoặc xóa lý do nghỉ | Tên không trùng; có ít nhất một loại nghỉ hợp lệ; ghi số ngày theo luật và nguồn nếu có. Lý do đã có đơn không xóa được, chỉ ngừng dùng; lý do ngừng dùng không chọn được cho đơn mới | A-003 | Assumed |
+| BR-144 | Nhập mô tả thêm cho đơn | Bắt buộc khi lý do là Khác, không bắt buộc với lý do khác. Mô tả thêm thuộc lý do nghỉ nên chịu BR-067 | A-003 | Assumed |
+| BR-145 | Tính mức phủ của một phòng ban ở một buổi | Số nhân viên đang làm, thuộc trực tiếp phòng ban và có buổi đó là buổi làm việc, trừ người có đơn đang chờ, chờ phản hồi hoặc đã duyệt phủ buổi đó; chia cho số nhân viên đang làm, thuộc trực tiếp phòng ban và có buổi đó là buổi làm việc | A-003 | Assumed |
+| BR-146 | Đơn làm mức phủ của phòng ban xuống dưới ngưỡng ở một buổi | Không chặn gửi hay duyệt. Người duyệt và HR thấy các buổi dưới ngưỡng và người nghỉ ở buổi đó. Nhân viên chỉ thấy "[buổi, ngày]: nhóm thiếu người", không kèm tên hay số người; phòng ban có dưới `report_min_group_size` người thì nhân viên không thấy cảnh báo này. Ngưỡng là `min_staff_ratio`, trừ khi HR đặt ngưỡng riêng cho phòng ban | A-017, A-018 | Assumed |
+| BR-147 | Đơn có ngày thuộc một giai đoạn hạn chế nghỉ của phòng ban người gửi | Không chặn gửi hay duyệt; nhân viên và người duyệt thấy cảnh báo kèm ghi chú của giai đoạn. HR khai báo giai đoạn gồm khoảng ngày, phạm vi (toàn công ty hoặc một số phòng ban) và ghi chú | A-003 | Assumed |
+| BR-148 | Đơn chờ duyệt chưa được xử lý | Sau `approval_reminder_days` ngày làm việc, người duyệt được nhắc mỗi ngày làm việc. Sau `approval_escalation_days` ngày làm việc, hoặc khi chỉ còn một ngày làm việc tới ngày bắt đầu, HR được thông báo để duyệt thay (BR-058) | A-003 | Assumed |
+| BR-149 | Người duyệt của một đơn đang chờ có đơn nghỉ đã duyệt phủ hôm nay | Đơn được giao thêm cho người duyệt thay: quản lý trực tiếp của người duyệt, không có thì HR. Người duyệt gốc vẫn thao tác được; thao tác đến trước có hiệu lực. Hết thời gian nghỉ của người duyệt gốc thì người duyệt thay không còn được giao đơn | A-019 | Assumed |
+| BR-150 | Người duyệt, người duyệt thay hoặc HR đề nghị đổi ngày cho một đơn đang chờ | Nhập khoảng ngày, buổi đề nghị và lời nhắn. Khoảng đề nghị phải qua BR-044 tới BR-047 và BR-053 tại lúc đề nghị. Đơn chuyển sang Chờ phản hồi; nhân viên được thông báo | A-003 | Assumed |
+| BR-151 | Nhân viên phản hồi đề nghị đổi ngày | Chấp nhận: hệ thống kiểm lại BR-045 và BR-053; đạt thì đơn mang ngày đề nghị và chuyển sang Đã duyệt, nhật ký ghi người đề nghị là người duyệt; không đạt thì báo lỗi và đơn giữ trạng thái. Không đồng ý: đơn quay lại Chờ duyệt với ngày cũ, kèm phản hồi nếu có | A-003 | Assumed |
+| BR-152 | Nhân viên đổi một đơn đang chờ, hoặc đã duyệt mà chưa tới ngày bắt đầu | Hệ thống hủy đơn cũ và tạo đơn mới ở trạng thái Chờ duyệt trong một thao tác. Đơn mới phải qua mọi luật như đơn gửi mới; không qua thì đơn cũ giữ nguyên | A-003 | Assumed |
+| BR-153 | Nhân viên gửi nhiều đơn trong một lần xác nhận, ví dụ 3 ngày Kết hôn và 2 ngày Phép năm liền nhau | Mọi đơn qua luật thì tạo cả; một đơn không qua thì không tạo đơn nào | A-003 | Assumed |
+| BR-154 | Nhân viên chọn người nhận bàn giao cho đơn | Chỉ chọn được nhân viên đang làm trong cùng phòng ban. Khi đơn được duyệt, người đó được thông báo ngày nghỉ, không thấy loại nghỉ hay lý do | A-003 | Assumed |
+
 **Ca và chấm công**
 
 | ID | When | Then | Source | Status |
@@ -642,6 +699,35 @@ Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
 | BR-137 | Hiển thị trang tổng quan | Mỗi con số tính theo phạm vi của người xem; bấm vào thì mở danh sách chi tiết mà người đó có quyền xem | A-003 | Assumed |
 | BR-138 | Mở một báo cáo | Báo cáo đọc dữ liệu hiện có tại lúc mở; không lưu bản chụp riêng. Chỉ bảng công và bảng lương đã chốt là số liệu cố định | A-003 | Assumed |
 
+**AI: nguyên tắc chung**
+
+Áp dụng cho mọi tính năng AI của M6.
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-155 | Một tính năng AI cần thay đổi dữ liệu nghiệp vụ, như trạng thái đơn, số dư, hồ sơ, lương hay cấu hình | AI không tự thay đổi. Thay đổi chỉ đi qua core, do người có quyền bấm xác nhận hoặc do rule | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-156 | AI tự thực hiện một việc (tầng 1) | Chỉ gồm: đọc dữ liệu trong phạm vi tác vụ, chạy xem trước của core, tạo nháp, gửi giải thích, nhắc và ghi chú. Mỗi đầu ra có nhãn AI và được ghi lại | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-157 | AI đề xuất một thao tác (tầng 2) | Thao tác hiện thành thẻ đề xuất và chỉ thực hiện khi người có quyền bấm xác nhận. Core kiểm quyền và luật như khi người đó tự làm | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-158 | Thao tác thuộc tầng 3: duyệt, từ chối, điều chỉnh số dư, ghi đơn thay, hủy hay rút ngắn đơn đã bắt đầu | AI không đề xuất và không thực hiện | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-159 | AI chạy theo sự kiện hoặc theo lịch, không có người dùng đang thao tác | AI chỉ đọc dữ liệu của tình huống đang xử lý và số liệu mức nhóm cần cho tình huống đó | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-160 | AI gửi đầu ra tới một người | Đầu ra chỉ chứa dữ liệu người nhận có quyền xem theo Permission matrix trong [requirements](requirements.md#permission-matrix) | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-161 | Gửi dữ liệu tới dịch vụ AI | Chỉ gửi trường cần cho tác vụ. Không bao giờ gửi số CCCD, tài khoản ngân hàng, mã số thuế, mã số BHXH và thông tin người phụ thuộc | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-162 | AI lỗi, quá chậm hoặc đầu ra không đạt kiểm tra | Nghiệp vụ chạy như khi không có AI: form, rule và nội dung mẫu. Không chặn gửi hay duyệt | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-163 | Kiểm đầu ra của AI trước khi dùng | Đầu ra phải đúng định dạng; mọi con số và ngày phải khớp dữ kiện do core cung cấp | A-003 | Assumed |
+| BR-164 | AI hỗ trợ người duyệt hoặc quản lý ra quyết định về đơn của người khác | AI chỉ nêu tác động và phương án thay thế; không gợi ý duyệt hay từ chối. AI không dùng lịch sử nghỉ, số lần nghỉ ốm, đánh giá hay đặc điểm cá nhân nào của người gửi | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-165 | Lưu đầu ra của AI | Đơn ghi cờ có hỗ trợ AI. Đầu ra của AI và lựa chọn cuối của người dùng được lưu để đo chất lượng, cùng thời hạn lưu với lý do nghỉ | A-003 | Assumed |
+
+**AI Leave Coordinator**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-166 | AI diễn giải câu mô tả nghỉ | Ngày, buổi và lý do AI điền là gợi ý. Lý do chỉ được chọn trong danh mục đang dùng; không khớp mục nào thì chọn Khác. Thiếu thông tin hoặc không chắc thì hỏi lại, không đoán | A-003 | Assumed |
+| BR-167 | Mô tả thêm có vẻ thuộc lý do khác lý do đã chọn, hoặc ghi chi tiết sức khỏe | AI cảnh báo kèm lý do khớp hơn, hoặc nhắc chỉ cần ghi mức cần thiết. Nhân viên quyết định giữ hay đổi; không chặn gửi | A-003 | Assumed |
+| BR-168 | AI đề xuất phương án nghỉ | Core sinh phương án ứng viên từ: loại nghỉ hợp lệ của lý do, chia thành nhiều đơn, dời ngày, dùng phép tồn trước hạn. Mỗi phương án qua xem trước của core. AI chọn tối đa `leave_option_count` phương án hợp với mong muốn nhân viên nêu; mỗi phương án ghi số ngày, có hưởng lương không, phép trước và sau, mức phủ theo BR-146 | A-003 | Assumed |
+| BR-169 | Đơn gặp một tình huống: thiếu phép lúc duyệt, đổi lịch làm đổi số ngày, người duyệt đổi hoặc đang nghỉ, đơn chờ lâu, đề nghị đổi ngày, nhân viên nghỉ việc | Rule xử lý phần cố định theo luật tương ứng. AI gửi giải thích cho người liên quan và, khi có cách xử lý, thẻ đề xuất theo BR-157 | A-003 | Assumed |
+| BR-170 | Còn `carryover_reminder_days` ngày tới `carryover_expiry` mà nhân viên còn phép tồn | AI gợi ý tối đa `leave_option_count` khoảng ngày dùng phép tồn, không thuộc giai đoạn hạn chế và không làm phòng ban dưới ngưỡng. Nhân viên tự gửi đơn | A-003 | Assumed |
+| BR-171 | Còn `peak_planning_days` ngày tới một giai đoạn hạn chế nghỉ | Quản lý nhận tổng hợp đơn chờ và đã duyệt trong giai đoạn đó của phạm vi mình, kèm tối đa `leave_option_count` cách xử lý các đơn chờ để phòng ban không dưới ngưỡng. Cách xử lý chỉ dựa trên ngày gửi, ngày nghỉ và số ngày của đơn (BR-164). Quản lý quyết từng đơn | A-003 | Assumed |
+
 ### Parameters
 
 Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP chưa được đối chiếu văn bản gốc, xem
@@ -668,6 +754,12 @@ chiếu theo Q-008 và Q-023.
 | `carryover_max_days` | Số ngày phép tồn tối đa được chuyển sang năm sau | 5 | BR-051 |
 | `carryover_expiry` | Ngày cuối cùng dùng được phép tồn, tính trong năm mới | 31/3 | BR-051 |
 | `leave_backdate_days` | Số ngày tối đa nhân viên được gửi đơn cho ngày đã qua | 7 | BR-062 |
+| `min_staff_ratio` | Mức phủ tối thiểu mặc định của một phòng ban ở mỗi buổi | 50% (A-017) | BR-146 |
+| `approval_reminder_days` | Số ngày làm việc đơn chờ trước khi nhắc người duyệt | 2 | BR-148 |
+| `approval_escalation_days` | Số ngày làm việc đơn chờ trước khi báo HR | 4 | BR-148 |
+| `carryover_reminder_days` | Số ngày trước `carryover_expiry` để gợi ý dùng phép tồn | 30 | BR-170 |
+| `peak_planning_days` | Số ngày trước một giai đoạn hạn chế để gửi tổng hợp cho quản lý | 14 | BR-171 |
+| `leave_option_count` | Số phương án hoặc khoảng ngày tối đa AI đề xuất một lần | 3 | BR-168, BR-170, BR-171 |
 | `normal_hours_max_per_day` | Giờ làm việc bình thường tối đa trong một ngày | 8 | BR-069 |
 | `night_start`, `night_end` | Khoảng giờ làm ban đêm | 22:00 tới 06:00 | BR-071 |
 | `punch_window_before` | Số phút trước giờ bắt đầu ca mà lượt chấm vẫn thuộc ngày ca đó | 180 | BR-074 |
@@ -715,6 +807,25 @@ Các loại nghỉ có sẵn khi cài hệ thống (US-028). HR sửa, thêm ho�
 | Ốm đau | BHXH chi trả | Không | — | Luật Bảo hiểm xã hội 2024 |
 | Thai sản | BHXH chi trả | Không | — | Luật Bảo hiểm xã hội 2024 |
 
+### Default leave reasons
+
+Các lý do nghỉ có sẵn khi cài hệ thống (US-073). HR sửa, thêm hoặc ngừng dùng theo quy chế công ty (BR-143). Tên loại
+nghỉ viết gọn; tên đủ ở bảng trên.
+
+| Leave reason | Loại nghỉ hợp lệ | Theo luật | Source |
+|---|---|---|---|
+| Bản thân kết hôn | Kết hôn; Phép năm | 3 ngày có lương | Bộ luật Lao động 2019, Điều 115 |
+| Con kết hôn | Con kết hôn; Phép năm | 1 ngày có lương | Bộ luật Lao động 2019, Điều 115 |
+| Cha, mẹ, vợ hoặc chồng, con mất; cha, mẹ của vợ hoặc chồng mất | Tang; Phép năm | 3 ngày có lương | Bộ luật Lao động 2019, Điều 115 |
+| Ông bà mất | Việc riêng không lương; Phép năm | 1 ngày không lương, phải báo công ty | Bộ luật Lao động 2019, Điều 115 |
+| Anh chị em ruột mất | Việc riêng không lương; Phép năm | 1 ngày không lương, phải báo công ty | Bộ luật Lao động 2019, Điều 115 |
+| Cha hoặc mẹ kết hôn | Việc riêng không lương; Phép năm | 1 ngày không lương, phải báo công ty | Bộ luật Lao động 2019, Điều 115 |
+| Anh chị em ruột kết hôn | Việc riêng không lương; Phép năm | 1 ngày không lương, phải báo công ty | Bộ luật Lao động 2019, Điều 115 |
+| Ốm đau | Ốm đau; Phép năm | — | Luật Bảo hiểm xã hội 2024 |
+| Thai sản | Thai sản | — | Luật Bảo hiểm xã hội 2024 |
+| Nghỉ ngơi, việc cá nhân | Phép năm; Việc riêng không lương | — | Bộ luật Lao động 2019, Điều 113 và Điều 115 |
+| Khác | Phép năm; Việc riêng không lương | — | — |
+
 ### Default allowance types
 
 Các loại phụ cấp có sẵn khi cài hệ thống (US-050), theo cách làm phổ biến ở doanh nghiệp nhỏ (A-009). HR sửa, thêm hoặc
@@ -737,7 +848,8 @@ ngừng dùng theo quy chế công ty.
 | Hợp đồng lao động | Quản lý quan hệ lao động | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
 | Mật khẩu | Đăng nhập | Không ai, kể cả HR; HR chỉ đặt lại được | Tới khi tài khoản bị xóa |
 | Nhật ký thao tác | Truy vết thay đổi | HR | `retention_years` năm; nhật ký về người đã ẩn danh chỉ còn mã nhân viên (BR-141) |
-| Lý do nghỉ; đơn nghỉ ốm đau và thai sản | Duyệt đơn, chấm công, BHXH | Chính nhân viên, người duyệt, HR. Quản lý khác trong phạm vi chỉ thấy loại nghỉ (BR-067) | `retention_years` năm sau nghỉ việc (BR-141) |
+| Lý do nghỉ và mô tả thêm; đơn nghỉ ốm đau và thai sản | Duyệt đơn, chấm công, BHXH | Chính nhân viên, người duyệt, HR. Quản lý khác trong phạm vi chỉ thấy loại nghỉ (BR-067) | `retention_years` năm sau nghỉ việc (BR-141) |
+| Câu mô tả nghỉ, dữ liệu gửi tới dịch vụ AI và đầu ra của AI | Diễn giải yêu cầu, đo chất lượng AI | Chính nhân viên, HR. Chỉ trường cần cho tác vụ được gửi tới dịch vụ AI (BR-161) | Như lý do nghỉ (BR-165) |
 | Lương, phụ cấp, phiếu lương, bảng lương | Trả lương | HR; chính nhân viên, chỉ phiếu đã chốt (BR-122) | `retention_years` năm sau nghỉ việc; số liệu tổng hợp giữ lâu hơn (BR-141) |
 | Mã số thuế, mã số BHXH, cam kết thu nhập | Khấu trừ thuế, đóng bảo hiểm | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
 | Người phụ thuộc: họ tên, ngày sinh, số định danh, quan hệ | Giảm trừ gia cảnh | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
@@ -782,7 +894,7 @@ ngừng dùng theo quy chế công ty.
 | EC-033 | Đơn đã duyệt có ngày nghỉ sau hạn phép tồn | Phần ngày sau hạn đã được trừ vào phép năm mới ngay lúc duyệt, nên khi phép tồn hết hạn không có gì thay đổi | BR-052 | — |
 | EC-034 | Nhân viên vào làm giữa tháng | Tháng đó chỉ được cộng phép khi đủ tỷ lệ ngày làm việc | BR-050 | — |
 | EC-035 | Người gửi đơn là HR duy nhất và không có quản lý trực tiếp, nên không có ai khác để duyệt | Đơn được tự duyệt và nhật ký ghi rõ là tự duyệt | BR-060 | — |
-| EC-036 | Nhân viên muốn sửa đơn đang chờ duyệt | Không có thao tác sửa; nhân viên hủy rồi gửi đơn mới | BR-061 | — |
+| EC-036 | Nhân viên muốn sửa đơn đang chờ duyệt | Dùng thao tác đổi đơn: đơn cũ bị hủy và đơn mới được tạo trong một thao tác | BR-061, BR-152 | — |
 | EC-037 | HR đổi phép năm cơ bản của nhân viên giữa năm, ví dụ từ 12 lên 14 ngày | Các tháng đã cộng giữ nguyên; từ tháng kế tiếp cộng theo mức mới | BR-048 | — |
 | EC-038 | Lần cộng phép hằng tháng không chạy được đúng ngày, hoặc chạy hai lần | Lần chạy sau cộng bù các tháng còn thiếu; tháng đã cộng không được cộng lại | BR-049 | — |
 | EC-039 | Ca qua nửa đêm, ví dụ 22:00–06:00 | Lượt chấm sau nửa đêm thuộc ngày bắt đầu ca | BR-074 | — |
@@ -838,3 +950,17 @@ ngừng dùng theo quy chế công ty.
 | EC-089 | HR ghi bản ghi lương trùng ngày hiệu lực với bản ghi đã có | Từ chối; HR sửa bản ghi đã có | BR-093 | — |
 | EC-090 | Người có hồ sơ đã bị ẩn danh xin vào làm lại | Không tuyển lại được vì hồ sơ không còn thông tin; HR tiếp nhận như người mới với mã mới | BR-139, BR-141 | — |
 | EC-091 | Nhân viên được tuyển lại trước khi tới hạn xóa thông tin liên hệ | Không còn trong danh sách cần xóa; hạn được tính lại từ lần nghỉ việc sau | BR-140 | — |
+| EC-092 | AI hiểu sai ngày, ví dụ hiểu "thứ Sáu tuần sau" thành thứ Sáu tuần này | Bản nháp hiện ngày kèm thứ; nhân viên sửa trước khi gửi; core kiểm luật như đơn thường | BR-166 | — |
+| EC-093 | Một câu mô tả gồm hai đợt nghỉ | AI tạo hai bản nháp hoặc hỏi lại; hai đơn được gửi riêng hoặc gửi cùng theo BR-153 | BR-153, BR-166 | — |
+| EC-094 | Lý do không khớp mục nào trong danh mục | AI chọn Khác và hỏi thêm mô tả; HR thấy số đơn có lý do Khác để bổ sung danh mục | BR-143, BR-166 | — |
+| EC-095 | Câu mô tả, mô tả thêm hoặc phản hồi chứa câu nhằm điều khiển AI | AI coi đó là dữ liệu. Vì AI không tự thay đổi dữ liệu nghiệp vụ, không đơn nào bị gửi, duyệt hay hủy | BR-155, BR-158 | — |
+| EC-096 | AI lỗi hoặc chậm khi nhân viên đang tạo đơn | Form giữ chữ đã gõ và báo AI tạm không dùng được; nhân viên điền tay và gửi như thường | BR-162 | — |
+| EC-097 | Phương án AI đề xuất không còn hợp lệ lúc bấm Gửi, ví dụ số dư vừa đổi | Core kiểm lại và từ chối như đơn thường; AI đề xuất lại theo dữ kiện mới | BR-053, BR-168 | — |
+| EC-098 | Đầu ra của AI có con số hoặc ngày khác dữ kiện của core | Đầu ra bị bỏ; người nhận thấy nội dung mẫu của rule | BR-162, BR-163 | — |
+| EC-099 | Người duyệt gốc và người duyệt thay cùng thao tác một đơn | Thao tác đến trước có hiệu lực; thao tác sau bị từ chối vì đơn đã đổi trạng thái | BR-149 | — |
+| EC-100 | Nhân viên chưa phản hồi đề nghị đổi ngày khi đã tới ngày bắt đầu của khoảng đề nghị | Đơn được đánh dấu quá hạn như EC-029; người duyệt từ chối được | BR-150, BR-151 | — |
+| EC-101 | Phòng ban ít người, đơn nào cũng làm mức phủ dưới ngưỡng | Vẫn chỉ cảnh báo; người duyệt quyết định | BR-146 | — |
+| EC-102 | Nhân viên có thể suy ra đồng nghiệp nào nghỉ từ cảnh báo thiếu người | Cảnh báo không kèm tên hay số người, và không hiện ở phòng ban dưới `report_min_group_size` người | BR-146 | — |
+| EC-103 | Khoảng ngày gợi ý dùng phép tồn trùng giai đoạn hạn chế hoặc buổi phòng ban đã dưới ngưỡng | Khoảng đó không được gợi ý | BR-170 | — |
+| EC-104 | Thẻ đề xuất chưa được xác nhận thì tình huống đã đổi, ví dụ đơn đã bị hủy | Bấm xác nhận thì core kiểm lại và từ chối; thẻ được đánh dấu hết hiệu lực | BR-157 | — |
+| EC-105 | Gửi nhiều đơn trong một lần mà một đơn không qua luật | Không đơn nào được tạo; nhân viên thấy đơn nào lỗi và vì sao | BR-153 | — |

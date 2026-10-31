@@ -37,8 +37,14 @@
 | Q-022 | Công ty đặt ở địa bàn thuộc vùng lương tối thiểu nào? Có chi nhánh ở vùng khác không? | Giá trị `company_region`; mức sàn lương và trần BHTN | blocks-build | HR công ty mục tiêu | Assumed | Xem A-008 |
 | Q-023 | Luật Bảo hiểm xã hội 2024 và văn bản hướng dẫn quy định thế nào về đối tượng đóng với hợp đồng thử việc, ngưỡng 14 ngày không đóng và trần mức đóng? Sau khi Luật Thuế TNCN sửa đổi có hiệu lực, mức khấu trừ 10% với hợp đồng dưới 3 tháng và mức miễn thuế tiền ăn giữa ca còn đúng không? | Luật BR-100, BR-101, BR-110, BR-111, BR-113 và loại phụ cấp mặc định | blocks-design | Cơ sở dữ liệu quốc gia về văn bản pháp luật | Assumed | Xem A-013 |
 | Q-024 | Mỗi tuần HR nhận bao nhiêu câu hỏi của nhân viên về quy chế, số ngày phép và lương? Những câu nào lặp lại nhiều nhất? | Xác nhận vấn đề và phạm vi của AI HR Assistant; baseline của success metrics | blocks-design | HR công ty mục tiêu | Assumed | Xem A-014 |
-| Q-025 | Nhân viên có hay chọn sai loại nghỉ không? Những lý do nghỉ nào hay bị chọn sai? | Xác nhận vấn đề và danh mục lý do nghỉ cho AI Leave Workflow | blocks-design | HR công ty mục tiêu | Assumed | Xem A-015 |
+| Q-025 | Nhân viên có hay chọn sai loại nghỉ không? Những lý do nghỉ nào hay bị chọn sai? | Xác nhận vấn đề và danh mục lý do nghỉ cho AI Leave Coordinator | blocks-design | HR công ty mục tiêu | Assumed | Xem A-015 |
 | Q-026 | Ngoài các báo cáo ở Q-007, quản lý và ban giám đốc muốn được báo ngay những điều gì? Hiện họ có đọc hết báo cáo không? | Xác nhận vấn đề và loại insight cho AI Report Analyst | blocks-design | Quản lý và ban giám đốc công ty mục tiêu | Assumed | Xem A-016 |
+| Q-027 | Công ty có quy định số người tối thiểu phải có mặt ở mỗi phòng ban không? Ngưỡng là bao nhiêu, có khác nhau giữa các phòng ban không? | Giá trị `min_staff_ratio` và ngưỡng riêng của phòng ban (BR-146) | blocks-build | HR và quản lý công ty mục tiêu | Assumed | Xem A-017 |
+| Q-028 | Ngoài Tết, công ty có giai đoạn hạn chế nghỉ nào, như kiểm kê hay mùa cao điểm kinh doanh? | Dữ liệu ban đầu của giai đoạn hạn chế (BR-147) | nice-to-know | HR công ty mục tiêu | Open | |
+| Q-029 | Khi xin nghỉ, nhân viên có được biết buổi nào nhóm đã thiếu người không, nếu không kèm tên hay số người? | Cảnh báo phía nhân viên ở BR-146 | blocks-design | HR và quản lý công ty mục tiêu | Assumed | Xem A-018 |
+| Q-030 | Khi người duyệt đang nghỉ, công ty muốn ai duyệt thay: quản lý cấp trên, HR, hay người do người duyệt chỉ định? | Luật BR-149 | blocks-design | HR công ty mục tiêu | Assumed | Xem A-019 |
+| Q-031 | Ngân sách mỗi tháng cho dịch vụ AI là bao nhiêu, tách riêng hay gộp với ngân sách hạ tầng ở Q-009? | QA-009; chọn dịch vụ AI ở Phase 3 | blocks-design | Chủ dự án | Open | |
+| Q-032 | Ngoài các lý do theo Điều 115, danh mục lý do nghỉ của công ty gồm những mục nào? | Danh mục mặc định ở mục Default leave reasons của domain (BR-143) | blocks-build | HR công ty mục tiêu | Open | |
 
 ## Assumptions
 
@@ -63,3 +69,6 @@ con số thì đặt trong config.
 | A-014 | Q-024 | Nhân viên hỏi HR nhiều lần mỗi tuần về quy chế, số ngày phép và các khoản trên phiếu lương; phần lớn là câu lặp lại | AI HR Assistant ít giá trị; xếp sau hai tính năng AI còn lại | Hỏi HR công ty | No |
 | A-015 | Q-025 | Nhân viên thường không biết lý do nghỉ thuộc loại nghỉ nào, nhất là nghỉ việc riêng có hưởng lương và nghỉ không lương | Gợi ý loại nghỉ bằng AI ít giá trị; form chọn lý do theo danh mục là đủ | Hỏi HR công ty | No |
 | A-016 | Q-026 | Quản lý và ban giám đốc không đọc hết báo cáo; họ muốn được báo ngay khi có điều bất thường, như nghỉ việc tăng hay phép tồn sắp hết hạn | Đổi loại insight; nếu họ đã đọc đủ báo cáo thì AI Report Analyst ít giá trị | Hỏi quản lý và ban giám đốc công ty | No |
+| A-017 | Q-027 | Mỗi phòng ban cần ít nhất 50% nhân viên có mặt ở mỗi buổi; HR đặt ngưỡng riêng khi cần | Đổi `min_staff_ratio`; công ty không có quy định này thì cảnh báo nhóm thiếu người ít giá trị | Hỏi HR công ty | No |
+| A-018 | Q-029 | Nhân viên được thấy buổi nào nhóm thiếu người, không kèm tên hay số người | Bỏ cảnh báo phía nhân viên ở BR-146; phương án AI đề xuất vẫn tránh buổi thiếu người nhưng không nêu lý do | Hỏi HR công ty | No |
+| A-019 | Q-030 | Người duyệt thay là quản lý trực tiếp của người duyệt; không có thì HR | Đổi BR-149; có thể phải thêm thao tác chỉ định người duyệt thay | Hỏi HR công ty | No |

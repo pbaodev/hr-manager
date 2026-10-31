@@ -26,6 +26,10 @@ Ban giám đốc không có vai trò riêng: giám đốc là trưởng phòng b
 | Thời gian | Lịch | Làm cho thay đổi có ngày hiệu lực tự có tác dụng khi tới ngày | Chỉ thực hiện các chuyển trạng thái do thời gian trong mục Lifecycles của [domain](domain.md#lifecycles) |
 | Máy chấm công | Hệ thống ngoài | Cung cấp lượt chấm công của nhân viên qua file do HR xuất ra và tải lên | Hệ thống không kết nối trực tiếp với máy |
 
+AI Leave Coordinator và các tính năng AI khác của M6 là một phần của hệ thống, không phải actor. AI không có cột riêng
+trong ma trận dưới: AI làm việc theo ba tầng ở BR-155 tới BR-158, và đầu ra không bao giờ rộng hơn quyền của người nhận
+(BR-160).
+
 ### Permission matrix
 
 "Phạm vi" là nhân viên trong phạm vi của Quản lý theo BR-013. Quyền được kiểm ở backend, kể cả khi giao diện đã ẩn nút.
@@ -71,6 +75,15 @@ Các story do Thời gian thực hiện (US-030, US-031, US-040) không có dòn
 | Tính, điều chỉnh, chốt và xuất bảng lương (US-055 tới US-060, US-062, US-063) | ❌ | ❌ | ✅ |
 | Xem trang tổng quan và báo cáo nhân sự, nghỉ phép, chấm công; xuất báo cáo (US-064 tới US-068, US-070) | ❌ | ✅ phạm vi (BR-127) | ✅ mọi người |
 | Xem báo cáo chi phí lương (US-069) | ❌ | ✅ phạm vi, chỉ số tổng hợp từ bảng lương đã chốt (BR-128, BR-129) | ✅ mọi người, kể cả bảng lương Nháp |
+| Quản lý danh mục lý do nghỉ, giai đoạn hạn chế nghỉ, ngưỡng nhân sự của phòng ban (US-073, US-075, US-076) | ❌ | ❌ | ✅ |
+| Thấy cảnh báo phòng ban thiếu người khi gửi đơn (US-075) | ✅ không kèm tên hay số người (BR-146) | ✅ phạm vi, kèm tên | ✅ mọi người, kèm tên |
+| Đề nghị đổi ngày cho đơn đang chờ (US-079) | ❌ | ✅ đơn mình là người duyệt hoặc người duyệt thay | ✅ mọi đơn |
+| Phản hồi đề nghị đổi ngày, đổi đơn, gửi nhiều đơn một lần, chọn người nhận bàn giao (US-079 tới US-081) | ✅ đơn của mình | ✅ đơn của mình | ✅ đơn của mình |
+| Duyệt khi là người duyệt thay (US-078) | ❌ | ✅ đơn được giao thêm (BR-149) | ✅ |
+| Dùng AI tạo đơn; nhận phương án, giải thích và gợi ý của AI cho đơn của mình (US-082 tới US-086) | ✅ | ✅ | ✅ |
+| Xem tóm tắt tác động của AI; nhờ AI soạn lý do từ chối hay lời đề nghị (US-088, US-089) | ❌ | ✅ đơn mình là người duyệt hoặc người duyệt thay | ✅ mọi đơn |
+| Nhận tổng hợp đơn trong giai đoạn hạn chế (US-087) | ❌ | ✅ phạm vi | ✅ mọi người |
+| Nhận đề xuất xử lý đơn làm số phép âm (US-085) | ❌ | ❌ | ✅ |
 
 ## User stories
 
@@ -94,9 +107,11 @@ flowchart LR
     U5(["Quản lý hồ sơ, công tác, hợp đồng"])
     U6(["Quản lý cơ cấu tổ chức"])
     U7(["Quản lý tài khoản, vai trò"])
-    L1(["M2: Gửi đơn nghỉ, xem số dư phép"])
-    L2(["M2: Duyệt đơn nghỉ"])
-    L3(["M2: Cấu hình loại nghỉ, ngày lễ"])
+    L1(["M2: Gửi, đổi đơn nghỉ, xem số dư phép"])
+    L2(["M2: Duyệt đơn nghỉ, đề nghị đổi ngày"])
+    L3(["M2: Cấu hình loại nghỉ, lý do nghỉ, ngày lễ, ngưỡng nhân sự"])
+    I1(["M6: Tạo đơn, nhận phương án với AI"])
+    I2(["M6: Nhận hỗ trợ duyệt của AI"])
     A1(["M3: Xem bảng công, giải trình, đăng ký làm thêm"])
     A2(["M3: Nhập chấm công, quản lý ca, chốt bảng công"])
     A3(["M3: Duyệt giải trình, làm thêm"])
@@ -104,8 +119,8 @@ flowchart LR
     P2(["M4: Tính và chốt bảng lương"])
     R1(["M5: Xem báo cáo"])
   end
-  NV --- U1 & U2 & U3 & L1 & A1 & P1
-  QL --- U4 & L2 & A3 & R1
+  NV --- U1 & U2 & U3 & L1 & A1 & P1 & I1
+  QL --- U4 & L2 & A3 & R1 & I2
   HR --- U5 & U6 & U7 & L3 & A2 & P2 & R1
 ```
 
@@ -194,13 +209,15 @@ flowchart LR
 
 ### UC-005: Gửi và duyệt đơn nghỉ
 
-- **Actor:** Nhân viên; Quản lý, HR · **Stories:** US-023, US-025, US-026, US-034
+- **Actor:** Nhân viên; Quản lý, HR · **Stories:** US-023, US-025, US-026, US-034, US-074, US-075, US-077, US-078,
+  US-079
 - **Trigger:** Nhân viên cần nghỉ.
 - **Preconditions:** Nhân viên đang làm việc và có tài khoản.
 - **Main flow:**
-  1. Nhân viên chọn loại nghỉ, ngày và buổi bắt đầu, ngày và buổi kết thúc, nhập lý do.
+  1. Nhân viên chọn lý do nghỉ trong danh mục, loại nghỉ hợp lệ của lý do đó (BR-142), ngày và buổi bắt đầu, ngày và
+     buổi kết thúc; nhập mô tả thêm khi cần (BR-144).
   2. Hệ thống tính số ngày nghỉ theo lịch làm việc (BR-044). Với phép năm, hệ thống hiện số phép còn lại sau đơn
-     (BR-053).
+     (BR-053). Đơn làm phòng ban dưới ngưỡng hoặc thuộc giai đoạn hạn chế thì hiện cảnh báo (BR-146, BR-147).
   3. Nhân viên gửi đơn.
   4. Hệ thống xác định người duyệt (BR-056) và gửi thông báo cho người đó (BR-066).
   5. Người duyệt xem đơn, số dư phép của nhân viên và các đơn khác của nhóm trong cùng khoảng ngày.
@@ -210,7 +227,10 @@ flowchart LR
   - `4a`. Nhân viên không có quản lý trực tiếp: HR là người duyệt (BR-056).
   - `5a`. Người duyệt không còn quản lý nhân viên trước khi duyệt: đơn chuyển cho người duyệt mới (BR-057, EC-027).
   - `5b`. HR duyệt thay người duyệt (BR-058).
+  - `5c`. Đơn chờ lâu: người duyệt được nhắc, rồi HR được thông báo (BR-148).
+  - `5d`. Người duyệt đang nghỉ: đơn được giao thêm cho người duyệt thay (BR-149).
   - `6a`. Người duyệt từ chối và nhập lý do (BR-059). Số dư không đổi.
+  - `6b`. Người duyệt đề nghị đổi ngày; nhân viên chấp nhận, không đồng ý hoặc hủy đơn (BR-150, BR-151).
 - **Exceptions:**
   - `2a`. Khoảng nghỉ không có ngày làm việc nào: từ chối (EC-025).
   - `2b`. Đơn chồng buổi với đơn khác đang chờ duyệt hoặc đã duyệt: từ chối (BR-045).
@@ -366,6 +386,81 @@ flowchart LR
   - `4a`. Mở báo cáo của phòng ban ngoài phạm vi bằng đường dẫn trực tiếp: từ chối (BR-127, EC-086).
 - **Postconditions:** Quản lý không suy ra được lương của từng người. Mỗi lần xuất được ghi nhật ký (BR-136).
 
+### UC-013: Tạo đơn nghỉ với AI Leave Coordinator
+
+Giai đoạn 1 và 2 của AI Leave Coordinator: tiếp nhận, hiểu yêu cầu và đề xuất phương án. Chạy cả khi nhân viên dùng
+form lẫn khi dùng chat.
+
+- **Actor:** Nhân viên · **Stories:** US-082, US-083, US-084
+- **Trigger:** Nhân viên mô tả nhu cầu nghỉ bằng một câu, trong chat hoặc ở form, hoặc điền form.
+- **Preconditions:** Như UC-005.
+- **Main flow:**
+  1. Nhân viên nhập câu mô tả, hoặc điền lý do, loại nghỉ, ngày, buổi và mô tả thêm.
+  2. AI diễn giải thành bản nháp: ngày, buổi, lý do trong danh mục (BR-166). Với form, AI kiểm mô tả thêm có khớp lý do
+     đã chọn (BR-167).
+  3. Core tính dữ kiện của bản nháp: loại nghỉ hợp lệ, số ngày, số phép tại từng ngày, mức phủ, giai đoạn hạn chế
+     (BR-142, BR-044, BR-053, BR-146, BR-147).
+  4. Core sinh các phương án hợp lệ; AI chọn tối đa `leave_option_count` phương án và ghi hệ quả của từng phương án
+     (BR-168).
+  5. Nhân viên chọn một phương án hoặc tự sửa, rồi bấm Gửi. Đây là điểm người xác nhận; AI không gửi thay (BR-155).
+  6. Tiếp tục như UC-005 từ bước 4.
+- **Alternative flows:**
+  - `2a`. Câu thiếu thông tin hoặc AI không chắc: AI hỏi lại; nhân viên trả lời rồi quay lại bước 2 (BR-166).
+  - `2b`. Câu gồm hai đợt nghỉ: AI tạo hai bản nháp (EC-093).
+  - `5a`. Phương án gồm nhiều đơn: các đơn được gửi trong một lần xác nhận (BR-153).
+- **Exceptions:**
+  - `2c`. AI lỗi, chậm hoặc đầu ra không đạt kiểm tra: form giữ chữ đã gõ, nhân viên điền tay như UC-005 (BR-162,
+    BR-163, EC-096).
+  - `5b`. Dữ kiện đổi trước lúc gửi, như số dư: core từ chối như UC-005; AI đề xuất lại (EC-097).
+- **Postconditions:** Đơn chỉ được tạo khi nhân viên bấm Gửi. Đơn có cờ có hỗ trợ AI; đầu ra của AI và lựa chọn cuối
+  được lưu (BR-165).
+
+### UC-014: Điều phối tình huống của đơn nghỉ
+
+Giai đoạn 3 của AI Leave Coordinator: điều phối và thực thi. Rule làm phần cố định; AI giải thích và đề xuất cách xử
+lý.
+
+- **Actor:** Thời gian; Nhân viên, Quản lý, HR · **Stories:** US-077, US-078, US-085, US-086, US-087
+- **Trigger:** Một tình huống ở BR-169, hoặc tới lịch ở BR-170, BR-171.
+- **Preconditions:** Đơn hoặc phép tồn liên quan đang tồn tại.
+- **Main flow:**
+  1. Core phát sinh tình huống, hoặc tới lịch.
+  2. Rule xử lý phần cố định: nhắc, báo HR, giao người duyệt thay, tính lại, hủy đơn (BR-148, BR-149, BR-064, BR-065).
+  3. AI đọc dữ liệu của tình huống trong giới hạn BR-159, soạn giải thích, và soạn thẻ đề xuất khi có cách xử lý.
+  4. Core kiểm đầu ra: đúng định dạng, con số khớp, người nhận chỉ thấy dữ liệu trong quyền của mình (BR-160, BR-163).
+  5. Giải thích được gửi ngay, có nhãn AI (BR-156). Thẻ đề xuất chờ người có quyền bấm xác nhận (BR-157).
+  6. Người nhận xác nhận hoặc bỏ qua thẻ. Đây là điểm người xác nhận; core thực hiện thao tác bằng phiên của người đó.
+- **Alternative flows:**
+  - `3a`. Cách xử lý cần thao tác tầng 3, như điều chỉnh số dư khi phép âm (EC-032): AI chỉ giải thích và liệt kê đơn
+    cần xử lý cho HR (BR-158).
+- **Exceptions:**
+  - `3b`. AI lỗi hoặc đầu ra không đạt kiểm tra: người nhận thấy nội dung mẫu của rule (BR-162).
+  - `6a`. Tình huống đã đổi trước khi người nhận xác nhận: core từ chối, thẻ hết hiệu lực (EC-104).
+- **Postconditions:** Trạng thái đơn và số dư chỉ đổi qua core, do rule hoặc do người bấm. Mọi đầu ra của AI được lưu
+  (BR-165).
+
+### UC-015: Hỗ trợ người duyệt đơn nghỉ
+
+Giai đoạn 4 của AI Leave Coordinator. AI giúp người duyệt hiểu tác động của đơn; quyết định luôn thuộc về người.
+
+- **Actor:** Quản lý, HR · **Stories:** US-075, US-079, US-088, US-089
+- **Trigger:** Người duyệt mở một đơn ở SCR-021.
+- **Preconditions:** Đơn ở trạng thái Chờ duyệt; người xem là người duyệt, người duyệt thay hoặc HR.
+- **Main flow:**
+  1. Core hiện dữ kiện của đơn: lý do, phép trước và sau, đơn trùng ngày, mức phủ từng buổi, giai đoạn hạn chế
+     (BR-146, BR-147).
+  2. AI tóm tắt tác động của đơn và gợi ý khoảng ngày thay thế giữ phòng ban trên ngưỡng. AI không gợi ý duyệt hay từ
+     chối (BR-164).
+  3. Người duyệt chọn Duyệt, Từ chối hoặc Đề nghị đổi ngày. Đây là điểm người quyết định.
+  4. Với Từ chối hoặc Đề nghị đổi ngày, người duyệt có thể nhờ AI soạn lý do hoặc lời nhắn, sửa rồi gửi (BR-059,
+     BR-150).
+  5. Core thực hiện như UC-005 hoặc BR-150.
+- **Alternative flows:**
+  - `2a`. AI lỗi: SCR-021 chỉ hiện dữ kiện của rule (BR-162).
+- **Exceptions:**
+  - `5a`. Người duyệt gốc và người duyệt thay cùng thao tác: thao tác đến trước có hiệu lực (EC-099).
+- **Postconditions:** Mọi quyết định do người duyệt hoặc HR. Tóm tắt và bản nháp AI đã hiện được lưu (BR-165).
+
 ## Quality attributes
 
 Mỗi dòng là một scenario có số đo. Importance và Difficulty xếp theo `H`, `M`, `L`; các dòng `H/H` và `H/M` là
@@ -381,6 +476,10 @@ Cột Verify by ghi cách đo dự kiến. Test hay lần đo cụ thể ghi ở
 | QA-003 | Security | Người dùng gọi trực tiếp một thao tác ngoài quyền, kể cả xem dữ liệu ngoài phạm vi hay lương của người khác | 100% bị từ chối ở backend và ghi log; thông báo lỗi không lộ dữ liệu | Test tự động cho mọi dòng của ma trận phân quyền với cả ba vai trò | H / M |
 | QA-004 | Performance | Công ty 300 nhân viên, dữ liệu 12 tháng, 30 người dùng cùng lúc | Mở danh sách, bảng công, báo cáo: p95 dưới 1 giây. Tính bảng lương 300 phiếu dưới 30 giây. Nhập file chấm công một tháng, khoảng 20.000 lượt chấm, dưới 60 giây (assumption) | Load test trên staging với dữ liệu giả | M / M |
 | QA-005 | Recoverability | Cơ sở dữ liệu hỏng hoặc bị xóa nhầm | Mất tối đa 24 giờ dữ liệu; hệ thống chạy lại trong 4 giờ | Diễn tập khôi phục từ bản sao lưu mỗi quý, ghi thời gian vào runbook | H / L |
+| QA-006 | Correctness (AI) | Diễn giải câu mô tả nghỉ tiếng Việt trên bộ ca có ngày tương đối, ngày lễ, lý do theo Điều 115 và câu thiếu thông tin | Ngày và buổi đúng ở ít nhất 95% số ca; lý do đúng mục ở ít nhất 90%; 100% ca thiếu thông tin được hỏi lại thay vì đoán (assumption) | Eval trên bộ ca tổng hợp, chạy khi đổi prompt, model hoặc pipeline | H / M |
+| QA-007 | Security (AI) | Câu mô tả, dữ liệu do người khác nhập hoặc câu hỏi nhằm lấy dữ liệu ngoài quyền người nhận, hay nhằm khiến AI tự thao tác | 0 đầu ra chứa dữ liệu ngoài quyền người nhận; 0 thao tác ghi do AI tự thực hiện | Bộ ca tấn công trong eval; test tự động cho ba tầng hành động của AI (BR-155 tới BR-158) | H / H |
+| QA-008 | Availability (AI) | Dịch vụ AI lỗi hoặc chậm | Mọi luồng nghỉ phép hoàn thành được bằng form và rule; gợi ý AI hiện trong 5 giây hoặc bị bỏ qua (assumption) | Test với AI bị tắt và bị làm chậm | H / L |
+| QA-009 | Cost (AI) | Công ty 300 nhân viên dùng các tính năng AI bình thường trong một tháng | Chi phí dịch vụ AI không vượt ngân sách ở Q-031; vượt giới hạn thì AI tạm tắt và nghiệp vụ chạy theo BR-162 | Đo chi phí trên staging với dữ liệu giả; giới hạn chi tiêu đặt ở dịch vụ AI | M / L |
 
 ## Non-goals
 
@@ -421,3 +520,12 @@ Riêng M5 không làm:
 - Gửi báo cáo định kỳ qua email.
 - Phân tích và gợi ý bằng AI: làm ở M6, không thuộc bộ báo cáo cố định của M5.
 - Báo cáo nộp cơ quan nhà nước như báo cáo tình hình sử dụng lao động: HR tự lập từ file xuất.
+
+Riêng AI Leave Coordinator của M6 không làm:
+
+- AI gợi ý duyệt hay từ chối, hoặc chấm điểm đơn: người duyệt quyết định (BR-164).
+- AI dùng lịch sử nghỉ, số lần nghỉ ốm hay đánh giá của người gửi: theo phần Out của
+  [brief](../project/brief.md#scope).
+- Tự động duyệt đơn bằng AI hay theo chính sách: mọi đơn vẫn do người duyệt, trừ trường hợp tự duyệt ở EC-035.
+- Thu thập nguyện vọng nghỉ trước khi có đơn: tổng hợp giai đoạn hạn chế chỉ dùng đơn đã gửi (BR-171).
+- Gửi tin qua email hay ứng dụng chat ngoài hệ thống: như M2, chỉ thông báo trong hệ thống.

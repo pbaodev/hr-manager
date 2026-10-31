@@ -34,11 +34,11 @@
 | Prototype | — | UI prototype dùng dữ liệu giả, có design system, gồm màn hình của ba tính năng AI; nằm trong Baseline, trước Phase 3 |
 | v1.0 | — | Bản phát hành đầu tiên cho công ty: mọi story của M1–M6 |
 | M1 | — | Walking skeleton: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; chạy trên staging |
-| M2 | — | Nghỉ phép |
+| M2 | — | Nghỉ phép, gồm phần rule mà AI Leave Coordinator dựa vào (US-073 tới US-081) |
 | M3 | — | Chấm công |
 | M4 | — | Lương và phúc lợi |
 | M5 | — | Báo cáo và phân tích |
-| M6 | — | Ba tính năng AI: AI HR Assistant, AI Leave Workflow, AI Report Analyst; thứ tự chốt khi phân tích AI |
+| M6 | — | Ba tính năng AI theo thứ tự: AI Leave Coordinator, AI Report Analyst, AI HR Assistant |
 
 ## Tools
 

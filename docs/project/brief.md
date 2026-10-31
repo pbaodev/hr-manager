@@ -10,8 +10,8 @@
 
 Chủ dự án muốn xây một hệ thống quản lý nhân sự chạy trên web cho doanh nghiệp nhỏ và vừa tại Việt Nam. Hệ thống gồm
 sáu nhóm chức năng: quản trị hệ thống, quản lý nhân viên, cơ cấu tổ chức, chấm công và nghỉ phép, lương và phúc lợi,
-báo cáo và phân tích. AI là trọng tâm của sản phẩm, gồm ba tính năng: trợ lý HR dạng chat, hỗ trợ điền đơn nghỉ và phân
-tích báo cáo trên trang tổng quan. Phần AI gồm cả tính năng người dùng dùng trực tiếp và tự động hóa trong quy trình.
+báo cáo và phân tích. AI là trọng tâm của sản phẩm, gồm ba tính năng: điều phối nghỉ phép, phân tích báo cáo trên trang
+tổng quan và trợ lý HR dạng chat. Phần AI gồm cả tính năng người dùng thao tác trực tiếp và tự động hóa trong quy trình.
 Phần nghiệp vụ phải đủ và tính đúng trước, AI được xây trên nền đó.
 
 ## Problem
@@ -26,7 +26,8 @@ Ba việc sau tốn thời gian của con người, và form hay bảng báo cá
 - Nhân viên hỏi HR qua Zalo về quy chế, số ngày phép còn lại và các khoản trên phiếu lương. HR trả lời lặp lại những câu
   giống nhau.
 - Nhân viên không biết lý do nghỉ của mình thuộc loại nghỉ nào, ví dụ phép năm, nghỉ việc riêng có hưởng lương hay nghỉ
-  không lương. Chọn sai loại thì đơn bị trả lại, hoặc lương bị tính sai.
+  không lương. Chọn sai loại thì đơn bị trả lại, hoặc lương bị tính sai. Đơn còn bị treo khi quản lý bận hay đang nghỉ,
+  và vào mùa cao điểm nhiều người xin nghỉ cùng lúc, quản lý phải tự xếp để nhóm đủ người.
 - Quản lý và ban giám đốc ít khi đọc hết các bảng báo cáo, nên không thấy kịp điều đáng chú ý, như một phòng ban có
   nhiều người nghỉ việc hay phép tồn của nhiều người sắp hết hạn.
 
@@ -56,8 +57,8 @@ Cột Current workaround là nhận định của chủ dự án, chưa được
 | Cảnh báo theo ngưỡng trên trang tổng quan | Bắt được điều đã định trước, như phép tồn sắp hết hạn; không giải thích được con số và không xếp được điều nào đáng chú ý hơn |
 | Tự làm | Có hệ thống đủ nghiệp vụ và AI cho công ty, đồng thời đạt mục tiêu học trong [project](project.md#goals) |
 
-Ba cách không dùng AI ở trên vẫn có giá trị riêng. Cách nào thuộc lớp rule và AI làm thêm phần nào chốt khi phân tích
-AI.
+Ba cách không dùng AI ở trên vẫn có giá trị riêng. Danh mục lý do nghỉ và cảnh báo theo ngưỡng thuộc lớp rule, chạy
+được khi tắt AI; AI làm phần mà các cách này không làm được.
 
 ## Solution
 
@@ -72,14 +73,17 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
 
 | AI feature | Users | What it does |
 |---|---|---|
-| AI HR Assistant | Mọi vai trò | Trợ lý dạng chat: trả lời câu hỏi về quy chế kèm nguồn, tra dữ liệu người hỏi có quyền xem, soạn sẵn yêu cầu để người hỏi xác nhận |
-| AI Leave Workflow | Nhân viên | Đọc mô tả nghỉ bằng câu tự nhiên, gợi ý loại nghỉ và điền sẵn đơn để nhân viên kiểm rồi gửi |
+| AI Leave Coordinator | Mọi vai trò | Tham gia cả quy trình nghỉ phép, từ form hay chat: hiểu yêu cầu, đề xuất phương án hợp lệ, điều phối tình huống phát sinh, hỗ trợ người duyệt bằng tóm tắt tác động |
 | AI Report Analyst | Quản lý, HR | Chỉ ra điều đáng chú ý trên trang tổng quan và giải thích bằng câu ngắn; mọi con số do core tính |
+| AI HR Assistant | Mọi vai trò | Trợ lý dạng chat: trả lời câu hỏi về quy chế kèm nguồn, tra dữ liệu người hỏi có quyền xem, soạn sẵn yêu cầu để người hỏi xác nhận |
 
-- **AI role:** AI chỉ đề xuất. AI không tính tiền, không quyết định quyền và không tự ghi dữ liệu. Mọi thao tác ghi đi
-  qua core và do người dùng xác nhận; duyệt đơn luôn do người làm.
-- Bước nào dùng AI, quyền hành động của AI và điểm người xác nhận (human-in-the-loop) của từng tính năng chốt khi phân
-  tích AI.
+- **AI role:** AI không tính tiền, không quyết định quyền và không tự thay đổi dữ liệu nghiệp vụ như trạng thái đơn, số
+  dư hay hồ sơ. AI được tự gửi giải thích, nhắc và ghi chú có nhãn AI. Mọi thay đổi đi qua core, do người có quyền xác
+  nhận hoặc do rule; duyệt đơn luôn do người làm. Khi chạy theo sự kiện, AI chỉ đọc dữ liệu của tình huống đang xử lý,
+  và người nhận chỉ thấy dữ liệu trong quyền của mình. Chi tiết ở BR-155 tới BR-165 trong
+  [domain](../analysis/domain.md).
+- Workflow, quyền hành động và điểm người xác nhận (human-in-the-loop) của AI Leave Coordinator ở UC-013 tới UC-015
+  trong [requirements](../analysis/requirements.md). Hai tính năng còn lại được ghi khi phân tích tiếp.
 
 ## Scope
 
@@ -92,11 +96,13 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
   - v1.0, bản phát hành đầu tiên cho công ty, gồm mọi story của M1–M6. M1–M5 là mốc nội bộ: mỗi mốc qua release gate
     trên staging nhưng không giao cho công ty.
   - M1: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức.
-  - M2: nghỉ phép.
+  - M2: nghỉ phép, gồm phần rule mà AI Leave Coordinator dựa vào: danh mục lý do nghỉ, ngưỡng nhân sự, nhắc và ủy quyền
+    duyệt, đề nghị đổi ngày.
   - M3: chấm công.
   - M4: lương và phúc lợi.
   - M5: báo cáo và phân tích.
-  - M6: ba tính năng AI ở mục Solution, làm sau khi M1–M5 qua release gate. Thứ tự chốt khi phân tích AI.
+  - M6: ba tính năng AI ở mục Solution, làm sau khi M1–M5 qua release gate, theo thứ tự AI Leave Coordinator, AI Report
+    Analyst, AI HR Assistant.
 - **Out:**
   - Phục vụ nhiều công ty trên cùng một hệ thống (SaaS): mục tiêu là một công ty dùng.
   - Tuyển dụng, onboarding và đánh giá hiệu suất: nằm ngoài sáu nhóm chức năng đã chọn.
@@ -121,6 +127,7 @@ Baseline và Target của các dòng đo ở công ty là ước lượng của 
 | Thời gian HR trả lời câu "nhân viên X còn bao nhiêu ngày phép" | Chưa đo | Dưới 1 phút | Hỏi HR sau 4 tuần dùng thử |
 | Số câu hỏi về quy chế, số ngày phép và lương HR nhận qua tin nhắn mỗi tuần | Chưa đo | Giảm một nửa sau 4 tuần dùng thử | HR đếm trong tuần trước và tuần cuối của đợt dùng thử |
 | Tỷ lệ đơn nghỉ bị từ chối vì chọn sai loại nghỉ | Chưa đo | Dưới 5% | Đếm lý do từ chối trong 4 tuần dùng thử |
+| Tỷ lệ đơn nghỉ có quyết định trong một ngày làm việc kể từ khi gửi | Chưa đo | Từ 90% trở lên | Đo trên hệ thống trong 4 tuần dùng thử |
 | Tỷ lệ insight trên trang tổng quan được người xem đánh giá là hữu ích | Chưa có | Từ 70% trở lên | Đánh giá của người xem trên từng insight trong 4 tuần dùng thử |
 
 ## Risks
@@ -134,9 +141,11 @@ Baseline và Target của các dòng đo ở công ty là ước lượng của 
 | Dữ liệu thay đổi theo thời gian, như chuyển phòng ban hay tăng lương từ một ngày hiệu lực, làm mô hình dữ liệu phức tạp | Technical | Thiết kế kỹ ở Phase 3 và ghi quyết định vào ADR; cân nhắc spike sau khi chọn DB |
 | Dữ liệu cá nhân của nhân viên (lương, CCCD, tài khoản ngân hàng) chịu Luật Bảo vệ dữ liệu cá nhân; dữ liệu gửi tới dịch vụ AI bên ngoài có thể bị chuyển ra nước ngoài | Legal | Chỉ dùng dữ liệu giả cho tới khi có thỏa thuận với công ty; xác định dữ liệu nhạy cảm khi phân tích domain; gửi cho AI ít dữ liệu nhất có thể, cách làm chốt khi phân tích AI |
 | AI trả lời sai quy chế hay luật, người dùng tin và làm theo | AI | AI chỉ trả lời từ tài liệu quy chế đã nạp và dẫn nguồn; không có nguồn thì nói không biết và chỉ tới HR |
-| AI để lộ dữ liệu ngoài quyền của người hỏi, ví dụ lương của đồng nghiệp | AI | AI đọc dữ liệu qua cùng lớp kiểm quyền như người dùng; AI không có quyền riêng |
-| AI bịa hoặc đọc sai số liệu trong insight | AI | Core tính mọi con số; code kiểm con số trong câu trả lời của AI khớp với dữ liệu trước khi hiển thị |
-| Nội dung người dùng nhập, như lý do nghỉ, chứa câu lệnh điều khiển AI (prompt injection) | AI | AI không có thao tác ghi; mọi thao tác do người dùng xác nhận trên form của core |
+| AI để lộ dữ liệu ngoài quyền của người nhận, ví dụ lương hay lý do nghỉ của đồng nghiệp | AI | AI đọc dữ liệu qua cùng lớp kiểm quyền như người dùng; khi chạy theo sự kiện, AI chỉ đọc dữ liệu của tình huống; đầu ra được lọc theo quyền người nhận (BR-159, BR-160) |
+| AI bịa hoặc đọc sai số liệu trong insight hay giải thích | AI | Core tính mọi con số; code kiểm con số trong đầu ra của AI khớp với dữ liệu trước khi hiển thị (BR-163) |
+| Nội dung người dùng nhập, như lý do nghỉ, chứa câu lệnh điều khiển AI (prompt injection) | AI | AI không tự thay đổi dữ liệu nghiệp vụ; thao tác chỉ chạy khi người có quyền xác nhận (BR-155 tới BR-158) |
+| AI dẫn dắt quyết định duyệt, hoặc đề xuất dựa trên đặc điểm của người gửi | AI | AI chỉ nêu tác động và phương án; không gợi ý duyệt hay từ chối, không dùng lịch sử hay đặc điểm cá nhân (BR-164) |
+| Nhân viên suy ra đồng nghiệp nào nghỉ từ cảnh báo nhóm thiếu người | Legal | Cảnh báo không kèm tên hay số người, và không hiện ở phòng ban nhỏ (BR-146) |
 | Chi phí gọi model AI vượt ngân sách hạ tầng | Cost | Ước lượng chi phí và đặt giới hạn chi tiêu khi phân tích AI |
 
 **Spike:** Chưa cần spike trước prototype. Rủi ro lớn nhất của phần nghiệp vụ là luật về lương, đã xử lý bằng việc đối
