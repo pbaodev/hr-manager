@@ -1,7 +1,7 @@
 # Requirements: hr-manager
 
 - **Status:** Accepted
-- **Updated:** 2026-10-30
+- **Updated:** 2026-10-31
 - **Reviewed:** 2026-10-30: chủ dự án review từng phần qua PR #17 tới #22; agent chạy Analysis checklist. Chưa có
   người ngoài review
 - **Related:** [brief](../project/brief.md) · [stories](stories.md) · [domain](domain.md) · [ui-flow](ui-flow.md) · [SPEC](../build/SPEC.md) ·
@@ -9,9 +9,9 @@
 
 ## Goal
 
-Baseline mô tả đủ hành vi của năm milestone M1–M5 trong [brief](../project/brief.md#scope) để thiết kế toàn hệ thống trước khi
-code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung cùng M1 tới M5. Bản phát hành đầu tiên là MVP,
-gồm các story có ✅ ở cột MVP trong [stories](stories.md#summary).
+Baseline mô tả đủ hành vi của sáu milestone M1–M6 trong [brief](../project/brief.md#scope) để thiết kế toàn hệ thống trước khi
+code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung cùng M1 tới M5; phần của M6 thêm khi phân tích
+AI. Bản phát hành đầu tiên là v1.0, gồm mọi story của M1 tới M6 trong [stories](stories.md#summary).
 
 ## Actors
 
@@ -419,5 +419,5 @@ Riêng M5 không làm:
 
 - Người dùng tự tạo báo cáo, tự chọn cột hay kéo thả biểu đồ: hệ thống có bộ báo cáo cố định.
 - Gửi báo cáo định kỳ qua email.
-- Dự báo, phân tích xu hướng hay gợi ý bằng AI: để ở M6.
+- Phân tích và gợi ý bằng AI: làm ở M6, không thuộc bộ báo cáo cố định của M5.
 - Báo cáo nộp cơ quan nhà nước như báo cáo tình hình sử dụng lao động: HR tự lập từ file xuất.

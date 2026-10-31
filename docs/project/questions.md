@@ -1,6 +1,6 @@
 # Questions and assumptions
 
-- **Updated:** 2026-10-30
+- **Updated:** 2026-10-31
 
 > Ghi mọi điều chưa biết ở đây, kể cả câu tự hỏi mình. Câu trả lời từ người dùng, tài liệu hay thử nghiệm được chép vào
 > đây, kèm nguồn và ngày. Nhiều người cần hỏi cùng một câu thì gửi kèm mã `Q-xxx` để dễ đối chiếu.
@@ -36,6 +36,9 @@
 | Q-021 | Điều 98 Bộ luật Lao động 2019 và Điều 55, 57, 67 Nghị định 145/2020/NĐ-CP về đơn giá giờ, hệ số làm thêm, làm ban đêm và lương làm căn cứ trả phép chưa nghỉ có đúng như domain đang ghi không? Hệ số làm thêm ban đêm có khác khi ban ngày không làm thêm không? | Luật BR-107, BR-108, BR-109, BR-120 | blocks-design | Cơ sở dữ liệu quốc gia về văn bản pháp luật | Assumed | Xem A-013 |
 | Q-022 | Công ty đặt ở địa bàn thuộc vùng lương tối thiểu nào? Có chi nhánh ở vùng khác không? | Giá trị `company_region`; mức sàn lương và trần BHTN | blocks-build | HR công ty mục tiêu | Assumed | Xem A-008 |
 | Q-023 | Luật Bảo hiểm xã hội 2024 và văn bản hướng dẫn quy định thế nào về đối tượng đóng với hợp đồng thử việc, ngưỡng 14 ngày không đóng và trần mức đóng? Sau khi Luật Thuế TNCN sửa đổi có hiệu lực, mức khấu trừ 10% với hợp đồng dưới 3 tháng và mức miễn thuế tiền ăn giữa ca còn đúng không? | Luật BR-100, BR-101, BR-110, BR-111, BR-113 và loại phụ cấp mặc định | blocks-design | Cơ sở dữ liệu quốc gia về văn bản pháp luật | Assumed | Xem A-013 |
+| Q-024 | Mỗi tuần HR nhận bao nhiêu câu hỏi của nhân viên về quy chế, số ngày phép và lương? Những câu nào lặp lại nhiều nhất? | Xác nhận vấn đề và phạm vi của AI HR Assistant; baseline của success metrics | blocks-design | HR công ty mục tiêu | Assumed | Xem A-014 |
+| Q-025 | Nhân viên có hay chọn sai loại nghỉ không? Những lý do nghỉ nào hay bị chọn sai? | Xác nhận vấn đề và danh mục lý do nghỉ cho AI Leave Workflow | blocks-design | HR công ty mục tiêu | Assumed | Xem A-015 |
+| Q-026 | Ngoài các báo cáo ở Q-007, quản lý và ban giám đốc muốn được báo ngay những điều gì? Hiện họ có đọc hết báo cáo không? | Xác nhận vấn đề và loại insight cho AI Report Analyst | blocks-design | Quản lý và ban giám đốc công ty mục tiêu | Assumed | Xem A-016 |
 
 ## Assumptions
 
@@ -57,3 +60,6 @@ con số thì đặt trong config.
 | A-011 | Q-003 | Công ty có tới 300 nhân viên, khoảng 30 phòng ban, tối đa 5 cấp | Đổi số đo của QA-004; trên 1.000 nhân viên thì tính lương và nhập file có thể phải chạy nền | Hỏi HR công ty | No |
 | A-012 | Q-004 | Quy chế nghỉ phép của công ty theo Bộ luật Lao động; phần khác luật nằm trong tham số của M2 và loại nghỉ cấu hình được | Thêm luật hoặc tham số cho phần quy chế khác luật | Hỏi HR công ty | No |
 | A-013 | Q-008, Q-013, Q-017, Q-020, Q-021, Q-023 | Luật và giá trị lấy từ văn bản pháp luật đang ghi trong domain là đúng. Mọi tỷ lệ, mức tiền và giới hạn đã là tham số | Sửa giá trị tham số; nếu cách tính khác thì sửa luật, story và test liên quan | Đối chiếu văn bản gốc trước khi code milestone dùng luật đó | No |
+| A-014 | Q-024 | Nhân viên hỏi HR nhiều lần mỗi tuần về quy chế, số ngày phép và các khoản trên phiếu lương; phần lớn là câu lặp lại | AI HR Assistant ít giá trị; xếp sau hai tính năng AI còn lại | Hỏi HR công ty | No |
+| A-015 | Q-025 | Nhân viên thường không biết lý do nghỉ thuộc loại nghỉ nào, nhất là nghỉ việc riêng có hưởng lương và nghỉ không lương | Gợi ý loại nghỉ bằng AI ít giá trị; form chọn lý do theo danh mục là đủ | Hỏi HR công ty | No |
+| A-016 | Q-026 | Quản lý và ban giám đốc không đọc hết báo cáo; họ muốn được báo ngay khi có điều bất thường, như nghỉ việc tăng hay phép tồn sắp hết hạn | Đổi loại insight; nếu họ đã đọc đủ báo cáo thì AI Report Analyst ít giá trị | Hỏi quản lý và ban giám đốc công ty | No |

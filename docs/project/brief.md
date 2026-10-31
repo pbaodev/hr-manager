@@ -1,8 +1,8 @@
 # Brief: hr-manager
 
 - **Status:** Accepted
-- **Updated:** 2026-10-30
-- **Reviewed:** 2026-10-30: chủ dự án đọc lại; không có AI review
+- **Updated:** 2026-10-31
+- **Reviewed:** 2026-10-31: chủ dự án review diff ở #39; agent soạn
 - **Related:** [questions](questions.md) · [research](research.md) · [requirements](../analysis/requirements.md) ·
   [decisions](../decisions/README.md)
 
@@ -10,8 +10,9 @@
 
 Chủ dự án muốn xây một hệ thống quản lý nhân sự chạy trên web cho doanh nghiệp nhỏ và vừa tại Việt Nam. Hệ thống gồm
 sáu nhóm chức năng: quản trị hệ thống, quản lý nhân viên, cơ cấu tổ chức, chấm công và nghỉ phép, lương và phúc lợi,
-báo cáo và phân tích. Tính năng AI là hướng mở rộng, làm sau khi phần nghiệp vụ đã xong.
-
+báo cáo và phân tích. AI là trọng tâm của sản phẩm, gồm ba tính năng: trợ lý HR dạng chat, hỗ trợ điền đơn nghỉ và phân
+tích báo cáo trên trang tổng quan. Phần AI gồm cả tính năng người dùng dùng trực tiếp và tự động hóa trong quy trình.
+Phần nghiệp vụ phải đủ và tính đúng trước, AI được xây trên nền đó.
 
 ## Problem
 
@@ -20,8 +21,17 @@ Không có nơi nào ghi lại số ngày phép đã dùng, nên cả nhân viê
 ngày. Cuối tháng, HR phải lục lại tin nhắn để tính công, rồi tính lương trên các bảng tính rời rạc. Hậu quả là công và
 lương dễ bị tính sai, và nhân viên với HR hay tranh cãi về số ngày phép còn lại.
 
+Ba việc sau tốn thời gian của con người, và form hay bảng báo cáo không giải hết:
+
+- Nhân viên hỏi HR qua Zalo về quy chế, số ngày phép còn lại và các khoản trên phiếu lương. HR trả lời lặp lại những câu
+  giống nhau.
+- Nhân viên không biết lý do nghỉ của mình thuộc loại nghỉ nào, ví dụ phép năm, nghỉ việc riêng có hưởng lương hay nghỉ
+  không lương. Chọn sai loại thì đơn bị trả lại, hoặc lương bị tính sai.
+- Quản lý và ban giám đốc ít khi đọc hết các bảng báo cáo, nên không thấy kịp điều đáng chú ý, như một phòng ban có
+  nhiều người nghỉ việc hay phép tồn của nhiều người sắp hết hạn.
+
 Mô tả trên là nhận định của chủ dự án, chưa được công ty xác nhận. Các câu cần hỏi công ty để kiểm chứng nằm ở
-[questions](questions.md).
+[questions](questions.md), gồm Q-001, Q-002 và Q-024 tới Q-026.
 
 ## Users
 
@@ -29,10 +39,10 @@ Cột Current workaround là nhận định của chủ dự án, chưa được
 
 | User | Need | Current workaround |
 |---|---|---|
-| Nhân viên | Gửi đơn nghỉ và biết mình còn bao nhiêu ngày phép | Nhắn Zalo cho quản lý; hỏi HR khi cần biết số ngày phép còn lại |
-| Quản lý trực tiếp | Duyệt đơn nghỉ của nhóm và biết ai vắng ngày nào | Nhận đơn qua Zalo hoặc nói miệng, duyệt bằng lời |
-| HR | Quản lý hồ sơ, theo dõi nghỉ phép, tổng hợp công và lương ở một nơi | Dùng nhiều bảng tính; lục lại tin nhắn Zalo khi tính công |
-| Ban giám đốc | Xem tình hình nhân sự và chi phí lương | Nhờ HR hoặc kế toán lập báo cáo |
+| Nhân viên | Gửi đơn nghỉ đúng loại, biết mình còn bao nhiêu ngày phép, hỏi quy chế mà không phải chờ HR | Nhắn Zalo cho quản lý; hỏi HR khi cần biết số ngày phép hay quy chế |
+| Quản lý trực tiếp | Duyệt đơn nghỉ của nhóm, biết ai vắng ngày nào và điều gì trong nhóm đáng chú ý | Nhận đơn qua Zalo hoặc nói miệng, duyệt bằng lời |
+| HR | Quản lý hồ sơ, nghỉ phép, công và lương ở một nơi; bớt trả lời câu hỏi lặp lại | Dùng nhiều bảng tính; lục lại tin nhắn Zalo khi tính công; trả lời từng tin nhắn |
+| Ban giám đốc | Biết tình hình nhân sự, chi phí lương và điều đáng chú ý mà không phải đọc hết bảng số | Nhờ HR hoặc kế toán lập báo cáo |
 
 ## Alternatives
 
@@ -41,67 +51,100 @@ Cột Current workaround là nhận định của chủ dự án, chưa được
 | Bảng tính và Zalo, cách công ty đang dùng | Không có luồng duyệt và không tự tính số ngày phép còn lại; HR tổng hợp công và lương bằng tay |
 | Phần mềm HRM trong nước như MISA AMIS HRM, Base HRM, 1Office | Đủ chức năng, nhưng dùng sản phẩm có sẵn thì không đạt mục tiêu luyện phân tích và thiết kế |
 | Odoo HR, mã nguồn mở | Tùy biến được, nhưng thứ học được là cách cấu hình Odoo, không phải cách thiết kế hệ thống |
-| Tự làm | Đạt được cả hai mục tiêu nêu ở mục Origin |
+| Trang quy chế và câu hỏi thường gặp, có ô tìm kiếm | Trả lời được câu hỏi chung, nhưng không trả lời được câu hỏi về dữ liệu của chính người hỏi; người dùng phải tự tìm đúng mục |
+| Form chọn lý do nghỉ theo danh mục, rule ánh xạ lý do sang loại nghỉ | Chính xác và rẻ, nhưng không hiểu lý do gõ tự do hay lý do ngoài danh mục |
+| Cảnh báo theo ngưỡng trên trang tổng quan | Bắt được điều đã định trước, như phép tồn sắp hết hạn; không giải thích được con số và không xếp được điều nào đáng chú ý hơn |
+| Tự làm | Có hệ thống đủ nghiệp vụ và AI cho công ty, đồng thời đạt mục tiêu học trong [project](project.md#goals) |
+
+Ba cách không dùng AI ở trên vẫn có giá trị riêng. Cách nào thuộc lớp rule và AI làm thêm phần nào chốt khi phân tích
+AI.
 
 ## Solution
 
-Một web app cho bốn nhóm người dùng của một công ty. Nhân viên tự gửi đơn nghỉ và xem số ngày phép còn lại. Quản lý
-duyệt đơn ngay trên hệ thống. HR quản lý hồ sơ, cơ cấu tổ chức, bảng công và bảng lương ở một nơi. Ban giám đốc xem báo
-cáo nhân sự và chi phí lương. Hệ thống tự tính số ngày phép, công và lương theo luật lao động và quy chế của công ty.
+Một web app cho bốn nhóm người dùng của một công ty, xây theo ba lớp. Mỗi lớp chỉ dựa vào lớp dưới nó, nên tắt AI thì
+mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
 
-- **AI role:** Bản đầu chưa có tính năng AI. Khi thêm AI sau này, AI không tính tiền và không quyết định quyền; những
-  việc đó do code đảm nhận.
+| Layer | Role | Examples |
+|---|---|---|
+| Core nghiệp vụ | Lưu dữ liệu và tính toán theo luật lao động và quy chế công ty; là nơi duy nhất quyết định dữ liệu đúng | Hồ sơ, cơ cấu tổ chức, đơn nghỉ và số dư phép, bảng công, bảng lương, báo cáo |
+| Tự động hóa bằng rule | Chạy việc lặp lại theo lịch hoặc theo sự kiện; luật nằm trong code và cấu hình | Cộng phép hằng tháng, chuyển phép tồn, chọn người duyệt, thông báo, cảnh báo hợp đồng sắp hết hạn |
+| AI | Hiểu câu tự nhiên, tóm tắt và gợi ý; đọc dữ liệu qua cùng lớp kiểm quyền như người dùng | Ba tính năng ở bảng dưới |
+
+| AI feature | Users | What it does |
+|---|---|---|
+| AI HR Assistant | Mọi vai trò | Trợ lý dạng chat: trả lời câu hỏi về quy chế kèm nguồn, tra dữ liệu người hỏi có quyền xem, soạn sẵn yêu cầu để người hỏi xác nhận |
+| AI Leave Workflow | Nhân viên | Đọc mô tả nghỉ bằng câu tự nhiên, gợi ý loại nghỉ và điền sẵn đơn để nhân viên kiểm rồi gửi |
+| AI Report Analyst | Quản lý, HR | Chỉ ra điều đáng chú ý trên trang tổng quan và giải thích bằng câu ngắn; mọi con số do core tính |
+
+- **AI role:** AI chỉ đề xuất. AI không tính tiền, không quyết định quyền và không tự ghi dữ liệu. Mọi thao tác ghi đi
+  qua core và do người dùng xác nhận; duyệt đơn luôn do người làm.
+- Bước nào dùng AI, quyền hành động của AI và điểm người xác nhận (human-in-the-loop) của từng tính năng chốt khi phân
+  tích AI.
 
 ## Scope
 
 - **In:**
-  - Phân tích chi tiết cả năm milestone dưới đây trước khi code. Phân rã chức năng nằm ở
+  - Phân tích chi tiết sáu milestone dưới đây trước khi code. Phân rã chức năng của M1–M5 nằm ở
     [research](research.md#decomposition).
-  - Thiết kế kiến trúc và dữ liệu cho cả năm milestone; thiết kế API và giao diện chi tiết cho MVP.
-  - MVP, bản phát hành đầu tiên: M1, M2 và các báo cáo của M5 không cần dữ liệu chấm công hay lương. Danh sách story ở cột
-    MVP của [stories](../analysis/stories.md#summary). Chủ dự án chọn ngày 2026-10-30, để công ty dùng thử sớm phần giải chỗ đau xin
-    nghỉ trước hai milestone có nhiều rủi ro về luật là M3 và M4.
+  - UI prototype dùng dữ liệu giả và có design system, gồm cả màn hình của ba tính năng AI. Phạm vi màn hình chốt khi
+    lập kế hoạch prototype.
+  - Thiết kế kiến trúc, dữ liệu, API và giao diện sau khi prototype được duyệt; stack được chọn ở bước này.
+  - v1.0, bản phát hành đầu tiên cho công ty, gồm mọi story của M1–M6. M1–M5 là mốc nội bộ: mỗi mốc qua release gate
+    trên staging nhưng không giao cho công ty.
   - M1: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức.
   - M2: nghỉ phép.
   - M3: chấm công.
   - M4: lương và phúc lợi.
   - M5: báo cáo và phân tích.
+  - M6: ba tính năng AI ở mục Solution, làm sau khi M1–M5 qua release gate. Thứ tự chốt khi phân tích AI.
 - **Out:**
-  - Tính năng AI: milestone M6, làm sau năm milestone trên.
   - Phục vụ nhiều công ty trên cùng một hệ thống (SaaS): mục tiêu là một công ty dùng.
   - Tuyển dụng, onboarding và đánh giá hiệu suất: nằm ngoài sáu nhóm chức năng đã chọn.
+  - AI đánh giá, xếp loại hay dự đoán về từng nhân viên, ví dụ dự đoán ai sắp nghỉ việc hay chấm điểm chuyên cần.
+    Insight của AI chỉ ở mức nhóm; cảnh báo về một người chỉ đến từ rule, ví dụ phép tồn sắp hết hạn.
   - Dữ liệu nhân viên thật: chỉ dùng dữ liệu giả cho tới khi có thỏa thuận với công ty.
 - **Constraints:**
   - Hệ thống chạy trên web.
   - Một người làm cùng coding agent, khoảng 6 giờ mỗi ngày.
-  - Phân tích và thiết kế phải xong trước 2026-11-12. Code làm sau mốc này; chưa đặt ngày phát hành.
+  - Chưa viết code cho tới khi prototype được duyệt và stack được chọn. Chưa đặt ngày cho các mốc và ngày phát hành.
   - Hệ thống phải tuân theo luật Việt Nam về lao động, bảo hiểm xã hội, thuế thu nhập cá nhân và bảo vệ dữ liệu cá
     nhân. Danh sách văn bản nằm ở [research](research.md#legal-sources).
 
 ## Success metrics
 
-Baseline và Target ở hai dòng cuối là ước lượng của chủ dự án; chỉnh lại sau khi hỏi công ty.
+Baseline và Target của các dòng đo ở công ty là ước lượng của chủ dự án; chỉnh lại sau khi hỏi công ty.
 
 | Metric | Baseline | Target | Measured by |
 |---|---|---|---|
-| Số hạng mục phân tích và thiết kế đã chốt | 0 trên 13 | 13 trên 13 trước 2026-11-12 | Số Issue đã đóng trong milestone `Baseline` trên GitHub |
+| Số luồng đi được trên prototype, gồm các luồng trong [ui-flow](../analysis/ui-flow.md#flows) và luồng của ba tính năng AI | 0 | Mọi luồng; chủ dự án duyệt prototype | Đi thử từng luồng trên prototype; ghi kết quả vào Issue của prototype |
 | Tỷ lệ đơn nghỉ ở công ty mục tiêu được gửi và duyệt trên hệ thống | 0%; mọi đơn đi qua Zalo hoặc nói miệng | 100% sau 4 tuần dùng thử | Đối chiếu số đơn trên hệ thống với danh sách nghỉ của HR |
 | Thời gian HR trả lời câu "nhân viên X còn bao nhiêu ngày phép" | Chưa đo | Dưới 1 phút | Hỏi HR sau 4 tuần dùng thử |
+| Số câu hỏi về quy chế, số ngày phép và lương HR nhận qua tin nhắn mỗi tuần | Chưa đo | Giảm một nửa sau 4 tuần dùng thử | HR đếm trong tuần trước và tuần cuối của đợt dùng thử |
+| Tỷ lệ đơn nghỉ bị từ chối vì chọn sai loại nghỉ | Chưa đo | Dưới 5% | Đếm lý do từ chối trong 4 tuần dùng thử |
+| Tỷ lệ insight trên trang tổng quan được người xem đánh giá là hữu ích | Chưa có | Từ 70% trở lên | Đánh giá của người xem trên từng insight trong 4 tuần dùng thử |
 
 ## Risks
 
 | Risk | Type | Mitigation or spike |
 |---|---|---|
 | Công ty mục tiêu không đau nhất ở nghỉ phép, hoặc không muốn dùng hệ thống | Product | Hỏi HR công ty về chỗ đau và cách làm hiện tại trước khi chốt requirements |
-| Không kịp phân tích và thiết kế cả năm milestone trước 2026-11-12 | Time | Xem tiến độ mỗi Chủ nhật; nếu trễ thì lùi mốc, không làm lướt các bước kiểm tra |
+| Ba việc AI giải không phải chỗ đau thật của công ty | Product | Hỏi công ty theo Q-024 tới Q-026 trước khi chốt story của M6 |
+| v1.0 gồm sáu milestone nên lâu mới có người dùng thật | Time | Mỗi mốc M1–M5 qua release gate trên staging; xem tiến độ mỗi Chủ nhật; cắt story theo priority khi cần |
 | Luật về lương (bảo hiểm xã hội, thuế thu nhập cá nhân, làm thêm giờ) phức tạp và đang thay đổi, dễ dẫn tới tính sai tiền | Technical | Đối chiếu văn bản gốc khi phân tích; mỗi luật ghi rõ nguồn và có test; tỷ lệ và mức giảm trừ đặt trong cấu hình, không viết cứng trong code |
 | Dữ liệu thay đổi theo thời gian, như chuyển phòng ban hay tăng lương từ một ngày hiệu lực, làm mô hình dữ liệu phức tạp | Technical | Thiết kế kỹ ở Phase 3 và ghi quyết định vào ADR; cân nhắc spike sau khi chọn DB |
-| Dữ liệu cá nhân của nhân viên (lương, CCCD, tài khoản ngân hàng) chịu Luật Bảo vệ dữ liệu cá nhân | Legal | Chỉ dùng dữ liệu giả cho tới khi có thỏa thuận với công ty; xác định dữ liệu nhạy cảm khi phân tích domain |
+| Dữ liệu cá nhân của nhân viên (lương, CCCD, tài khoản ngân hàng) chịu Luật Bảo vệ dữ liệu cá nhân; dữ liệu gửi tới dịch vụ AI bên ngoài có thể bị chuyển ra nước ngoài | Legal | Chỉ dùng dữ liệu giả cho tới khi có thỏa thuận với công ty; xác định dữ liệu nhạy cảm khi phân tích domain; gửi cho AI ít dữ liệu nhất có thể, cách làm chốt khi phân tích AI |
+| AI trả lời sai quy chế hay luật, người dùng tin và làm theo | AI | AI chỉ trả lời từ tài liệu quy chế đã nạp và dẫn nguồn; không có nguồn thì nói không biết và chỉ tới HR |
+| AI để lộ dữ liệu ngoài quyền của người hỏi, ví dụ lương của đồng nghiệp | AI | AI đọc dữ liệu qua cùng lớp kiểm quyền như người dùng; AI không có quyền riêng |
+| AI bịa hoặc đọc sai số liệu trong insight | AI | Core tính mọi con số; code kiểm con số trong câu trả lời của AI khớp với dữ liệu trước khi hiển thị |
+| Nội dung người dùng nhập, như lý do nghỉ, chứa câu lệnh điều khiển AI (prompt injection) | AI | AI không có thao tác ghi; mọi thao tác do người dùng xác nhận trên form của core |
+| Chi phí gọi model AI vượt ngân sách hạ tầng | Cost | Ước lượng chi phí và đặt giới hạn chi tiêu khi phân tích AI |
 
-**Spike:** Phase 1 chưa cần spike, vì hai lý do. Rủi ro kỹ thuật lớn nhất là luật về lương, và việc đối chiếu văn bản
-luật ở Phase 2 xử lý rủi ro này. Ngoài ra, chưa chọn stack nên chưa có nền để viết code thử.
+**Spike:** Chưa cần spike trước prototype. Rủi ro lớn nhất của phần nghiệp vụ là luật về lương, đã xử lý bằng việc đối
+chiếu văn bản luật ở Phase 2. Rủi ro của AI, như độ chính xác khi gợi ý loại nghỉ từ câu tiếng Việt, cần spike sau khi
+phân tích AI và trước khi chọn stack.
 
 ## Decision
 
-Go · 2026-10-29. Dù chỗ đau thật của công ty là gì, thứ tự làm các milestone vẫn giữ nguyên, vì mỗi module cần dữ liệu
-của module trước nó. Do đó Phase 2 bắt đầu được ngay trong lúc chờ hỏi công ty.
+Go · 2026-10-29. Dù chỗ đau thật của công ty là gì, thứ tự làm các milestone vẫn giữ nguyên: mỗi module cần dữ liệu của
+module trước nó, và AI cần dữ liệu của cả năm module. Do đó việc phân tích và làm prototype bắt đầu được ngay trong lúc
+chờ hỏi công ty.
