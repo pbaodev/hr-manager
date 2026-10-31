@@ -49,8 +49,8 @@
 | Agent access to tracker | `gh` CLI |
 | AI agent | Claude Code, Codex |
 | Diagrams | Mermaid trong Markdown |
-| Hosting | Render cho production, gói miễn phí cho staging ([ADR-0005](../decisions/0005-hosting.md)) |
-| Secrets | `.env` ở local; biến môi trường của từng service trên Render ([ADR-0005](../decisions/0005-hosting.md)) |
+| Hosting | Chưa chọn; chọn ở Phase 3, sau prototype |
+| Secrets | `.env` ở local; nơi lưu ở môi trường deploy chọn cùng hosting |
 
 ## Deviations from default
 

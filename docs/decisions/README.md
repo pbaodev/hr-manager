@@ -17,11 +17,15 @@ Lựa chọn dễ đổi lại thì không cần ADR, ví dụ một thư viện
 
 Cột Options not chosen giúp tìm lại phương án đã cân nhắc mà không phải mở từng ADR.
 
+ADR-0001 tới ADR-0006 được viết cho phạm vi cũ và đã bỏ ngày 2026-10-31 (#41), để chọn lại stack ở Phase 3 sau
+prototype. Nội dung đầy đủ nằm ở tag `design-v0`. Các dòng dưới đây giữ lại để link cũ vẫn có nghĩa; ADR mới đánh số từ
+0007.
+
 | ADR | Title | Status | Date | Drivers | Options not chosen |
 |---|---|---|---|---|---|
-| [0001](0001-architecture-style.md) | Modular monolith gồm một backend và một SPA | Accepted | 2026-10-30 | QA-001, QA-003, QA-004 | Client + BaaS; microservices |
-| [0002](0002-stack.md) | Python FastAPI cho backend, React TypeScript cho frontend | Accepted | 2026-10-30 | QA-002, QA-003, QA-004 | NestJS + React; Spring Boot + React; Next.js full-stack |
-| [0003](0003-data-store.md) | PostgreSQL là nơi lưu dữ liệu duy nhất | Accepted | 2026-10-30 | QA-001, QA-002, QA-005 | MySQL; SQLite |
-| [0004](0004-authentication.md) | Xác thực tự làm bằng JWT ngắn hạn và refresh token lưu DB | Accepted | 2026-10-30 | QA-003 | Session lưu DB; dịch vụ auth ngoài |
-| [0005](0005-hosting.md) | Render cho production, gói miễn phí cho staging | Accepted | 2026-10-30 | QA-004, QA-005 | Railway; app trên Render với DB trên Neon |
-| [0006](0006-frontend-libraries.md) | Mantine, TanStack Query, openapi-fetch và React Router cho frontend | Accepted | 2026-10-30 | QA-003 | shadcn/ui; Ant Design; SWR; Orval; TanStack Router |
+| 0001 | Modular monolith gồm một backend và một SPA | (removed, #41) | 2026-10-30 | QA-001, QA-003, QA-004 | Client + BaaS; microservices |
+| 0002 | Python FastAPI cho backend, React TypeScript cho frontend | (removed, #41) | 2026-10-30 | QA-002, QA-003, QA-004 | NestJS + React; Spring Boot + React; Next.js full-stack |
+| 0003 | PostgreSQL là nơi lưu dữ liệu duy nhất | (removed, #41) | 2026-10-30 | QA-001, QA-002, QA-005 | MySQL; SQLite |
+| 0004 | Xác thực tự làm bằng JWT ngắn hạn và refresh token lưu DB | (removed, #41) | 2026-10-30 | QA-003 | Session lưu DB; dịch vụ auth ngoài |
+| 0005 | Render cho production, gói miễn phí cho staging | (removed, #41) | 2026-10-30 | QA-004, QA-005 | Railway; app trên Render với DB trên Neon |
+| 0006 | Mantine, TanStack Query, openapi-fetch và React Router cho frontend | (removed, #41) | 2026-10-30 | QA-003 | shadcn/ui; Ant Design; SWR; Orval; TanStack Router |
