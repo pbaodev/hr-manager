@@ -50,7 +50,7 @@ Quyền chi tiết của từng thao tác nằm ở [permission matrix](docs/ana
 
 ## Product Mind Map
 
-![Product mind map]()
+<!-- Ảnh mind map: bổ sung sau -->
 
 ## Key Features
 
@@ -107,7 +107,7 @@ scripts/               Script dựng GitHub
 
 **Use case diagram**
 
-![Use case diagram]()
+<!-- Ảnh use case diagram: bổ sung sau -->
 
 **User stories INVEST**
 
@@ -128,7 +128,7 @@ Có 72 story, mỗi story kèm acceptance criteria dạng Given, When, Then. 32 
 
 46 màn hình, nhóm theo menu. Menu chỉ hiện mục người dùng có quyền; quyền vẫn được kiểm ở backend.
 
-![Information architecture]()
+<!-- Ảnh information architecture: bổ sung sau -->
 
 Luồng giữa các màn hình ở [UI flow](docs/analysis/ui-flow.md).
 
