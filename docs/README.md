@@ -12,7 +12,6 @@ docs/
   decisions/    Phase 1 trở đi: ADR
   build/        Phase 3–4: SPEC, setup, testing, conventions
   operations/   Phase 5: runbook; user guide và handover khi cần
-  assets/       Ảnh dùng trong tài liệu
   playbook/     Hướng dẫn quy trình của template, không phải tài liệu dự án
 ```
 
@@ -39,16 +38,15 @@ docs/
 
 | Document | Answers | Hat | Phase | Status |
 |---|---|---|---|---|
-| [ARCHITECTURE.md](../ARCHITECTURE.md) | C4 Context và Container, driver, cross-cutting, threat, deployment | Architect | 3 | Draft |
-| [components.md](design/components.md) | C4 Component: module, dependency rule, frontend, cấu hình | Architect | 3 | Draft |
-| [data.md](design/data.md) | Dữ liệu lưu thế nào, luật nào giữ ở tầng dữ liệu, transaction, migration | Architect | 3 | Draft |
-| [schema.dbml](design/schema.dbml) | Schema dạng DBML, sinh từ data.md | Architect | 3 | Theo data.md |
-| [api.md](design/api.md) | Quy ước API, lỗi, xác thực, danh sách operation | Architect | 3 | Draft |
-| [openapi.yaml](../contracts/openapi.yaml) | Contract chính xác của API | Architect | 3 | Theo api.md |
-| [flows.md](design/flows.md) | Sequence diagram của luồng chính và job | Architect | 3 | Draft |
-| [ui.md](design/ui.md) | Design system, trạng thái màn hình, định dạng, accessibility | Architect | 3 | Draft |
-| [ai.md](design/ai.md) | Component AI; điền khi làm M6 | Architect | 3 | Mẫu, chưa dùng |
-| [decisions/](decisions/README.md) | Vì sao chọn phương án này, đã cân nhắc phương án nào | Architect | 1 trở đi | 6 ADR Accepted |
+| [ARCHITECTURE.md](../ARCHITECTURE.md) | C4 Context và Container, driver, cross-cutting, threat, deployment | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [components.md](design/components.md) | C4 Component: module, dependency rule, frontend, cấu hình | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [data.md](design/data.md) | Dữ liệu lưu thế nào, luật nào giữ ở tầng dữ liệu, transaction, migration | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [api.md](design/api.md) | Quy ước API, lỗi, xác thực, danh sách operation | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [openapi.yaml](../contracts/openapi.yaml) | Contract chính xác của API | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [flows.md](design/flows.md) | Sequence diagram của luồng chính và job | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [ui.md](design/ui.md) | Design system, trạng thái màn hình, định dạng, accessibility | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [ai.md](design/ai.md) | Component AI của ba tính năng ở M6 | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [decisions/](decisions/README.md) | Vì sao chọn phương án này, đã cân nhắc phương án nào | Architect | 1 trở đi | Chưa có ADR; ADR-0001 tới 0006 đã bỏ |
 
 ## Build
 
