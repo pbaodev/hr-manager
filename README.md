@@ -2,8 +2,9 @@
 
 Hệ thống quản lý nhân sự chạy trên web cho doanh nghiệp nhỏ và vừa tại Việt Nam.
 
-> **Trạng thái:** Phase 3, Thiết kế. Phân tích yêu cầu đã chốt; kiến trúc, dữ liệu, API và giao diện của MVP đã có bản
-> Draft. Chưa có code. Cập nhật 2026-10-30.
+> **Trạng thái:** đang đổi phạm vi ([#39](https://github.com/pbaodev/hr-manager/issues/39)). v1.0 gồm M1–M6, AI là
+> trọng tâm; bước tiếp theo là UI prototype dùng dữ liệu giả, chưa có code. Các mục dưới đây vẫn mô tả phạm vi MVP cũ
+> và sẽ được viết lại sau khi có prototype. Cập nhật 2026-10-31.
 
 ## Project Overview
 

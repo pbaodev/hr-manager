@@ -21,7 +21,7 @@ docs/
 | Document | Answers | Hat | Phase | Status |
 |---|---|---|---|---|
 | [project.md](project/project.md) | Mục tiêu, quỹ thời gian, công cụ, chỗ làm khác default | Ops | 0 | Accepted |
-| [brief.md](project/brief.md) | Bài toán, giải pháp, phạm vi, rủi ro; có nên làm không | Analyst | 1 | Accepted |
+| [brief.md](project/brief.md) | Bài toán, giải pháp ba lớp và ba tính năng AI, phạm vi, rủi ro; có nên làm không | Analyst | 1 | Accepted |
 | [research.md](project/research.md) | Phân rã chức năng, văn bản luật, nguồn tham khảo | Analyst | 1 | Accepted |
 | [questions.md](project/questions.md) | Câu hỏi chờ công ty trả lời và assumption đang dùng | Analyst | 1 trở đi | Cập nhật liên tục |
 
@@ -30,7 +30,7 @@ docs/
 | Document | Answers | Hat | Phase | Status |
 |---|---|---|---|---|
 | [requirements.md](analysis/requirements.md) | Ai dùng, được làm gì, use case, quality attribute | Analyst | 2 | Accepted |
-| [stories.md](analysis/stories.md) | 72 user story, acceptance criteria, phạm vi MVP | Analyst | 2 | Accepted |
+| [stories.md](analysis/stories.md) | 72 user story của M1–M5, acceptance criteria, priority | Analyst | 2 | Accepted |
 | [invest.md](analysis/invest.md) | Story MVP đạt INVEST tới đâu | Analyst | 2 | Draft |
 | [domain.md](analysis/domain.md) | Thuật ngữ, entity, vòng đời, luật nghiệp vụ, edge case, dữ liệu nhạy cảm | Analyst | 2 | Accepted |
 | [ui-flow.md](analysis/ui-flow.md) | Người dùng thấy và làm gì trên từng màn hình | Analyst | 2 | Accepted |
