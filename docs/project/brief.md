@@ -57,8 +57,8 @@ Cột Current workaround là nhận định của chủ dự án, chưa được
 | Cảnh báo theo ngưỡng trên trang tổng quan | Bắt được điều đã định trước, như phép tồn sắp hết hạn; không giải thích được con số và không xếp được điều nào đáng chú ý hơn |
 | Tự làm | Có hệ thống đủ nghiệp vụ và AI cho công ty, đồng thời đạt mục tiêu học trong [project](project.md#goals) |
 
-Ba cách không dùng AI ở trên vẫn có giá trị riêng. Danh mục lý do nghỉ và cảnh báo theo ngưỡng thuộc lớp rule, chạy
-được khi tắt AI; AI làm phần mà các cách này không làm được.
+Ba cách không dùng AI ở trên vẫn có giá trị riêng. Danh mục lý do nghỉ, cảnh báo theo ngưỡng, thư viện quy chế và câu
+hỏi thường gặp thuộc lớp rule, chạy được khi tắt AI; AI làm phần mà các cách này không làm được.
 
 ## Solution
 
@@ -71,11 +71,14 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
 | Tự động hóa bằng rule | Chạy việc lặp lại theo lịch hoặc theo sự kiện; luật nằm trong code và cấu hình | Cộng phép hằng tháng, chuyển phép tồn, chọn người duyệt, thông báo, cảnh báo hợp đồng sắp hết hạn |
 | AI | Hiểu câu tự nhiên, tóm tắt và gợi ý; đọc dữ liệu qua cùng lớp kiểm quyền như người dùng | Ba tính năng ở bảng dưới |
 
+Mỗi tính năng AI được chọn bằng ba câu hỏi: người dùng đang gặp vấn đề gì, software truyền thống giải được tới đâu, và
+phần còn lại có thật sự cần AI không. Phần form, rule hay báo cáo làm đủ thì không dùng AI.
+
 | AI feature | Users | What it does |
 |---|---|---|
 | AI Leave Coordinator | Mọi vai trò | Tham gia cả quy trình nghỉ phép, từ form hay chat: hiểu yêu cầu, đề xuất phương án hợp lệ, điều phối tình huống phát sinh, hỗ trợ người duyệt bằng tóm tắt tác động |
 | AI Report Analyst | Quản lý, HR | Gom tín hiệu do rule phát hiện thành vài điều đáng chú ý trên trang tổng quan, giải thích bằng câu ngắn, soạn tin nhắc nhóm, viết cập nhật và tóm tắt tuần; mọi con số do core tính |
-| AI HR Assistant | Mọi vai trò | Trợ lý dạng chat: trả lời câu hỏi về quy chế kèm nguồn, tra dữ liệu người hỏi có quyền xem, soạn sẵn yêu cầu để người hỏi xác nhận |
+| AI HR Assistant | Mọi vai trò | Lối vào hội thoại, không thay màn hình nghiệp vụ: trả lời câu hỏi về quy chế kèm nguồn, tra dữ liệu người hỏi có quyền xem, chuyển ý định sang workflow nghiệp vụ đã có và chuyển câu chưa trả lời được cho HR |
 
 - **AI role:** AI không tính tiền, không quyết định quyền và không tự thay đổi dữ liệu nghiệp vụ như trạng thái đơn, số
   dư hay hồ sơ. AI được tự gửi giải thích, nhắc và ghi chú có nhãn AI. Mọi thay đổi đi qua core, do người có quyền xác
@@ -83,10 +86,13 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
   và người nhận chỉ thấy dữ liệu trong quyền của mình. Chi tiết ở BR-155 tới BR-165 trong
   [domain](../analysis/domain.md).
 - Workflow, quyền hành động và điểm người xác nhận (human-in-the-loop) của AI Leave Coordinator ở UC-013 tới UC-015,
-  của AI Report Analyst ở UC-016 và UC-017 trong [requirements](../analysis/requirements.md). AI HR Assistant được ghi
-  khi phân tích tiếp.
+  của AI Report Analyst ở UC-016 và UC-017, của AI HR Assistant ở UC-018 tới UC-020 trong
+  [requirements](../analysis/requirements.md).
 - AI Report Analyst chỉ nhận số liệu mức nhóm do core tính, không nhận dữ liệu của từng người, và không nêu nguyên nhân
   ngoài phần phân rã con số của core (BR-182 tới BR-185).
+- Chat không sở hữu nghiệp vụ riêng: AI HR Assistant chỉ hỏi đáp, nhận ra ý định và chuyển người dùng sang workflow đã
+  có; mọi thao tác được xác nhận trên màn hình nghiệp vụ (BR-204 tới BR-207). Các cách tương tác nằm ở mục Interaction
+  modes của [ui-flow](../analysis/ui-flow.md#interaction-modes).
 
 ## Scope
 
@@ -98,11 +104,12 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
   - Thiết kế kiến trúc, dữ liệu, API và giao diện sau khi prototype được duyệt; stack được chọn ở bước này.
   - v1.0, bản phát hành đầu tiên cho công ty, gồm mọi story của M1–M6. M1–M5 là mốc nội bộ: mỗi mốc qua release gate
     trên staging nhưng không giao cho công ty.
-  - M1: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức.
+  - M1: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; thư viện quy chế, câu hỏi thường gặp và hộp câu hỏi gửi HR
+    mà AI HR Assistant dựa vào.
   - M2: nghỉ phép, gồm phần rule mà AI Leave Coordinator dựa vào: danh mục lý do nghỉ, ngưỡng nhân sự, nhắc và ủy quyền
     duyệt, đề nghị đổi ngày.
   - M3: chấm công.
-  - M4: lương và phúc lợi.
+  - M4: lương và phúc lợi, gồm so sánh phiếu lương với tháng trước.
   - M5: báo cáo và phân tích, gồm phần rule mà AI Report Analyst dựa vào: danh mục tín hiệu, phân rã chỉ số, thông báo,
     theo dõi tín hiệu và tóm tắt tuần.
   - M6: ba tính năng AI ở mục Solution, làm sau khi M1–M5 qua release gate, theo thứ tự AI Leave Coordinator, AI Report
@@ -144,7 +151,8 @@ Baseline và Target của các dòng đo ở công ty là ước lượng của 
 | Luật về lương (bảo hiểm xã hội, thuế thu nhập cá nhân, làm thêm giờ) phức tạp và đang thay đổi, dễ dẫn tới tính sai tiền | Technical | Đối chiếu văn bản gốc khi phân tích; mỗi luật ghi rõ nguồn và có test; tỷ lệ và mức giảm trừ đặt trong cấu hình, không viết cứng trong code |
 | Dữ liệu thay đổi theo thời gian, như chuyển phòng ban hay tăng lương từ một ngày hiệu lực, làm mô hình dữ liệu phức tạp | Technical | Thiết kế kỹ ở Phase 3 và ghi quyết định vào ADR; cân nhắc spike sau khi chọn DB |
 | Dữ liệu cá nhân của nhân viên (lương, CCCD, tài khoản ngân hàng) chịu Luật Bảo vệ dữ liệu cá nhân; dữ liệu gửi tới dịch vụ AI bên ngoài có thể bị chuyển ra nước ngoài | Legal | Chỉ dùng dữ liệu giả cho tới khi có thỏa thuận với công ty; xác định dữ liệu nhạy cảm khi phân tích domain; gửi cho AI ít dữ liệu nhất có thể, cách làm chốt khi phân tích AI |
-| AI trả lời sai quy chế hay luật, người dùng tin và làm theo | AI | AI chỉ trả lời từ tài liệu quy chế đã nạp và dẫn nguồn; không có nguồn thì nói không biết và chỉ tới HR |
+| AI trả lời sai quy chế hay luật, người dùng tin và làm theo | AI | AI chỉ trả lời từ thư viện quy chế, câu hỏi thường gặp và cấu hình, kèm nguồn; không có nguồn thì nói không biết và đề nghị gửi câu hỏi cho HR (BR-200) |
+| Chat thành giao diện thay thế màn hình nghiệp vụ, khiến thao tác khó kiểm và không làm được khi tắt AI | Product | Chat không sở hữu nghiệp vụ; mọi thao tác được xác nhận trên màn hình nghiệp vụ (BR-204, BR-207) |
 | AI để lộ dữ liệu ngoài quyền của người nhận, ví dụ lương hay lý do nghỉ của đồng nghiệp | AI | AI đọc dữ liệu qua cùng lớp kiểm quyền như người dùng; khi chạy theo sự kiện, AI chỉ đọc dữ liệu của tình huống; đầu ra được lọc theo quyền người nhận (BR-159, BR-160) |
 | AI bịa hoặc đọc sai số liệu trong insight hay giải thích | AI | Core tính mọi con số; code kiểm con số trong đầu ra của AI khớp với dữ liệu trước khi hiển thị (BR-163) |
 | Nội dung người dùng nhập, như lý do nghỉ, chứa câu lệnh điều khiển AI (prompt injection) | AI | AI không tự thay đổi dữ liệu nghiệp vụ; thao tác chỉ chạy khi người có quyền xác nhận (BR-155 tới BR-158) |

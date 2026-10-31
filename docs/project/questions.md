@@ -46,6 +46,7 @@
 | Q-031 | Ngân sách mỗi tháng cho dịch vụ AI là bao nhiêu, tách riêng hay gộp với ngân sách hạ tầng ở Q-009? | QA-009; chọn dịch vụ AI ở Phase 3 | blocks-design | Chủ dự án | Open | |
 | Q-032 | Ngoài các lý do theo Điều 115, danh mục lý do nghỉ của công ty gồm những mục nào? | Danh mục mặc định ở mục Default leave reasons của domain (BR-143) | blocks-build | HR công ty mục tiêu | Open | |
 | Q-033 | Với từng loại tín hiệu ở mục Default signal types của domain, con số đổi bao nhiêu thì quản lý và ban giám đốc muốn được báo? Có loại nào họ không cần? | Ngưỡng và danh mục tín hiệu (BR-172, BR-173) | blocks-build | Quản lý và ban giám đốc công ty mục tiêu | Assumed | Xem A-020 |
+| Q-034 | Công ty đang có những văn bản quy chế nào, như nội quy lao động, quy chế lương thưởng hay sổ tay nhân viên? Văn bản ở dạng gì và ai cập nhật? | Nội dung ban đầu của thư viện quy chế (BR-192) và nguồn trả lời của AI HR Assistant | blocks-build | HR công ty mục tiêu | Open | |
 
 ## Assumptions
 

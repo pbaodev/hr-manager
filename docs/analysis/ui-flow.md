@@ -8,7 +8,7 @@
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
 được kiểm ở backend theo Permission matrix trong [requirements](requirements.md#permission-matrix). Bản hiện tại có
-information architecture và các màn hình của M1 tới M5, cùng phần AI Leave Coordinator và AI Report Analyst của M6. Phần AI của một màn
+information architecture và các màn hình của M1 tới M5, cùng ba tính năng AI của M6. Phần AI của một màn
 hình ghi trong dòng **AI (M6)**; khi AI không dùng được, màn hình chạy như không có dòng đó (BR-162).
 
 ## Information architecture
@@ -62,7 +62,12 @@ flowchart TD
   RP --> RPAT["Chấm công<br/>SCR-044"]
   RP --> RPPY["Chi phí lương<br/>SCR-045"]
   RP --> SIG["Chi tiết tín hiệu<br/>SCR-048"]
+  HOME --> POL["Quy chế<br/>SCR-049"]
+  POL --> POLED["Soạn quy chế<br/>SCR-050"]
+  HOME --> HQ["Câu hỏi gửi HR<br/>SCR-051"]
 ```
+
+Khung chat Trợ lý HR (SCR-052) có từ M6, mở được từ mọi màn hình và không nằm trong menu.
 
 | Menu | Nhân viên | Quản lý | HR | Screens |
 |---|---|---|---|---|
@@ -76,6 +81,8 @@ flowchart TD
 | Chấm công | ✅ chỉ bảng công của mình | ✅ thêm bảng công của nhóm | ✅ thêm nhập file và chốt bảng công | SCR-027 tới SCR-032 |
 | Lương | ✅ chỉ phiếu lương của mình | ✅ chỉ phiếu lương của mình | ✅ thêm bảng lương | SCR-037 tới SCR-039 |
 | Báo cáo | ❌ | ✅ chỉ phạm vi; chi phí lương chỉ số tổng hợp | ✅ | SCR-040 tới SCR-045, SCR-048 |
+| Quy chế | ✅ | ✅ | ✅ thêm soạn và đăng phiên bản | SCR-049, SCR-050 |
+| Câu hỏi gửi HR | ✅ câu hỏi của mình | ✅ câu hỏi của mình | ✅ thêm hộp câu hỏi của mọi người | SCR-051 |
 | Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034, SCR-046, SCR-047 |
 
 Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem không có quyền thì không hiện.
@@ -90,6 +97,31 @@ Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem kh�
 | Lương | Các bản ghi lương, thông tin thuế và bảo hiểm, người phụ thuộc, phiếu lương các tháng; mở SCR-035, SCR-036 | ❌ (BR-122) | ✅ |
 | Tài khoản | Trạng thái tài khoản, vai trò | ❌ | ✅ |
 | Nhật ký | Thay đổi trên hồ sơ này | ❌ | ✅ |
+
+## Interaction modes
+
+Hệ thống có bốn cách tương tác. Màn hình nghiệp vụ là cách chính và làm được mọi việc khi không có AI; ba cách còn lại
+đều dẫn về màn hình nghiệp vụ.
+
+| Mode | Dùng cho | Không dùng cho | Ở đâu |
+|---|---|---|---|
+| Màn hình nghiệp vụ | Mọi thao tác và mọi lần xem dữ liệu | — | Các màn hình trong mục Screens |
+| AI nhúng trong màn hình (M6) | Gợi ý, giải thích, tóm tắt gắn với đối tượng đang xem | Hỏi đáp tự do | Dòng **AI (M6)** của từng màn hình, như SCR-020, SCR-021, SCR-040, SCR-048 |
+| Thông báo | Nhắc, giải thích tình huống, tín hiệu mức Cao, tóm tắt tuần; bấm vào thì mở màn hình nghiệp vụ | Thao tác ngay trong thông báo | Danh sách thông báo ở SCR-003 |
+| Chat (M6) | Câu hỏi mở, quy chế, câu cần tra nhiều màn hình, tìm đúng nơi để làm một việc | Thay màn hình nghiệp vụ, hoàn tất thao tác, hiện bảng hay danh sách dài | SCR-052, mở từ mọi màn hình |
+
+Luật cho chat:
+
+- Chat không sở hữu nghiệp vụ riêng. Chat chỉ là lối vào hội thoại để hỏi đáp, nhận ra ý định và chuyển người dùng
+  sang workflow nghiệp vụ đã có. Không thao tác nào được hoàn tất trong chat; điểm xác nhận là nút của màn hình nghiệp
+  vụ (BR-204).
+- Câu trả lời trình bày theo loại nội dung (BR-205). Câu trả lời ngắn hiện trực tiếp. Kết quả có nhiều bản ghi, bảng
+  hay danh sách thì hiện tổng quan và đường dẫn tới màn hình đã lọc sẵn. Giải thích dài thì hiện bản tóm tắt, cho mở
+  rộng hoặc xem ở màn hình liên quan. Giữ mỗi câu trả lời trong khoảng 5 dòng là hướng dẫn khi viết nội dung, không phải
+  giới hạn kỹ thuật.
+- Chat không lặp lại phần AI nhúng. Ví dụ, hỏi về một đơn đang chờ duyệt thì chat dẫn tới khối Tóm tắt của AI ở SCR-021.
+- Theo UC-019, chat chỉ mở các màn hình SCR-004, SCR-019, SCR-020, SCR-021, SCR-029, SCR-030 và SCR-051, cùng màn hình
+  được dẫn làm nguồn.
 
 ## Flows
 
@@ -195,6 +227,26 @@ flowchart LR
 - **Insight (M6):** SCR-040 hiện insight của AI thay cho các thẻ rời; SCR-048 có thêm giải thích và thẻ nhắc nhóm. Thẻ
   nhắc chỉ gửi khi người xem bấm Gửi (BR-185).
 
+```mermaid
+flowchart LR
+  chat["SCR-052 Trợ lý HR"] -->|"chọn phương án của Coordinator"| form["SCR-020 Gửi đơn nghỉ"]
+  chat -->|"chọn phương án đổi"| form
+  chat -->|"hủy đơn"| mine["SCR-019 Nghỉ phép của tôi"]
+  chat -->|"mở form"| other["SCR-004, SCR-029, SCR-030"]
+  chat -->|"gửi cho HR"| hq["SCR-051 Câu hỏi gửi HR"]
+  chat -->|"mở nguồn"| pol["SCR-049 Thư viện quy chế"]
+  pol -->|"không tìm thấy"| hq
+  form -->|"Gửi hoặc Xác nhận đổi đơn"| mine
+```
+
+- **Quy chế và câu hỏi:** người dùng đọc hoặc tìm ở SCR-049. Không tìm thấy thì gửi câu hỏi ở SCR-051; HR trả lời ở
+  SCR-051 và người hỏi nhận thông báo ở SCR-003. Luồng này chạy cả khi không có AI.
+- **Hỏi đáp (M6):** người dùng mở SCR-052 từ bất kỳ màn hình nào và hỏi. Câu trả lời có nguồn và đường dẫn; nguồn là mục
+  quy chế thì mở SCR-049 tại mục đó.
+- **Từ chat sang workflow (M6):** muốn xin hay đổi đơn thì chat hiện phương án của AI Leave Coordinator; chọn một phương
+  án thì mở SCR-020, và nhân viên bấm Gửi hoặc Xác nhận đổi đơn ở đó. Hủy đơn thì mở SCR-019 tại đơn đó. Việc khác thì
+  mở đúng form. Câu chưa trả lời được thì mở SCR-051 với câu hỏi do AI soạn sẵn (BR-206 tới BR-208).
+
 ## Screens
 
 ### SCR-001: Đăng nhập
@@ -225,11 +277,13 @@ flowchart LR
 
 ### SCR-003: Trang chủ
 
-- **Purpose:** điểm bắt đầu sau khi đăng nhập · **Stories:** US-001, US-016, US-034, US-092, US-094, US-095
+- **Purpose:** điểm bắt đầu sau khi đăng nhập · **Stories:** US-001, US-016, US-034, US-092, US-094, US-095, US-104,
+  US-105
 - **Content and actions:** lối tắt tới các mục trong menu theo vai trò; số dư phép của mình; danh sách thông báo kèm số
   thông báo chưa đọc. Quản lý và HR thấy số đơn đang chờ mình duyệt. HR thấy thêm số hợp đồng sắp hết hạn và số hồ sơ
   chưa có hợp đồng. Bấm vào mỗi con số để mở danh sách tương ứng. Với Quản lý và HR, danh sách thông báo gồm cả thông báo
-  tín hiệu mức Cao, nhắc theo dõi và tóm tắt tuần; bấm một dòng để mở SCR-048 (BR-177, BR-180, BR-181).
+  tín hiệu mức Cao, nhắc theo dõi và tóm tắt tuần; bấm một dòng để mở SCR-048 (BR-177, BR-180, BR-181). Người hỏi nhận
+  thông báo khi HR trả lời câu hỏi; HR nhận nhắc câu hỏi chờ lâu; bấm vào thì mở SCR-051 (BR-195, BR-196).
 - **AI (M6):** cập nhật theo dõi và tóm tắt tuần là đoạn ngắn do AI viết, có nhãn AI; AI lỗi thì dùng nội dung mẫu
   (BR-191).
 
@@ -381,7 +435,7 @@ flowchart LR
 ### SCR-019: Nghỉ phép của tôi
 
 - **Purpose:** biết mình còn bao nhiêu phép và theo dõi đơn của mình · **Stories:** US-022, US-024, US-030, US-031,
-  US-079, US-080, US-085, US-086
+  US-079, US-080, US-085, US-086, US-110
 - **Content and actions:** ba khối. Khối số dư: số phép hiện tại, phép tồn kèm hạn dùng, số ngày của các đơn đang chờ.
   Khối đơn của tôi: danh sách đơn với loại, ngày, số ngày, trạng thái; nút Hủy với đơn được hủy theo BR-061; nút Đổi
   đơn mở SCR-020 với dữ liệu của đơn (BR-152). Đơn ở trạng thái Chờ phản hồi hiện khoảng ngày và lời nhắn của người
@@ -394,11 +448,15 @@ flowchart LR
 ### SCR-020: Gửi đơn nghỉ
 
 - **Purpose:** tạo hoặc đổi đơn nghỉ · **Stories:** US-023, US-033, US-074, US-075, US-076, US-080, US-081, US-082,
-  US-083, US-084 · **Use case:** UC-005, UC-013
+  US-083, US-084, US-110 · **Use case:** UC-005, UC-013, UC-019
 - **Content and actions:** form gồm các trường dưới. Khi nhập, form hiện ngay số ngày nghỉ, người duyệt, và với phép năm
   thì hiện số phép còn lại sau đơn. Form hiện cảnh báo khi đơn làm nhóm thiếu người (BR-146) hoặc thuộc giai đoạn hạn
   chế (BR-147). Nút Thêm đơn liền kề để gửi nhiều đơn trong một lần (BR-153). HR mở form từ hồ sơ của nhân viên thì có
   thêm ô chọn nhân viên, và đơn được duyệt ngay khi lưu (BR-063).
+- **Chế độ Đổi đơn:** mở từ nút Đổi đơn của SCR-019, hoặc từ phương án đổi do AI Leave Coordinator đề xuất, kể cả khi
+  bắt đầu từ chat. Đầu form hiện đơn gốc gồm ngày, buổi, loại nghỉ, số ngày và trạng thái, cạnh giá trị mới, kèm câu "Đơn
+  cũ sẽ bị hủy và đơn mới chờ duyệt lại."; đơn gốc đã duyệt thì ghi thêm "Nếu đơn mới bị từ chối, các ngày của đơn cũ
+  không còn được duyệt.". Nút xác nhận là Xác nhận đổi đơn; đơn chỉ đổi khi nhân viên bấm nút này (BR-152, BR-207).
 - **AI (M6):** ô "Mô tả nhu cầu nghỉ" ở đầu form; AI điền các trường, mỗi trường AI điền có nhãn AI gợi ý (BR-166).
   Khối Gợi ý của AI hiện câu hỏi làm rõ, cảnh báo mô tả không khớp lý do (BR-167), và tối đa `leave_option_count`
   phương án kèm hệ quả (BR-168). Chọn một phương án thì form điền theo phương án đó. Đơn chỉ được gửi khi nhân viên bấm
@@ -627,11 +685,14 @@ flowchart LR
 
 ### SCR-038: Chi tiết phiếu lương
 
-- **Purpose:** xem cách tính và thêm khoản điều chỉnh cho một nhân viên · **Stories:** US-056 tới US-059, US-062
+- **Purpose:** xem cách tính và thêm khoản điều chỉnh cho một nhân viên · **Stories:** US-056 tới US-059, US-062,
+  US-106
 - **Content and actions:** phần đầu: nhân viên, tháng, công chuẩn, công hưởng lương, số người phụ thuộc. Các nhóm dòng:
   thu nhập (lương theo công từng đoạn, phụ cấp, làm thêm theo loại, làm ban đêm, tiền phép chưa nghỉ), khấu trừ (BHXH,
   BHYT, BHTN, thuế TNCN), khoản điều chỉnh, thực lĩnh, phần công ty đóng. Mỗi dòng tự tính có diễn giải công thức, ví dụ
-  "10.000.000 × 20 ÷ 22". Khi bảng lương chưa chốt, HR thêm, sửa hoặc xóa khoản điều chỉnh.
+  "10.000.000 × 20 ÷ 22". Khi bảng lương chưa chốt, HR thêm, sửa hoặc xóa khoản điều chỉnh. Với phiếu đã chốt, nút So
+  với tháng trước hiện thêm số của tháng trước và chênh lệch ở mỗi dòng; dòng chỉ có ở một tháng ghi mới hoặc không còn
+  (BR-197).
 - **Inputs:**
 
   | Field | Required | Rule | Message when invalid |
@@ -646,9 +707,11 @@ flowchart LR
 
 ### SCR-039: Phiếu lương của tôi
 
-- **Purpose:** nhân viên xem phiếu lương · **Stories:** US-061
+- **Purpose:** nhân viên xem phiếu lương · **Stories:** US-061, US-106, US-109
 - **Content and actions:** danh sách các tháng có bảng lương đã chốt; chọn một tháng để xem phiếu với các nhóm dòng như
-  SCR-038, không có phần công ty đóng và không có thao tác sửa. Tháng chưa chốt không hiện (BR-122).
+  SCR-038, không có phần công ty đóng và không có thao tác sửa. Tháng chưa chốt không hiện (BR-122). Nút So với tháng
+  trước như SCR-038; không hiện khi tháng trước chưa có phiếu đã chốt (BR-197).
+- **AI (M6):** nút Hỏi về phiếu lương này mở SCR-052 với ngữ cảnh là phiếu đang xem (BR-211).
 
 ### Report screens
 
@@ -751,3 +814,67 @@ tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đ�
     công được chốt." (BR-179)
   - Tín hiệu đã hết: "Điều này không còn đúng từ [ngày]." kèm số liệu lúc hết.
   - AI không dùng được: chỉ hiện bảng phân rã và các nút của rule (BR-162).
+
+### SCR-049: Thư viện quy chế
+
+- **Purpose:** đọc và tìm quy chế, câu hỏi thường gặp · **Stories:** US-102, US-103 · **Use case:** UC-020
+- **Content and actions:** hai tab. Tab Quy chế liệt kê các quy chế đang dùng, mỗi quy chế có tên, phiên bản hiệu lực và
+  ngày hiệu lực; mở một quy chế thì thấy các mục và danh sách phiên bản trước. Ô tìm kiếm theo từ khóa trả về các mục
+  kèm tên quy chế (BR-193). Tab Câu hỏi thường gặp liệt kê các mục đã đăng, lọc được theo quy chế. HR thấy thêm nút Thêm
+  quy chế, Soạn phiên bản mới (mở SCR-050) và Ngừng dùng; ở tab Câu hỏi thường gặp, HR tạo, sửa, đăng, ẩn mục và thấy
+  cờ cần rà lại (BR-194).
+- **States:** không có kết quả tìm: "Không có mục nào chứa “[từ khóa]”. Bạn có thể gửi câu hỏi cho HR." kèm đường dẫn
+  tới SCR-051.
+
+### SCR-050: Soạn phiên bản quy chế
+
+- **Purpose:** tạo và đăng phiên bản quy chế · **Stories:** US-101
+- **Content and actions:** tên quy chế; danh sách mục với thao tác thêm, sửa, xóa và đổi thứ tự; ngày hiệu lực. Phiên
+  bản mới bắt đầu từ nội dung của phiên bản gần nhất. Nút Lưu nháp và Đăng. Bấm Đăng thì hiện xác nhận gồm ngày hiệu lực
+  và số mục câu hỏi thường gặp sẽ có cờ cần rà lại (BR-192, BR-194).
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Tên quy chế | Có | Không trùng tên quy chế khác | Đã có quy chế tên này. |
+  | Tiêu đề mục | Có | Không trống | Nhập tiêu đề mục. |
+  | Nội dung mục | Có | Không trống | Nhập nội dung mục. |
+  | Ngày hiệu lực | Có | Khác ngày hiệu lực của các phiên bản đã đăng của cùng quy chế (BR-192) | Đã có phiên bản hiệu lực từ ngày này. |
+
+### SCR-051: Câu hỏi gửi HR
+
+- **Purpose:** gửi câu hỏi cho HR và theo dõi trả lời · **Stories:** US-104, US-105, US-112, US-113 · **Use case:**
+  UC-020
+- **Content and actions:** tab Câu hỏi của tôi liệt kê câu hỏi của người dùng với nội dung, trạng thái và thời điểm; mở
+  một câu hỏi để xem các lượt trả lời và hỏi thêm (BR-195). Nút Gửi câu hỏi mới mở ô nội dung; khi nhập, màn hình gợi ý
+  các mục câu hỏi thường gặp có từ khóa trùng. HR thấy thêm tab Hộp câu hỏi gồm câu hỏi của mọi người, lọc theo trạng
+  thái; câu chờ quá `hr_question_reminder_days` ngày làm việc được đánh dấu (BR-196). HR mở một câu hỏi để trả lời.
+- **AI (M6):** mở từ chat thì ô nội dung có sẵn câu hỏi và tóm tắt hội thoại do AI soạn, có nhãn AI; người dùng sửa rồi
+  bấm Gửi (BR-208). HR thấy thêm tab Gợi ý câu hỏi thường gặp: mỗi gợi ý có số câu đã gom và nháp mục; bấm Sửa và đăng
+  thì mở mục đó ở SCR-049 (BR-212).
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Nội dung câu hỏi | Có | Không trống | Nhập câu hỏi. |
+  | Nội dung trả lời (HR) | Có | Không trống | Nhập câu trả lời. |
+
+- **States:** chưa có câu hỏi: "Bạn chưa gửi câu hỏi nào." AI không soạn được: ô nội dung để trống, kèm "AI tạm không
+  soạn được. Bạn nhập câu hỏi như thường."
+
+### SCR-052: Trợ lý HR
+
+- **Purpose:** hỏi đáp và đi tới đúng workflow nghiệp vụ · **Stories:** US-107 tới US-112 · **Use case:** UC-018,
+  UC-019, UC-020
+- **Content and actions:** có từ M6. Khung bên cạnh, mở bằng nút Trợ lý ở mọi màn hình. Mở từ một màn hình thì đầu khung
+  ghi đối tượng đang xem, ví dụ "Phiếu lương tháng 5" (BR-211). Mỗi câu trả lời có nhãn AI, nguồn dẫn và đường dẫn tới
+  màn hình gốc; kết quả nhiều bản ghi hiện tổng quan và đường dẫn tới màn hình đã lọc sẵn (BR-205). Kết quả của AI Leave
+  Coordinator hiện trong khung, có nhãn Coordinator (BR-206). Thẻ trong khung chỉ có nút mở màn hình, như Mở đơn đã
+  điền, Mở đơn hay Gửi cho HR; không có nút Gửi, Duyệt hay Lưu (BR-204). Danh sách hội thoại của chính người dùng; hội
+  thoại quá `assistant_retention_days` ngày bị xóa (BR-203).
+- **States:**
+  - Không có nguồn: "Mình chưa tìm thấy quy định cho câu này. Bạn có muốn gửi câu hỏi cho HR không?" (BR-200)
+  - Không có quyền: "Bạn không có quyền xem thông tin này." (BR-198)
+  - Dữ liệu không đi qua Trợ lý: "Bạn xem thông tin này ở [màn hình]." kèm đường dẫn (BR-199)
+  - AI không dùng được hoặc đã hết số câu hỏi trong ngày: "Trợ lý tạm không dùng được. Bạn vẫn xem quy chế, gửi câu hỏi
+    cho HR và làm mọi việc trên các màn hình như thường." kèm đường dẫn tới SCR-049 và SCR-051 (BR-162, BR-209)
