@@ -30,7 +30,7 @@ docs/
 |---|---|---|---|---|
 | [requirements.md](analysis/requirements.md) | Ai dùng, được làm gì, use case, quality attribute | Analyst | 2 | Accepted |
 | [stories.md](analysis/stories.md) | User story của M1–M6, acceptance criteria, priority | Analyst | 2 | Accepted |
-| [invest.md](analysis/invest.md) | Story MVP đạt INVEST tới đâu | Analyst | 2 | Draft |
+| [invest.md](analysis/invest.md) | Story Must đạt INVEST tới đâu | Analyst | 2 | Draft |
 | [domain.md](analysis/domain.md) | Thuật ngữ, entity, vòng đời, luật nghiệp vụ, edge case, dữ liệu nhạy cảm | Analyst | 2 | Accepted |
 | [ui-flow.md](analysis/ui-flow.md) | Người dùng thấy và làm gì trên từng màn hình | Analyst | 2 | Accepted |
 
