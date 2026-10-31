@@ -45,6 +45,7 @@
 | Q-030 | Khi người duyệt đang nghỉ, công ty muốn ai duyệt thay: quản lý cấp trên, HR, hay người do người duyệt chỉ định? | Luật BR-149 | blocks-design | HR công ty mục tiêu | Assumed | Xem A-019 |
 | Q-031 | Ngân sách mỗi tháng cho dịch vụ AI là bao nhiêu, tách riêng hay gộp với ngân sách hạ tầng ở Q-009? | QA-009; chọn dịch vụ AI ở Phase 3 | blocks-design | Chủ dự án | Open | |
 | Q-032 | Ngoài các lý do theo Điều 115, danh mục lý do nghỉ của công ty gồm những mục nào? | Danh mục mặc định ở mục Default leave reasons của domain (BR-143) | blocks-build | HR công ty mục tiêu | Open | |
+| Q-033 | Với từng loại tín hiệu ở mục Default signal types của domain, con số đổi bao nhiêu thì quản lý và ban giám đốc muốn được báo? Có loại nào họ không cần? | Ngưỡng và danh mục tín hiệu (BR-172, BR-173) | blocks-build | Quản lý và ban giám đốc công ty mục tiêu | Assumed | Xem A-020 |
 
 ## Assumptions
 
@@ -72,3 +73,4 @@ con số thì đặt trong config.
 | A-017 | Q-027 | Mỗi phòng ban cần ít nhất 50% nhân viên có mặt ở mỗi buổi; HR đặt ngưỡng riêng khi cần | Đổi `min_staff_ratio`; công ty không có quy định này thì cảnh báo nhóm thiếu người ít giá trị | Hỏi HR công ty | No |
 | A-018 | Q-029 | Nhân viên được thấy buổi nào nhóm thiếu người, không kèm tên hay số người | Bỏ cảnh báo phía nhân viên ở BR-146; phương án AI đề xuất vẫn tránh buổi thiếu người nhưng không nêu lý do | Hỏi HR công ty | No |
 | A-019 | Q-030 | Người duyệt thay là quản lý trực tiếp của người duyệt; không có thì HR | Đổi BR-149; có thể phải thêm thao tác chỉ định người duyệt thay | Hỏi HR công ty | No |
+| A-020 | Q-033 | Ngưỡng ở mục Parameters và danh mục ở mục Default signal types của domain đủ để báo điều đáng chú ý mà không quá nhiều thẻ | Đổi tham số hoặc bỏ loại tín hiệu; ngưỡng quá thấp thì người xem tắt thẻ và tỷ lệ hữu ích giảm | Hỏi quản lý và ban giám đốc công ty; xem tỷ lệ hữu ích theo loại tín hiệu khi dùng thử | No |

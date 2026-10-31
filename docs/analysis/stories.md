@@ -13,7 +13,9 @@
 - **Feature:** Issue Feature trên tracker chứa story; điền khi tạo Issue ở Phase 4.
 - Bản hiện tại có đủ story của M1 tới M5. US-071 và US-072 thuộc M1 nhưng được thêm ở lần review cuối của Phase 2.
 - US-073 tới US-081 là phần rule của M2 mà AI Leave Coordinator dựa vào; US-082 tới US-089 là AI Leave Coordinator
-  của M6. Story của AI Report Analyst và AI HR Assistant thêm khi phân tích hai tính năng đó.
+  của M6.
+- US-090 tới US-095 là phần rule của M5 mà AI Report Analyst dựa vào; US-096 tới US-100 là AI Report Analyst của M6.
+  Story của AI HR Assistant thêm khi phân tích tính năng đó.
 - **Release:** v1.0 gồm mọi story của M1 tới M6.
 
 | ID | Story | Priority | Milestone | Feature |
@@ -107,6 +109,17 @@
 | US-087 | Quản lý nhận tổng hợp đơn trong giai đoạn hạn chế | Should | M6 | |
 | US-088 | Người duyệt xem tóm tắt tác động và phương án thay thế | Must | M6 | |
 | US-089 | Người duyệt nhờ AI soạn lý do từ chối hoặc lời đề nghị | Should | M6 | |
+| US-090 | Xem thẻ cảnh báo trên trang tổng quan | Must | M5 | |
+| US-091 | Xem chi tiết và phân rã của một tín hiệu | Must | M5 | |
+| US-092 | Nhận thông báo khi có tín hiệu mức Cao | Must | M5 | |
+| US-093 | Đánh giá, đóng hoặc tắt thẻ cảnh báo | Must | M5 | |
+| US-094 | Theo dõi một tín hiệu | Should | M5 | |
+| US-095 | Nhận tóm tắt tuần | Should | M5 | |
+| US-096 | AI gom tín hiệu thành insight | Must | M6 | |
+| US-097 | AI giải thích insight từ phân rã | Must | M6 | |
+| US-098 | AI soạn thẻ nhắc nhóm từ insight | Should | M6 | |
+| US-099 | AI viết cập nhật cho tín hiệu đang theo dõi | Should | M6 | |
+| US-100 | AI viết tóm tắt tuần | Should | M6 | |
 
 ## Details
 
@@ -1465,3 +1478,177 @@ không mất thời gian.
   và phải bấm gửi.
 - AC2: Given bản nháp, then không tự gửi; lý do vẫn bắt buộc theo BR-059.
 - AC3: Given bản nháp gửi tới nhân viên, then không chứa tên hay lý do nghỉ của đồng nghiệp (BR-160).
+
+### US-090: Xem thẻ cảnh báo trên trang tổng quan
+
+**Story:** Là quản lý, tôi muốn trang tổng quan chỉ ra điều đáng chú ý trong phạm vi mình, để không phải tự đọc hết các
+báo cáo.
+
+**Links:** UC-016, UC-017 · BR-172 tới BR-175, BR-179 · EC-106, EC-108, EC-110 · SCR-040
+
+**Acceptance criteria**
+
+- AC1: Given phòng Kinh doanh 15 người có 3 người nghỉ việc trong 3 tháng gần nhất, tỷ lệ 20%, còn cả công ty là 8%, when
+  tính tín hiệu, then trưởng phòng Kinh doanh và HR thấy thẻ Nghỉ việc tăng mức Cao.
+- AC2: Given phòng ban 4 người tăng từ 1 lên 2 ngày nghỉ trong tháng, then không có thẻ (EC-106).
+- AC3: Given có 7 tín hiệu Đang có, then trang hiện `insight_max_count` thẻ, xếp theo mức độ rồi theo thời điểm phát hiện,
+  kèm đường dẫn tới danh sách đầy đủ (BR-175).
+- AC4: Given người xem là Quản lý, then không thấy thẻ Hợp đồng sắp hết hạn hay Ngày chưa xử lý, vì chỉ HR xem được
+  (BR-174).
+- AC5: Given lần tính sau tỷ lệ nghỉ việc không còn đạt điều kiện, then tín hiệu sang Đã hết và thẻ không hiện nữa
+  (BR-179).
+- AC6: Given mọi thẻ, then thẻ ghi thời điểm tính; báo cáo mở ra dùng dữ liệu tại lúc mở nên số có thể khác (EC-108).
+- AC7: Given Quản lý thôi làm trưởng phòng ban, then không còn thấy thẻ của phạm vi cũ (EC-110).
+
+### US-091: Xem chi tiết và phân rã của một tín hiệu
+
+**Story:** Là giám đốc, tôi muốn biết con số trên thẻ thay đổi vì những thành phần nào, để không phải tự đối chiếu nhiều
+báo cáo.
+
+**Links:** UC-016, UC-017 · BR-128, BR-129, BR-176, BR-179 · EC-109 · SCR-048
+
+**Acceptance criteria**
+
+- AC1: Given tín hiệu Chi phí lương đổi lớn của tháng 5, then chi tiết có phân rã theo người vào mới, người nghỉ việc,
+  thay đổi lương, làm thêm, phụ cấp, khoản điều chỉnh và phần công ty đóng, kèm so với tháng 4 và với tháng 5 năm trước.
+- AC2: Given Quản lý xem, then phân rã chỉ có số tổng hợp theo phòng ban; phòng ban dưới `report_min_group_size` người
+  được gộp vào phòng ban cha (BR-128, BR-129).
+- AC3: Given bấm Mở báo cáo, then báo cáo tương ứng mở với kỳ và phòng ban đã lọc sẵn.
+- AC4: Given tín hiệu dùng một tháng có bảng công đang mở lại, then chi tiết ghi số liệu đang được sửa (EC-109).
+
+### US-092: Nhận thông báo khi có tín hiệu mức Cao
+
+**Story:** Là HR, tôi muốn được báo ngay khi có điều đáng chú ý mức cao, để xử lý kịp mà không phải mở trang tổng quan
+mỗi ngày.
+
+**Links:** UC-016 · BR-177 · EC-112 · SCR-003
+
+**Acceptance criteria**
+
+- AC1: Given tín hiệu Ngày chưa xử lý xuất hiện, then HR nhận một thông báo trong hệ thống; bấm vào thì mở SCR-048.
+- AC2: Given tín hiệu đó vẫn Đang có ở lần tính sau, then không có thông báo lần hai.
+- AC3: Given tín hiệu Đơn chờ quá hạn, then chỉ hiện thẻ, vì người duyệt đã được nhắc theo BR-148 (EC-112).
+- AC4: Given HR đã tắt loại tín hiệu Ngày chưa xử lý, then không nhận thông báo của loại đó.
+
+### US-093: Đánh giá, đóng hoặc tắt thẻ cảnh báo
+
+**Story:** Là quản lý, tôi muốn đánh giá, đóng hoặc tắt các thẻ không hữu ích với mình, để trang tổng quan chỉ còn điều
+tôi cần.
+
+**Links:** UC-017 · BR-178 · SCR-040, SCR-048
+
+**Acceptance criteria**
+
+- AC1: Given bấm Không hữu ích trên một thẻ, then đánh giá được lưu; bấm Hữu ích sau đó thì đánh giá đổi.
+- AC2: Given Đóng một thẻ, then thẻ không hiện với người đó nữa; người khác vẫn thấy.
+- AC3: Given tắt loại Ngày nghỉ tăng, then thẻ và thông báo của loại đó dừng với người đó; người đó bật lại được ở danh
+  sách đầy đủ.
+- AC4: Given HR mở danh sách đầy đủ, then thấy tỷ lệ đánh giá hữu ích theo loại tín hiệu, không thấy từng người đánh giá
+  thế nào.
+
+### US-094: Theo dõi một tín hiệu
+
+**Story:** Là quản lý, tôi muốn theo dõi một điều đáng chú ý, để biết khi nào nó hết hay vẫn kéo dài.
+
+**Links:** UC-017 · BR-180 · EC-116 · SCR-048
+
+**Acceptance criteria**
+
+- AC1: Given ngày 1/3 quản lý theo dõi tín hiệu Phép tồn sắp hết hạn lúc phòng còn 18 ngày phép tồn của 7 người, when tín
+  hiệu sang Đã hết, then quản lý nhận thông báo kèm số liệu lúc bắt đầu theo dõi và lúc hết.
+- AC2: Given `signal_follow_up_days` ngày sau khi theo dõi tín hiệu vẫn Đang có, then quản lý nhận nhắc kèm số liệu hiện
+  tại.
+- AC3: Given tín hiệu đã hết rồi xuất hiện lại, then đó là tín hiệu mới và chưa được theo dõi (EC-116).
+
+### US-095: Nhận tóm tắt tuần
+
+**Story:** Là giám đốc, tôi muốn đầu tuần nhận một tin liệt kê các điều đáng chú ý, để nắm tình hình mà không phải mở
+từng báo cáo.
+
+**Links:** UC-017 · BR-181 · SCR-003
+
+**Acceptance criteria**
+
+- AC1: Given sáng thứ Hai có 4 tín hiệu Đang có trong phạm vi, then Quản lý nhận một thông báo liệt kê 4 tín hiệu theo
+  mức độ; mỗi dòng mở SCR-048.
+- AC2: Given không có tín hiệu nào, then không có thông báo.
+- AC3: Given thứ Hai là ngày nghỉ lễ, then tóm tắt gửi vào ngày làm việc đầu tiên của tuần.
+
+### US-096: AI gom tín hiệu thành insight
+
+**Story:** Là quản lý, tôi muốn các tín hiệu liên quan được gom thành vài điều đáng chú ý, để không phải đọc từng thẻ rời.
+
+**Links:** UC-016, UC-017 · BR-156, BR-160, BR-182 tới BR-186, BR-188, BR-189 · EC-107, EC-111, EC-113 · SCR-040
+
+**Acceptance criteria**
+
+- AC1: Given tín hiệu Ngày nghỉ tăng ở 6 trên 8 phòng ban trong tháng trước Tết, then trang hiện một insight gom 6 tín
+  hiệu thay cho 6 thẻ.
+- AC2: Given tháng 5 phòng Kho có tín hiệu Làm thêm gần giới hạn, Vắng không lý do hoặc đi muộn tăng và Nghỉ việc tăng,
+  then insight gom ba tín hiệu và chỉ nêu chúng xảy ra cùng kỳ, không nêu nguyên nhân (BR-184).
+- AC3: Given dữ liệu gửi cho AI, then chỉ có tên phòng ban, kỳ và con số; không có tên hay mã nhân viên; phòng ban dưới
+  `report_min_group_size` người đã được gộp vào phòng ban cha (BR-182, EC-107).
+- AC4: Given giám đốc và HR cùng có phạm vi cả công ty, then insight của giám đốc không gồm tín hiệu chỉ HR thấy (EC-111).
+- AC5: Given đầu ra của AI có tên nhân viên hoặc con số khác dữ kiện, then insight bị bỏ và trang hiện thẻ cảnh báo của
+  rule (BR-188, EC-113).
+- AC6: Given mở trang tổng quan, then insight đã tính sẵn hiện ngay, có nhãn AI và thời điểm tính; trang không chờ AI
+  (BR-156, BR-189).
+
+### US-097: AI giải thích insight từ phân rã
+
+**Story:** Là giám đốc, tôi muốn đọc vài câu giải thích con số thay đổi vì những thành phần nào, để hiểu ngay mà không phải
+đọc bảng phân rã.
+
+**Links:** UC-016, UC-017 · BR-162, BR-163, BR-184, BR-187 · EC-114 · SCR-040, SCR-048
+
+**Acceptance criteria**
+
+- AC1: Given chi phí lương tháng 5 tăng 9,8% so với tháng 4, với phân rã gồm 4 người vào mới +120 triệu, truy lĩnh của
+  tháng 3 +35 triệu và làm thêm của phòng Kho tăng 60%, then giải thích nêu người vào mới là thành phần lớn nhất và nêu
+  khoản truy lĩnh của tháng 3 được trả trong tháng 5.
+- AC2: Given mọi con số trong giải thích, then khớp dữ kiện của core; không khớp thì giải thích bị bỏ và SCR-048 chỉ hiện
+  bảng phân rã (BR-163).
+- AC3: Given mọi giải thích, then không nêu nguyên nhân ngoài phân rã, như "vì lương thấp", và không dự báo tháng sau
+  (BR-184, EC-114).
+- AC4: Given AI không dùng được, then SCR-048 hiện bảng phân rã như khi không có AI (BR-162).
+
+### US-098: AI soạn thẻ nhắc nhóm từ insight
+
+**Story:** Là HR, tôi muốn có sẵn tin nhắc cho đúng nhóm người từ một insight, để xử lý việc tồn đọng trước khi chốt công
+mà không phải tự lọc danh sách và soạn tin.
+
+**Links:** UC-017 · BR-157, BR-160, BR-185, BR-190 · EC-115 · SCR-048
+
+**Acceptance criteria**
+
+- AC1: Given insight có tín hiệu Ngày chưa xử lý của 6 người, then SCR-048 có thẻ nhắc với nội dung do AI soạn; người
+  nhận do core chọn.
+- AC2: Given thẻ nhắc, then không có tin nào được gửi khi HR chưa bấm Gửi; HR sửa được nội dung (BR-157).
+- AC3: Given nội dung, then là lời nhắc chung, không chứa số liệu của từng người hay tên đồng nghiệp (BR-160, BR-190).
+- AC4: Given một người vừa gửi giải trình trước lúc HR bấm Gửi, then người đó không nhận tin (EC-115).
+- AC5: Given Quản lý gửi thẻ nhắc người còn phép tồn, then chỉ người trong phạm vi của Quản lý nhận tin.
+
+### US-099: AI viết cập nhật cho tín hiệu đang theo dõi
+
+**Story:** Là quản lý, tôi muốn nhận cập nhật ngắn bằng câu về điều tôi đang theo dõi, để biết đã cải thiện tới đâu.
+
+**Links:** UC-017 · BR-180, BR-184, BR-191 · SCR-003, SCR-048
+
+**Acceptance criteria**
+
+- AC1: Given phòng Kinh doanh còn 6 ngày phép tồn của 3 người, giảm từ 18 ngày của 7 người lúc bắt đầu theo dõi ngày 1/3,
+  then cập nhật nêu đúng hai mốc số liệu đó.
+- AC2: Given AI lỗi hoặc đầu ra không đạt kiểm tra, then người theo dõi nhận thông báo mẫu kèm số liệu của rule (BR-191).
+
+### US-100: AI viết tóm tắt tuần
+
+**Story:** Là giám đốc, tôi muốn tóm tắt tuần là một đoạn ngắn dễ đọc thay vì một danh sách, để nắm tình hình trong một
+phút.
+
+**Links:** UC-017 · BR-181, BR-184, BR-191 · SCR-003
+
+**Acceptance criteria**
+
+- AC1: Given tóm tắt tuần có 4 tín hiệu, then AI viết một đoạn ngắn; mỗi tín hiệu vẫn có đường dẫn tới SCR-048.
+- AC2: Given đoạn tóm tắt, then không nêu tên người, không nêu nguyên nhân ngoài phân rã và không dự báo (BR-184).
+- AC3: Given AI lỗi hoặc đầu ra không đạt kiểm tra, then thông báo dùng danh sách mẫu như US-095 (BR-191).

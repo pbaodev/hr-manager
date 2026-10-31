@@ -37,7 +37,7 @@
 | M2 | — | Nghỉ phép, gồm phần rule mà AI Leave Coordinator dựa vào (US-073 tới US-081) |
 | M3 | — | Chấm công |
 | M4 | — | Lương và phúc lợi |
-| M5 | — | Báo cáo và phân tích |
+| M5 | — | Báo cáo và phân tích, gồm phần rule mà AI Report Analyst dựa vào (US-090 tới US-095) |
 | M6 | — | Ba tính năng AI theo thứ tự: AI Leave Coordinator, AI Report Analyst, AI HR Assistant |
 
 ## Tools

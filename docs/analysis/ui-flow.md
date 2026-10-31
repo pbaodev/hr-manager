@@ -8,7 +8,7 @@
 
 Trang này ghi người dùng thấy gì và đi qua màn hình nào, ở mức wireframe. Giao diện ẩn nút chỉ để dễ dùng; quyền thật
 được kiểm ở backend theo Permission matrix trong [requirements](requirements.md#permission-matrix). Bản hiện tại có
-information architecture và các màn hình của M1 tới M5, cùng phần AI Leave Coordinator của M6. Phần AI của một màn
+information architecture và các màn hình của M1 tới M5, cùng phần AI Leave Coordinator và AI Report Analyst của M6. Phần AI của một màn
 hình ghi trong dòng **AI (M6)**; khi AI không dùng được, màn hình chạy như không có dòng đó (BR-162).
 
 ## Information architecture
@@ -61,6 +61,7 @@ flowchart TD
   RP --> RPLV["Nghỉ phép<br/>SCR-043"]
   RP --> RPAT["Chấm công<br/>SCR-044"]
   RP --> RPPY["Chi phí lương<br/>SCR-045"]
+  RP --> SIG["Chi tiết tín hiệu<br/>SCR-048"]
 ```
 
 | Menu | Nhân viên | Quản lý | HR | Screens |
@@ -74,7 +75,7 @@ flowchart TD
 | Nghỉ phép | ✅ chỉ nghỉ phép của mình | ✅ thêm lịch nghỉ của nhóm | ✅ thêm lịch nghỉ của nhóm | SCR-019, SCR-020, SCR-022 |
 | Chấm công | ✅ chỉ bảng công của mình | ✅ thêm bảng công của nhóm | ✅ thêm nhập file và chốt bảng công | SCR-027 tới SCR-032 |
 | Lương | ✅ chỉ phiếu lương của mình | ✅ chỉ phiếu lương của mình | ✅ thêm bảng lương | SCR-037 tới SCR-039 |
-| Báo cáo | ❌ | ✅ chỉ phạm vi; chi phí lương chỉ số tổng hợp | ✅ | SCR-040 tới SCR-045 |
+| Báo cáo | ❌ | ✅ chỉ phạm vi; chi phí lương chỉ số tổng hợp | ✅ | SCR-040 tới SCR-045, SCR-048 |
 | Quản trị | ❌ | ❌ | ✅ | SCR-014 tới SCR-017, SCR-023 tới SCR-026, SCR-033, SCR-034, SCR-046, SCR-047 |
 
 Chi tiết nhân viên (SCR-008) chia thành các tab. Tab nào người xem không có quyền thì không hiện.
@@ -180,6 +181,20 @@ flowchart LR
   ngay.
 - **Chốt lương:** khi không còn lỗi, HR bấm Chốt ở SCR-037. Nhân viên nhận thông báo và thấy phiếu ở SCR-039.
 
+```mermaid
+flowchart LR
+  home["SCR-003 Trang chủ"] -->|"thông báo tín hiệu, tóm tắt tuần"| sig["SCR-048 Chi tiết tín hiệu"]
+  dash["SCR-040 Tổng quan báo cáo"] -->|"bấm thẻ hoặc insight"| sig
+  sig -->|"mở báo cáo đã lọc"| rep["SCR-041 tới SCR-045"]
+  sig -->|"gửi thẻ nhắc nhóm (M6)"| sig
+  sig -->|"đóng, theo dõi"| dash
+```
+
+- **Điều đáng chú ý:** Quản lý và HR thấy thẻ cảnh báo ở SCR-040, hoặc nhận thông báo tín hiệu mức Cao và tóm tắt tuần ở
+  SCR-003. Bấm một thẻ hay một dòng thông báo để mở SCR-048, rồi mở báo cáo đã lọc sẵn khi cần xem từng người.
+- **Insight (M6):** SCR-040 hiện insight của AI thay cho các thẻ rời; SCR-048 có thêm giải thích và thẻ nhắc nhóm. Thẻ
+  nhắc chỉ gửi khi người xem bấm Gửi (BR-185).
+
 ## Screens
 
 ### SCR-001: Đăng nhập
@@ -210,10 +225,13 @@ flowchart LR
 
 ### SCR-003: Trang chủ
 
-- **Purpose:** điểm bắt đầu sau khi đăng nhập · **Stories:** US-001, US-016, US-034
+- **Purpose:** điểm bắt đầu sau khi đăng nhập · **Stories:** US-001, US-016, US-034, US-092, US-094, US-095
 - **Content and actions:** lối tắt tới các mục trong menu theo vai trò; số dư phép của mình; danh sách thông báo kèm số
   thông báo chưa đọc. Quản lý và HR thấy số đơn đang chờ mình duyệt. HR thấy thêm số hợp đồng sắp hết hạn và số hồ sơ
-  chưa có hợp đồng. Bấm vào mỗi con số để mở danh sách tương ứng.
+  chưa có hợp đồng. Bấm vào mỗi con số để mở danh sách tương ứng. Với Quản lý và HR, danh sách thông báo gồm cả thông báo
+  tín hiệu mức Cao, nhắc theo dõi và tóm tắt tuần; bấm một dòng để mở SCR-048 (BR-177, BR-180, BR-181).
+- **AI (M6):** cập nhật theo dõi và tóm tắt tuần là đoạn ngắn do AI viết, có nhãn AI; AI lỗi thì dùng nội dung mẫu
+  (BR-191).
 
 ### SCR-004: Hồ sơ của tôi
 
@@ -640,10 +658,21 @@ tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đ�
 
 ### SCR-040: Tổng quan báo cáo
 
-- **Purpose:** xem nhanh tình hình nhân sự và mở các báo cáo · **Stories:** US-064, US-070
+- **Purpose:** xem nhanh tình hình nhân sự, điều đáng chú ý và mở các báo cáo · **Stories:** US-064, US-070, US-090,
+  US-093, US-096, US-097 · **Use case:** UC-017
 - **Content and actions:** các thẻ số theo phạm vi: nhân viên đang làm, vào mới và nghỉ việc trong tháng, người đang nghỉ
   hôm nay, đơn chờ mình duyệt. HR thấy thêm hợp đồng sắp hết hạn, ngày chưa xử lý của tháng đang mở, trạng thái bảng công
-  và bảng lương tháng trước. Bấm một thẻ để mở danh sách chi tiết (BR-137). Bên dưới là danh sách năm báo cáo.
+  và bảng lương tháng trước. Bấm một thẻ số để mở danh sách chi tiết (BR-137).
+- **Điều đáng chú ý:** tối đa `insight_max_count` thẻ cảnh báo, xếp theo mức độ (BR-175). Mỗi thẻ có tên tín hiệu, phòng
+  ban, kỳ, con số chính, mức độ và thời điểm tính; có nút Hữu ích, Không hữu ích, và menu Theo dõi, Đóng, Tắt loại này
+  (BR-178, BR-180). Bấm thẻ để mở SCR-048. Đường dẫn Xem tất cả mở danh sách đầy đủ các tín hiệu đang có, nơi bật lại
+  loại đã tắt; HR thấy thêm tỷ lệ đánh giá hữu ích theo loại tín hiệu. Bên dưới là danh sách năm báo cáo.
+- **AI (M6):** khối Điều đáng chú ý hiện insight thay cho các thẻ rời. Mỗi insight có tiêu đề, 2 tới 3 câu giải thích,
+  nhãn AI và thời điểm tính; các nút như thẻ cảnh báo (BR-186, BR-187). Insight được tính sẵn nên trang không chờ AI
+  (BR-189).
+- **States:**
+  - Không có tín hiệu: "Không có điều gì cần chú ý trong phạm vi của bạn."
+  - AI không dùng được hoặc insight không đạt kiểm tra: hiện thẻ cảnh báo của rule (BR-162, BR-188).
 
 ### SCR-041: Biến động nhân sự
 
@@ -704,3 +733,21 @@ tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đ�
   | Loại nghỉ hợp lệ | Có | Ít nhất một loại nghỉ đang dùng (BR-143) | Chọn ít nhất một loại nghỉ. |
   | Số ngày theo luật | Không | Bội số của 0,5 | Nhập số ngày theo bội số của 0,5. |
   | Nguồn | Không | — | — |
+
+### SCR-048: Chi tiết tín hiệu
+
+- **Purpose:** hiểu một điều đáng chú ý và làm việc tiếp theo · **Stories:** US-091, US-093, US-094, US-097, US-098,
+  US-099 · **Use case:** UC-017
+- **Content and actions:** tên tín hiệu, phòng ban, kỳ, mức độ và thời điểm tính. Bảng phân rã theo các thành phần ở mục
+  Default signal types của [domain](domain.md#default-signal-types), kèm so với kỳ trước và cùng kỳ năm trước (BR-176).
+  Quản lý chỉ thấy chỉ số và chiều có trong báo cáo của mình. Nút Mở báo cáo mở báo cáo tương ứng với kỳ và phòng ban
+  đã lọc sẵn. Nút Theo dõi hoặc Bỏ theo dõi, Đóng, Hữu ích, Không hữu ích (BR-178, BR-180). Tín hiệu đang được theo dõi
+  hiện số liệu lúc bắt đầu theo dõi và hiện tại.
+- **AI (M6):** với insight, đầu trang là tiêu đề và giải thích của AI, rồi danh sách tín hiệu nguồn, mỗi tín hiệu có bảng
+  phân rã riêng (BR-187). Với loại tín hiệu có việc nhắc, khối Thẻ nhắc nhóm hiện số người nhận do core chọn và nội dung
+  do AI soạn; người xem sửa nội dung rồi bấm Gửi (BR-190). Cập nhật theo dõi do AI viết hiện trên phần theo dõi (BR-191).
+- **States:**
+  - Bảng công của tháng tín hiệu dùng đang mở lại: "Số liệu của tháng này đang được sửa và sẽ được tính lại khi bảng
+    công được chốt." (BR-179)
+  - Tín hiệu đã hết: "Điều này không còn đúng từ [ngày]." kèm số liệu lúc hết.
+  - AI không dùng được: chỉ hiện bảng phân rã và các nút của rule (BR-162).

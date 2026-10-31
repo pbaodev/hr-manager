@@ -84,6 +84,10 @@ Các story do Thời gian thực hiện (US-030, US-031, US-040) không có dòn
 | Xem tóm tắt tác động của AI; nhờ AI soạn lý do từ chối hay lời đề nghị (US-088, US-089) | ❌ | ✅ đơn mình là người duyệt hoặc người duyệt thay | ✅ mọi đơn |
 | Nhận tổng hợp đơn trong giai đoạn hạn chế (US-087) | ❌ | ✅ phạm vi | ✅ mọi người |
 | Nhận đề xuất xử lý đơn làm số phép âm (US-085) | ❌ | ❌ | ✅ |
+| Xem thẻ cảnh báo và chi tiết tín hiệu; nhận thông báo và tóm tắt tuần; đánh giá, đóng, tắt và theo dõi thẻ (US-090 tới US-095) | ❌ | ✅ phạm vi, theo cột Viewers của loại tín hiệu (BR-174) | ✅ mọi người |
+| Xem tỷ lệ đánh giá hữu ích theo loại tín hiệu (US-093) | ❌ | ❌ | ✅ không thấy đánh giá của từng người (BR-178) |
+| Xem insight, cập nhật và tóm tắt tuần do AI viết (US-096, US-097, US-099, US-100) | ❌ | ✅ phạm vi; chỉ chỉ số và chiều thấy được trong báo cáo (BR-183) | ✅ mọi người |
+| Gửi thẻ nhắc nhóm từ insight (US-098) | ❌ | ✅ người nhận trong phạm vi (BR-190) | ✅ mọi người |
 
 ## User stories
 
@@ -118,10 +122,12 @@ flowchart LR
     P1(["M4: Xem phiếu lương"])
     P2(["M4: Tính và chốt bảng lương"])
     R1(["M5: Xem báo cáo"])
+    R2(["M5: Nhận cảnh báo, theo dõi tín hiệu"])
+    I3(["M6: Nhận insight của AI"])
   end
   NV --- U1 & U2 & U3 & L1 & A1 & P1 & I1
-  QL --- U4 & L2 & A3 & R1 & I2
-  HR --- U5 & U6 & U7 & L3 & A2 & P2 & R1
+  QL --- U4 & L2 & A3 & R1 & R2 & I2 & I3
+  HR --- U5 & U6 & U7 & L3 & A2 & P2 & R1 & R2 & I3
 ```
 
 ### UC-001: Tiếp nhận nhân viên mới
@@ -461,6 +467,61 @@ Giai đoạn 4 của AI Leave Coordinator. AI giúp người duyệt hiểu tác
   - `5a`. Người duyệt gốc và người duyệt thay cùng thao tác: thao tác đến trước có hiệu lực (EC-099).
 - **Postconditions:** Mọi quyết định do người duyệt hoặc HR. Tóm tắt và bản nháp AI đã hiện được lưu (BR-165).
 
+### UC-016: Phát hiện tín hiệu và tạo insight
+
+Giai đoạn 1 và 2 của AI Report Analyst, chạy nền. Bước 1 tới 3 là lớp rule của M5; bước 4 tới 6 có từ M6.
+
+- **Actor:** Thời gian · **Stories:** US-090, US-091, US-092, US-096, US-097
+- **Trigger:** Lịch hằng đêm; HR chốt bảng công, chốt lại bảng công hoặc chốt bảng lương (BR-172).
+- **Preconditions:** Có dữ liệu của M1 tới M4 cho kỳ cần tính.
+- **Main flow:**
+  1. Core tính các loại tín hiệu ở mục Default signal types của [domain](domain.md#default-signal-types) cho từng phòng
+     ban và cả công ty, áp ngưỡng và mức tối thiểu (BR-172, BR-173).
+  2. Core lưu tín hiệu mới, cập nhật tín hiệu đang có, và chuyển tín hiệu không còn đạt điều kiện sang Đã hết (BR-179).
+     Mỗi tín hiệu có phân rã do core tính (BR-176).
+  3. Tín hiệu mới mức Cao được thông báo tới những người xem được nó, trừ tình huống đã có thông báo (BR-177).
+  4. Với mỗi phạm vi và vai trò có tín hiệu thay đổi, core gửi cho AI số liệu mức nhóm của tín hiệu và phân rã, đã gộp
+     nhóm nhỏ (BR-182, BR-183).
+  5. AI gom tín hiệu thành insight, viết tiêu đề và giải thích, chọn việc tiếp theo (BR-184, BR-186, BR-187, BR-190).
+  6. Code kiểm đầu ra (BR-163, BR-188), rồi lưu insight kèm thời điểm tính (BR-189).
+- **Alternative flows:**
+  - `1a`. Phòng ban dưới `report_min_group_size` người, hoặc chưa đạt mức tối thiểu: không có tín hiệu (EC-106,
+    EC-107).
+  - `2a`. Bảng công của tháng tín hiệu dùng đang được mở lại: tín hiệu có cờ số liệu đang sửa (BR-179, EC-109).
+- **Exceptions:**
+  - `5a`. AI lỗi, chậm hoặc đầu ra không đạt kiểm tra: không có insight mới; trang tổng quan hiện thẻ cảnh báo của rule
+    (BR-162, EC-113).
+- **Postconditions:** Mọi con số trên thẻ và insight do core tính. AI không nhận dữ liệu của từng người. Đầu ra của AI
+  được lưu (BR-165).
+
+### UC-017: Xử lý điều đáng chú ý trên trang tổng quan
+
+Giai đoạn 2 tới 4 của AI Report Analyst, phía người xem. Khi không có AI, người xem làm các bước này với thẻ cảnh báo
+của rule.
+
+- **Actor:** Quản lý, HR · **Stories:** US-091, US-093, US-094, US-095, US-097, US-098, US-099, US-100
+- **Trigger:** Người xem mở SCR-040, hoặc bấm vào thông báo tín hiệu hay tóm tắt tuần.
+- **Preconditions:** Người xem là Quản lý hoặc HR.
+- **Main flow:**
+  1. SCR-040 hiện tối đa `insight_max_count` insight theo phạm vi và vai trò; khi không có insight thì hiện thẻ cảnh báo
+     (BR-175, BR-186).
+  2. Người xem mở một thẻ ở SCR-048: số liệu, phân rã, so với kỳ trước và cùng kỳ năm trước, giải thích của AI (BR-176,
+     BR-187).
+  3. Người xem mở báo cáo đã lọc sẵn. Danh sách từng người chỉ hiện trong báo cáo, theo quyền của người xem (BR-137).
+  4. Với loại tín hiệu có việc nhắc, AI soạn sẵn thẻ nhắc nhóm. Người xem sửa nội dung rồi bấm Gửi. Đây là điểm người
+     xác nhận; core chọn người nhận tại lúc gửi (BR-185, BR-190).
+  5. Người xem đánh giá thẻ, bấm Theo dõi hoặc Đóng (BR-178, BR-180).
+  6. Khi tín hiệu đang theo dõi hết, hoặc tới hạn nhắc, người xem nhận cập nhật do AI viết (BR-180, BR-191).
+- **Alternative flows:**
+  - `1a`. Không có tín hiệu nào: SCR-040 ghi không có điều cần chú ý.
+  - `4a`. Người xem không bấm Gửi: không ai nhận tin (BR-157).
+  - `5a`. Người xem tắt một loại tín hiệu: thẻ và thông báo của loại đó dừng với người đó (BR-178).
+- **Exceptions:**
+  - `4b`. Người nhận đổi trước lúc gửi: core chọn lại người nhận (EC-115).
+  - `6a`. AI lỗi: cập nhật và tóm tắt tuần dùng nội dung mẫu của rule (BR-191).
+- **Postconditions:** Tin chỉ tới người khác khi người xem bấm Gửi. Đánh giá được lưu để đo tỷ lệ hữu ích; không ai xem
+  được đánh giá của từng người (BR-178).
+
 ## Quality attributes
 
 Mỗi dòng là một scenario có số đo. Importance và Difficulty xếp theo `H`, `M`, `L`; các dòng `H/H` và `H/M` là
@@ -478,8 +539,9 @@ Cột Verify by ghi cách đo dự kiến. Test hay lần đo cụ thể ghi ở
 | QA-005 | Recoverability | Cơ sở dữ liệu hỏng hoặc bị xóa nhầm | Mất tối đa 24 giờ dữ liệu; hệ thống chạy lại trong 4 giờ | Diễn tập khôi phục từ bản sao lưu mỗi quý, ghi thời gian vào runbook | H / L |
 | QA-006 | Correctness (AI) | Diễn giải câu mô tả nghỉ tiếng Việt trên bộ ca có ngày tương đối, ngày lễ, lý do theo Điều 115 và câu thiếu thông tin | Ngày và buổi đúng ở ít nhất 95% số ca; lý do đúng mục ở ít nhất 90%; 100% ca thiếu thông tin được hỏi lại thay vì đoán (assumption) | Eval trên bộ ca tổng hợp, chạy khi đổi prompt, model hoặc pipeline | H / M |
 | QA-007 | Security (AI) | Câu mô tả, dữ liệu do người khác nhập hoặc câu hỏi nhằm lấy dữ liệu ngoài quyền người nhận, hay nhằm khiến AI tự thao tác | 0 đầu ra chứa dữ liệu ngoài quyền người nhận; 0 thao tác ghi do AI tự thực hiện | Bộ ca tấn công trong eval; test tự động cho ba tầng hành động của AI (BR-155 tới BR-158) | H / H |
-| QA-008 | Availability (AI) | Dịch vụ AI lỗi hoặc chậm | Mọi luồng nghỉ phép hoàn thành được bằng form và rule; gợi ý AI hiện trong 5 giây hoặc bị bỏ qua (assumption) | Test với AI bị tắt và bị làm chậm | H / L |
+| QA-008 | Availability (AI) | Dịch vụ AI lỗi hoặc chậm | Mọi luồng nghỉ phép hoàn thành được bằng form và rule; gợi ý AI hiện trong 5 giây hoặc bị bỏ qua (assumption). Trang tổng quan hiện thẻ cảnh báo của rule; thông báo dùng nội dung mẫu | Test với AI bị tắt và bị làm chậm | H / L |
 | QA-009 | Cost (AI) | Công ty 300 nhân viên dùng các tính năng AI bình thường trong một tháng | Chi phí dịch vụ AI không vượt ngân sách ở Q-031; vượt giới hạn thì AI tạm tắt và nghiệp vụ chạy theo BR-162 | Đo chi phí trên staging với dữ liệu giả; giới hạn chi tiêu đặt ở dịch vụ AI | M / L |
+| QA-010 | Correctness (AI) | Tạo insight trên bộ ca tổng hợp gồm tín hiệu và phân rã của mọi loại tín hiệu, có ca gom nhiều tín hiệu và ca nhóm nhỏ | 0 insight được hiện có con số khác dữ kiện hoặc có tên người; ít nhất 90% giải thích nêu đúng thành phần đóng góp lớn nhất; ít nhất 95% không có khẳng định nguyên nhân ngoài phân rã (assumption) | Eval trên bộ ca tổng hợp: code chấm con số, tên và thành phần lớn nhất; LLM chấm theo rubric, kiểm lại một phần mẫu bằng tay. Chạy khi đổi prompt, model hoặc pipeline | H / M |
 
 ## Non-goals
 
@@ -529,3 +591,13 @@ Riêng AI Leave Coordinator của M6 không làm:
 - Tự động duyệt đơn bằng AI hay theo chính sách: mọi đơn vẫn do người duyệt, trừ trường hợp tự duyệt ở EC-035.
 - Thu thập nguyện vọng nghỉ trước khi có đơn: tổng hợp giai đoạn hạn chế chỉ dùng đơn đã gửi (BR-171).
 - Gửi tin qua email hay ứng dụng chat ngoài hệ thống: như M2, chỉ thông báo trong hệ thống.
+
+Riêng AI Report Analyst của M6 không làm:
+
+- Nêu tên, đánh giá, xếp loại hay dự đoán về từng người: AI chỉ nhận số liệu mức nhóm (BR-182), theo phần Out của
+  [brief](../project/brief.md#scope).
+- Nêu nguyên nhân ngoài phân rã của core, như đổ cho lương hay cách quản lý (BR-184).
+- Dự báo con số tương lai, như chi phí lương hay số người nghỉ việc tháng tới (BR-184).
+- Tự tìm điều bất thường ngoài danh mục tín hiệu: rule phát hiện, AI chỉ gom và giải thích (BR-172, BR-186).
+- Trả lời câu hỏi tự do về số liệu: để AI HR Assistant làm, dùng chung phân rã của core.
+- Gửi insight hay tóm tắt tuần qua email hoặc ứng dụng chat ngoài hệ thống.
