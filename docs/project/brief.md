@@ -74,7 +74,7 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
 | AI feature | Users | What it does |
 |---|---|---|
 | AI Leave Coordinator | Mọi vai trò | Tham gia cả quy trình nghỉ phép, từ form hay chat: hiểu yêu cầu, đề xuất phương án hợp lệ, điều phối tình huống phát sinh, hỗ trợ người duyệt bằng tóm tắt tác động |
-| AI Report Analyst | Quản lý, HR | Chỉ ra điều đáng chú ý trên trang tổng quan và giải thích bằng câu ngắn; mọi con số do core tính |
+| AI Report Analyst | Quản lý, HR | Gom tín hiệu do rule phát hiện thành vài điều đáng chú ý trên trang tổng quan, giải thích bằng câu ngắn, soạn tin nhắc nhóm, viết cập nhật và tóm tắt tuần; mọi con số do core tính |
 | AI HR Assistant | Mọi vai trò | Trợ lý dạng chat: trả lời câu hỏi về quy chế kèm nguồn, tra dữ liệu người hỏi có quyền xem, soạn sẵn yêu cầu để người hỏi xác nhận |
 
 - **AI role:** AI không tính tiền, không quyết định quyền và không tự thay đổi dữ liệu nghiệp vụ như trạng thái đơn, số
@@ -82,8 +82,11 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
   nhận hoặc do rule; duyệt đơn luôn do người làm. Khi chạy theo sự kiện, AI chỉ đọc dữ liệu của tình huống đang xử lý,
   và người nhận chỉ thấy dữ liệu trong quyền của mình. Chi tiết ở BR-155 tới BR-165 trong
   [domain](../analysis/domain.md).
-- Workflow, quyền hành động và điểm người xác nhận (human-in-the-loop) của AI Leave Coordinator ở UC-013 tới UC-015
-  trong [requirements](../analysis/requirements.md). Hai tính năng còn lại được ghi khi phân tích tiếp.
+- Workflow, quyền hành động và điểm người xác nhận (human-in-the-loop) của AI Leave Coordinator ở UC-013 tới UC-015,
+  của AI Report Analyst ở UC-016 và UC-017 trong [requirements](../analysis/requirements.md). AI HR Assistant được ghi
+  khi phân tích tiếp.
+- AI Report Analyst chỉ nhận số liệu mức nhóm do core tính, không nhận dữ liệu của từng người, và không nêu nguyên nhân
+  ngoài phần phân rã con số của core (BR-182 tới BR-185).
 
 ## Scope
 
@@ -100,7 +103,8 @@ mọi nghiệp vụ vẫn làm được bằng form và báo cáo.
     duyệt, đề nghị đổi ngày.
   - M3: chấm công.
   - M4: lương và phúc lợi.
-  - M5: báo cáo và phân tích.
+  - M5: báo cáo và phân tích, gồm phần rule mà AI Report Analyst dựa vào: danh mục tín hiệu, phân rã chỉ số, thông báo,
+    theo dõi tín hiệu và tóm tắt tuần.
   - M6: ba tính năng AI ở mục Solution, làm sau khi M1–M5 qua release gate, theo thứ tự AI Leave Coordinator, AI Report
     Analyst, AI HR Assistant.
 - **Out:**
@@ -146,6 +150,8 @@ Baseline và Target của các dòng đo ở công ty là ước lượng của 
 | Nội dung người dùng nhập, như lý do nghỉ, chứa câu lệnh điều khiển AI (prompt injection) | AI | AI không tự thay đổi dữ liệu nghiệp vụ; thao tác chỉ chạy khi người có quyền xác nhận (BR-155 tới BR-158) |
 | AI dẫn dắt quyết định duyệt, hoặc đề xuất dựa trên đặc điểm của người gửi | AI | AI chỉ nêu tác động và phương án; không gợi ý duyệt hay từ chối, không dùng lịch sử hay đặc điểm cá nhân (BR-164) |
 | Nhân viên suy ra đồng nghiệp nào nghỉ từ cảnh báo nhóm thiếu người | Legal | Cảnh báo không kèm tên hay số người, và không hiện ở phòng ban nhỏ (BR-146) |
+| AI nêu nguyên nhân không có trong số liệu, như đổ cho lương hay cách quản lý, khiến người đọc kết luận sai về một nhóm | AI | AI chỉ nhận số liệu mức nhóm và phân rã của core; không nêu nguyên nhân ngoài phân rã (BR-182, BR-184); eval chấm theo rubric (QA-010) |
+| Quá nhiều thẻ cảnh báo, hoặc thẻ sai trọng tâm, nên người xem bỏ qua cả trang tổng quan | Product | Tín hiệu có ngưỡng và mức tối thiểu (BR-173); tối đa `insight_max_count` thẻ; người xem đánh giá và tắt từng loại; đo tỷ lệ hữu ích (BR-178) |
 | Chi phí gọi model AI vượt ngân sách hạ tầng | Cost | Ước lượng chi phí và đặt giới hạn chi tiêu khi phân tích AI |
 
 **Spike:** Chưa cần spike trước prototype. Rủi ro lớn nhất của phần nghiệp vụ là luật về lương, đã xử lý bằng việc đối

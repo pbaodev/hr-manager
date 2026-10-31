@@ -7,7 +7,7 @@
 - **Related:** [requirements](requirements.md) · [questions](../project/questions.md) · [research](../project/research.md) ·
   [data design](../design/data.md) · [analysis guide](../playbook/analysis.md)
 
-Bản hiện tại có đủ phần dùng chung, M1 tới M5 và phần AI Leave Coordinator của M6.
+Bản hiện tại có đủ phần dùng chung, M1 tới M5, cùng phần AI Leave Coordinator và AI Report Analyst của M6.
 
 ## Glossary
 
@@ -83,10 +83,17 @@ Hệ thống có một bounded context.
 | Biến động nhân sự | Số người đầu kỳ, vào mới, nghỉ việc, chuyển đến, chuyển đi và cuối kỳ trong một kỳ báo cáo (BR-132) | `headcountMovement` | — |
 | Tỷ lệ nghỉ việc | Số người nghỉ việc trong kỳ chia số người bình quân của kỳ (BR-132) | `turnoverRate` | — |
 | Kỳ báo cáo | Khoảng tháng hoặc khoảng ngày người xem chọn cho một báo cáo | `reportPeriod` | Kỳ công, kỳ lương |
+| Tín hiệu | Một điều đáng chú ý do rule phát hiện từ số liệu báo cáo, theo danh mục ở mục Default signal types (BR-172) | `Signal` | Insight |
+| Mức độ của tín hiệu | Cao hoặc Thường; tín hiệu mức Cao được thông báo ngay (BR-177) | `severity` | — |
+| Thẻ cảnh báo | Thẻ trên trang tổng quan hiện một tín hiệu với nội dung mẫu (BR-175) | `signalCard` | Thẻ đề xuất |
+| Phân rã chỉ số | Phần đóng góp của từng thành phần vào thay đổi của một chỉ số giữa hai kỳ, như người vào mới hay làm thêm trong chi phí lương (BR-176) | `metricBreakdown` | — |
+| Tóm tắt tuần | Thông báo đầu tuần liệt kê các tín hiệu đang có mà người nhận xem được (BR-181) | `weeklyDigest` | Gửi báo cáo định kỳ qua email: không làm |
 | AI Leave Coordinator | Phần AI tham gia quy trình nghỉ phép: hiểu yêu cầu, đề xuất phương án, điều phối tình huống, hỗ trợ người duyệt | `LeaveCoordinator` | Rule tự động: phần không dùng AI, như nhắc hay chuyển đơn |
 | Tầng hành động của AI | Ba mức quyền của AI: tự làm, đề xuất chờ người xác nhận, chỉ người làm (BR-156 tới BR-158) | `aiActionTier` | — |
 | Thẻ đề xuất | Một thao tác AI đề xuất, chỉ thực hiện khi người có quyền bấm xác nhận (BR-157) | `ActionProposal` | — |
 | Phương án nghỉ | Một cách nghỉ hợp lệ do core sinh và AI chọn, kèm hệ quả (BR-168) | `LeaveOption` | — |
+| AI Report Analyst | Phần AI trên trang tổng quan: gom tín hiệu thành insight, giải thích, soạn việc tiếp theo, viết cập nhật và tóm tắt tuần | `ReportAnalyst` | Thẻ cảnh báo: phần rule, chạy cả khi không có AI |
+| Insight | Một điều đáng chú ý do AI gom từ một hoặc nhiều tín hiệu của một phạm vi, kèm tiêu đề và giải thích (BR-186) | `Insight` | Tín hiệu |
 
 ## Entities
 
@@ -208,14 +215,22 @@ Phiếu lương lưu lại mọi số liệu đầu vào đã dùng, để đọ
 
 **M5: báo cáo**
 
-M5 không thêm entity. Báo cáo đọc từ entity của M1 tới M4 (BR-138); việc xuất báo cáo được ghi bằng AuditEntry.
+Báo cáo đọc từ entity của M1 tới M4 (BR-138); việc xuất báo cáo được ghi bằng AuditEntry. M5 chỉ thêm entity cho tín
+hiệu, vì tín hiệu cần được lưu để theo dõi và để không báo trùng.
+
+| Name | Kind | Key attributes | Relations |
+|---|---|---|---|
+| Signal | Entity | Loại tín hiệu, phòng ban hoặc cả công ty, kỳ, số liệu và phân rã tại lúc tính, mức độ, thời điểm phát hiện, thời điểm tính gần nhất, cờ số liệu đang sửa, trạng thái | — |
+| SignalReaction | Entity | Người xem, đã xem, đang theo dõi từ ngày nào, đã đóng, đánh giá hữu ích hay không | Thuộc một Signal hoặc một Insight |
+| UserAccount | Entity, bổ sung ở M5 | Các loại tín hiệu người dùng đã tắt (BR-178) | — |
 
 **M6: AI**
 
 | Name | Kind | Key attributes | Relations |
 |---|---|---|---|
-| AiOutput | Entity | Thời điểm, tính năng, tình huống, người nhận, dữ liệu đã gửi tới dịch vụ AI, đầu ra, kết quả kiểm (BR-163), lựa chọn cuối của người dùng | Có thể gắn với một LeaveRequest hoặc một ActionProposal |
-| ActionProposal | Entity | Thao tác đề xuất, người được xác nhận, trạng thái (chờ, đã xác nhận, bỏ qua, hết hiệu lực) | Có thể gắn với một LeaveRequest |
+| AiOutput | Entity | Thời điểm, tính năng, tình huống, người nhận, dữ liệu đã gửi tới dịch vụ AI, đầu ra, kết quả kiểm (BR-163), lựa chọn cuối của người dùng | Có thể gắn với một LeaveRequest, một ActionProposal hoặc một Insight |
+| ActionProposal | Entity | Thao tác đề xuất, người được xác nhận, trạng thái (chờ, đã xác nhận, bỏ qua, hết hiệu lực) | Có thể gắn với một LeaveRequest hoặc một Insight |
+| Insight | Entity | Phạm vi, vai trò người xem, tiêu đề, giải thích, việc tiếp theo, thời điểm tính | Gom một hoặc nhiều Signal; nội dung là một AiOutput |
 
 ## Aggregates and invariants
 
@@ -241,6 +256,8 @@ M5 không thêm entity. Báo cáo đọc từ entity của M1 tới M4 (BR-138);
 | Dependent | Dependent | Tháng kết thúc không trước tháng bắt đầu | Một người phụ thuộc không được tính cho hai nhân viên trong cùng tháng (BR-099) |
 | PayrollParameter | PayrollParameter | Biểu thuế có các bậc liền nhau, bậc đầu từ 0, bậc cuối không có cận trên | Mỗi tham số không có hai giá trị cùng ngày hiệu lực; giá trị đã dùng ở bảng lương đã chốt không sửa được (BR-123) |
 | PayrollRun | PayrollRun, Payslip, PayslipLine | Thực lĩnh của phiếu bằng tổng các dòng (BR-114); không đổi khi đã chốt (BR-118) | Chỉ tính khi bảng công đã chốt (BR-102); điều kiện chốt (BR-117); hai thao tác chốt cùng lúc chỉ một thành công (EC-072) |
+| Signal | Signal | Số liệu và phân rã là bản chụp tại lúc tính gần nhất | Mỗi loại tín hiệu, phòng ban và kỳ có tối đa một tín hiệu Đang có (BR-172) |
+| SignalReaction | SignalReaction | — | Mỗi người xem có tối đa một SignalReaction cho một thẻ |
 
 ## Lifecycles
 
@@ -455,6 +472,26 @@ stateDiagram-v2
 | `draft` | `closed` | HR chốt | BR-117 |
 
 Bảng lương đã chốt không có chuyển trạng thái nào (BR-118).
+
+**Signal**
+
+```mermaid
+stateDiagram-v2
+  state "Đang có" as active
+  state "Đã hết" as resolved
+  [*] --> active: rule phát hiện
+  active --> active: tính lại, số liệu đổi
+  active --> resolved: tính lại, không còn đạt điều kiện
+  resolved --> [*]
+```
+
+| From | To | Trigger and actor | Guard |
+|---|---|---|---|
+| — | `active` | Thời gian, khi tính tín hiệu | Đạt điều kiện của loại tín hiệu ở mục Default signal types (BR-172, BR-173) |
+| `active` | `active` | Thời gian, khi tính lại | Vẫn đạt điều kiện; số liệu và mức độ được cập nhật |
+| `active` | `resolved` | Thời gian, khi tính lại | Không còn đạt điều kiện (BR-179) |
+
+Tín hiệu đã hết không quay lại Đang có; điều kiện xuất hiện lại thì rule tạo tín hiệu mới.
 
 ## Business rules
 
@@ -699,6 +736,23 @@ Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. 
 | BR-137 | Hiển thị trang tổng quan | Mỗi con số tính theo phạm vi của người xem; bấm vào thì mở danh sách chi tiết mà người đó có quyền xem | A-003 | Assumed |
 | BR-138 | Mở một báo cáo | Báo cáo đọc dữ liệu hiện có tại lúc mở; không lưu bản chụp riêng. Chỉ bảng công và bảng lương đã chốt là số liệu cố định | A-003 | Assumed |
 
+**Tín hiệu và thẻ cảnh báo**
+
+Các luật này thuộc lớp rule của M5 và chạy cả khi không có AI. AI Report Analyst ở M6 dùng chúng làm dữ kiện.
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-172 | Tính tín hiệu | Hằng đêm, và ngay sau khi chốt bảng công, chốt lại bảng công hay chốt bảng lương, core tính các loại tín hiệu ở mục Default signal types cho từng phòng ban và cả công ty. Mỗi tín hiệu lưu số liệu và phân rã tại lúc tính. Mỗi loại tín hiệu, phòng ban và kỳ có tối đa một tín hiệu Đang có | A-020 | Assumed |
+| BR-173 | Tính tín hiệu dạng tỷ lệ hay bình quân cho một phòng ban | Chỉ tính cho phòng ban có từ `report_min_group_size` người; phòng ban nhỏ hơn không có tín hiệu riêng, số liệu của nó vẫn nằm trong phòng ban cha. Ngoài điều kiện tỷ lệ, nhóm phải đạt mức tối thiểu tính bằng số tuyệt đối ghi ở từng loại tín hiệu, để vài trường hợp lẻ không tạo tín hiệu | A-020 | Assumed |
+| BR-174 | Xác định ai thấy một tín hiệu | Theo cột Người xem của loại tín hiệu, trong phạm vi của người xem theo BR-127. Tín hiệu chi phí lương chỉ dùng bảng lương đã chốt; Quản lý chỉ thấy số tổng hợp theo BR-128 và BR-129 | A-003 | Assumed |
+| BR-175 | Hiển thị thẻ cảnh báo trên trang tổng quan | Mỗi tín hiệu Đang có mà người xem thấy được là một thẻ với nội dung mẫu, trừ loại người xem đã tắt và thẻ người xem đã đóng. Thẻ xếp theo mức độ, rồi theo thời điểm phát hiện, mới trước. Trang hiện tối đa `insight_max_count` thẻ; phần còn lại nằm trong danh sách đầy đủ. Mỗi thẻ ghi thời điểm tính | A-003 | Assumed |
+| BR-176 | Xem chi tiết một tín hiệu | Core hiện số liệu, phân rã theo các thành phần ở mục Default signal types, so với kỳ trước và cùng kỳ năm trước, kèm đường dẫn tới báo cáo đã lọc sẵn. Phân rã chỉ dùng chỉ số và chiều người xem thấy được trong báo cáo (BR-127 tới BR-130, BR-133) | A-003 | Assumed |
+| BR-177 | Một tín hiệu mức Cao xuất hiện | Mỗi người xem được tín hiệu đó nhận một thông báo trong hệ thống, trừ người đã tắt loại tín hiệu. Tình huống đã có thông báo của rule hay của AI Leave Coordinator (BR-148, BR-170, BR-171) thì không gửi thêm | A-003 | Assumed |
+| BR-178 | Người xem đánh giá, đóng hoặc tắt thẻ | Mỗi thẻ có nút Hữu ích và Không hữu ích; người xem đổi được đánh giá. Thẻ đã đóng không hiện với người đó nữa, tín hiệu vẫn được tính. Loại tín hiệu đã tắt không hiện thẻ và không gửi thông báo cho người đó; người đó bật lại được. HR xem được tỷ lệ đánh giá hữu ích theo loại tín hiệu, không xem được đánh giá của từng người | A-003 | Assumed |
+| BR-179 | Tính lại một tín hiệu Đang có | Không còn đạt điều kiện thì tín hiệu sang Đã hết và thẻ không hiện nữa. HR mở lại bảng công của tháng tín hiệu dùng thì tín hiệu có cờ số liệu đang sửa cho tới khi tháng được chốt lại và tính lại | A-003 | Assumed |
+| BR-180 | Người xem theo dõi một tín hiệu | Tín hiệu sang Đã hết thì người theo dõi nhận thông báo kèm số liệu lúc bắt đầu theo dõi và lúc hết. Sau mỗi `signal_follow_up_days` ngày tín hiệu vẫn Đang có, người theo dõi nhận nhắc kèm số liệu hiện tại. Người xem bỏ theo dõi được bất cứ lúc nào | A-003 | Assumed |
+| BR-181 | Ngày làm việc đầu tiên của tuần | Mỗi Quản lý và HR nhận một thông báo tóm tắt tuần, liệt kê theo mức độ các tín hiệu Đang có mà mình xem được, trừ loại đã tắt. Không có tín hiệu nào thì không gửi | A-003 | Assumed |
+
 **AI: nguyên tắc chung**
 
 Áp dụng cho mọi tính năng AI của M6.
@@ -727,6 +781,21 @@ Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. 
 | BR-169 | Đơn gặp một tình huống: thiếu phép lúc duyệt, đổi lịch làm đổi số ngày, người duyệt đổi hoặc đang nghỉ, đơn chờ lâu, đề nghị đổi ngày, nhân viên nghỉ việc | Rule xử lý phần cố định theo luật tương ứng. AI gửi giải thích cho người liên quan và, khi có cách xử lý, thẻ đề xuất theo BR-157 | A-003 | Assumed |
 | BR-170 | Còn `carryover_reminder_days` ngày tới `carryover_expiry` mà nhân viên còn phép tồn | AI gợi ý tối đa `leave_option_count` khoảng ngày dùng phép tồn, không thuộc giai đoạn hạn chế và không làm phòng ban dưới ngưỡng. Nhân viên tự gửi đơn | A-003 | Assumed |
 | BR-171 | Còn `peak_planning_days` ngày tới một giai đoạn hạn chế nghỉ | Quản lý nhận tổng hợp đơn chờ và đã duyệt trong giai đoạn đó của phạm vi mình, kèm tối đa `leave_option_count` cách xử lý các đơn chờ để phòng ban không dưới ngưỡng. Cách xử lý chỉ dựa trên ngày gửi, ngày nghỉ và số ngày của đơn (BR-164). Quản lý quyết từng đơn | A-003 | Assumed |
+
+**AI Report Analyst**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-182 | Gửi dữ liệu tới dịch vụ AI cho AI Report Analyst | Chỉ gửi số liệu mức nhóm của tín hiệu và phân rã do core tính: tên phòng ban, kỳ, con số. Không gửi tên, mã hay dữ liệu của từng người. Nhóm dưới `report_min_group_size` người được gộp vào phòng ban cha trước khi gửi, với mọi người xem, kể cả HR | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-183 | AI tạo insight cho một người xem | Insight chỉ dùng tín hiệu, chỉ số và chiều mà người đó thấy được trong báo cáo cố định (BR-067, BR-127 tới BR-130, BR-133, BR-174) | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-184 | AI viết insight, cập nhật theo dõi hay tóm tắt tuần | Không nêu tên hay mã nhân viên. Không nêu nguyên nhân ngoài phân rã của core; khi gom nhiều tín hiệu, chỉ nêu chúng xảy ra cùng kỳ. Không dự báo con số tương lai | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-185 | AI Report Analyst hành động | AI chỉ tự hiện insight và gửi thông báo cho chính người xem. Tin gửi tới người khác là thẻ đề xuất theo BR-157. AI Report Analyst không có thao tác tầng 3 | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-186 | AI gom tín hiệu thành insight | AI gom các tín hiệu Đang có của một phạm vi thành insight; mỗi insight có các tín hiệu nguồn, tiêu đề và giải thích. Code xếp insight theo mức độ cao nhất trong các tín hiệu nguồn, bỏ insight mà mọi tín hiệu nguồn thuộc loại người xem đã tắt, rồi lấy tối đa `insight_max_count` | A-003 | Assumed |
+| BR-187 | AI giải thích một insight | Giải thích dài 2 tới 3 câu, dựa trên phân rã của core: nêu thành phần đóng góp lớn nhất và điểm khác so với kỳ trước hoặc cùng kỳ năm trước. Mọi con số lấy từ dữ kiện | A-003 | Assumed |
+| BR-188 | Kiểm đầu ra của AI Report Analyst | Ngoài BR-163: không chứa tên nhân viên nào trong danh bạ; mọi tín hiệu nguồn thuộc phạm vi và vai trò của insight; việc tiếp theo nằm trong danh sách của loại tín hiệu. Không đạt thì người xem thấy thẻ cảnh báo của rule (BR-162) | A-003 | Assumed |
+| BR-189 | Tính insight | Chạy sau mỗi lần tính tín hiệu có thay đổi (BR-172), theo phạm vi và vai trò người xem; những người cùng phạm vi và vai trò dùng chung insight. Insight ghi thời điểm tính; tín hiệu nguồn đổi số liệu thì insight được viết lại. Trang tổng quan đọc insight đã tính, không gọi AI khi mở trang | A-003 | Assumed |
+| BR-190 | AI đề xuất nhắc một nhóm người từ insight | Chỉ với loại tín hiệu có việc nhắc ở mục Default signal types. Core chọn người nhận theo tín hiệu và phạm vi người xem tại lúc bấm Gửi. AI soạn nội dung chung, không chứa số liệu của từng người; người xem sửa rồi bấm Gửi (BR-157) | A-003 | Assumed |
+| BR-191 | AI viết cập nhật theo dõi và tóm tắt tuần | Cập nhật so số liệu lúc bắt đầu theo dõi với số liệu hiện tại (BR-180). Tóm tắt tuần là một đoạn ngắn viết từ các tín hiệu trong thông báo (BR-181). AI lỗi hoặc đầu ra không đạt kiểm tra thì gửi nội dung mẫu của rule (BR-162) | A-003 | Assumed |
 
 ### Parameters
 
@@ -790,6 +859,13 @@ chiếu theo Q-008 và Q-023.
 | `ot_night_extra` | Phần trả thêm cho giờ làm thêm ban đêm, theo hệ số ban ngày | 20%. Hệ số làm thêm ban đêm vì thế là 210% ngày làm việc, 270% ngày nghỉ hằng tuần, 390% ngày nghỉ lễ | BR-108 |
 | `unused_leave_avg_months` | Số tháng liền trước tháng nghỉ việc để tính lương ngày trả phép chưa nghỉ | 6 | BR-120 |
 | `report_min_group_size` | Số người tối thiểu của một nhóm để Quản lý thấy số liệu tổng hợp nhạy cảm | 3 | BR-129 |
+| `turnover_gap_points` | Mức tỷ lệ nghỉ việc của một phòng ban cao hơn cả công ty để có tín hiệu, điểm phần trăm | 5 (A-020) | BR-172 |
+| `signal_change_ratio` | Mức tăng so với bình quân 3 tháng trước để có tín hiệu ngày nghỉ, vắng hoặc đi muộn | 30% (A-020) | BR-172 |
+| `signal_min_increase` | Mức tối thiểu tính bằng số tuyệt đối của một tín hiệu: ngày, lần hoặc người | 3 (A-020) | BR-172, BR-173 |
+| `coverage_lookahead_days` | Số ngày tới để tìm buổi dưới ngưỡng nhân sự | 14 | BR-172 |
+| `payroll_change_ratio` | Mức tăng hoặc giảm của chi phí lương so với tháng trước để có tín hiệu | 5% (A-020) | BR-172 |
+| `insight_max_count` | Số thẻ cảnh báo hoặc insight tối đa trên trang tổng quan | 5 | BR-175, BR-186 |
+| `signal_follow_up_days` | Số ngày giữa hai lần nhắc người theo dõi một tín hiệu còn Đang có | 14 | BR-180 |
 | `contact_retention_months` | Số tháng sau ngày làm việc cuối cùng để xóa thông tin liên hệ và tài khoản ngân hàng | 12 | BR-140 |
 | `retention_years` | Số năm sau ngày làm việc cuối cùng để ẩn danh hồ sơ; theo thời hạn lưu tài liệu kế toán, chờ đối chiếu | 10 | BR-141 |
 
@@ -837,6 +913,25 @@ ngừng dùng theo quy chế công ty.
 | Trách nhiệm | Cố định theo tháng | Chịu thuế | A-009 |
 | Điện thoại | Cố định theo tháng | Chịu thuế | A-009 |
 | Đi lại | Cố định theo tháng | Chịu thuế | A-009 |
+
+### Default signal types
+
+Các loại tín hiệu rule tính (BR-172). Ngưỡng là tham số ở mục Parameters, chờ quản lý và ban giám đốc xác nhận theo
+Q-033. Cột Breakdown là phân rã core hiện ở chi tiết tín hiệu (BR-176). Ở cột Next steps, việc ghi (M6) là thẻ nhắc của
+AI Report Analyst (BR-190); các việc còn lại là đường dẫn, không cần xác nhận.
+
+| Signal | Detected when | Severity | Viewers | Breakdown | Next steps |
+|---|---|---|---|---|---|
+| Nghỉ việc tăng | Tỷ lệ nghỉ việc trong 3 tháng gần nhất của một phòng ban cao hơn của cả công ty từ `turnover_gap_points` điểm phần trăm, và phòng ban có từ `signal_min_increase` người nghỉ việc (BR-132) | Cao | Quản lý, HR | Nghỉ việc theo tháng và theo nhóm thâm niên | Mở báo cáo biến động nhân sự đã lọc |
+| Ngày nghỉ tăng | Số ngày nghỉ bình quân mỗi người của một loại nghỉ trong tháng vừa qua tăng từ `signal_change_ratio` so với bình quân 3 tháng trước đó, và tổng tăng từ `signal_min_increase` ngày (BR-135) | Thường | Quản lý, HR | Theo loại nghỉ và theo phòng ban con | Mở báo cáo nghỉ phép đã lọc |
+| Vắng không lý do hoặc đi muộn tăng | Số ngày vắng không lý do hay số lần đi muộn bình quân mỗi người trong tháng đã chốt gần nhất tăng từ `signal_change_ratio` so với bình quân 3 tháng đã chốt trước đó, và tổng tăng từ `signal_min_increase` ngày hoặc lần (BR-134) | Thường | Quản lý, HR | Theo phòng ban con và theo tuần trong tháng | Mở báo cáo chấm công đã lọc |
+| Phép tồn sắp hết hạn | Còn `carryover_reminder_days` ngày tới `carryover_expiry` mà phòng ban còn phép tồn chưa dùng (BR-051) | Thường | Quản lý, HR | Số ngày phép tồn và số người theo phòng ban con | Mở tab Số dư phép đã lọc; nhắc người còn phép tồn (M6) |
+| Buổi dưới ngưỡng sắp tới | Có buổi dưới ngưỡng nhân sự trong `coverage_lookahead_days` ngày tới (BR-146) | Thường | Quản lý, HR | Các buổi dưới ngưỡng theo phòng ban, kèm mức phủ | Mở lịch nghỉ của nhóm |
+| Làm thêm gần giới hạn | Có người đã dùng từ 80% giới hạn làm thêm tháng hoặc năm (BR-084) | Thường | Quản lý, HR | Số người và số giờ theo phòng ban con | Mở danh sách người gần giới hạn ở báo cáo chấm công |
+| Đơn chờ quá hạn | Có đơn chờ quá `approval_reminder_days` ngày làm việc (BR-148) | Thường | Quản lý với đơn mình là người duyệt hoặc người duyệt thay; HR | Số đơn theo phòng ban và theo số ngày đã chờ | Mở đơn chờ duyệt |
+| Hợp đồng sắp hết hạn | Có hợp đồng hết hạn trong `contract_expiry_warning_days` ngày mà chưa có hợp đồng mới (BR-029) | Cao | HR | Số hợp đồng theo phòng ban và theo tuần hết hạn | Mở danh sách hợp đồng sắp hết hạn |
+| Ngày chưa xử lý | Kỳ công trước chưa chốt và còn ngày chưa xử lý (BR-089) | Cao | HR | Số ngày và số người theo phòng ban | Mở bảng công của nhóm đã lọc; nhắc người có ngày chưa xử lý gửi giải trình (M6) |
+| Chi phí lương đổi lớn | Chi phí lương của tháng vừa chốt, của một phòng ban hay cả công ty, tăng hoặc giảm từ `payroll_change_ratio` so với tháng trước (BR-131) | Cao | Quản lý, chỉ số tổng hợp (BR-128); HR | Người vào mới, người nghỉ việc, thay đổi lương, làm thêm, phụ cấp, khoản điều chỉnh, phần công ty đóng | Mở báo cáo chi phí lương đã lọc |
 
 ## Sensitive data
 
@@ -964,3 +1059,14 @@ ngừng dùng theo quy chế công ty.
 | EC-103 | Khoảng ngày gợi ý dùng phép tồn trùng giai đoạn hạn chế hoặc buổi phòng ban đã dưới ngưỡng | Khoảng đó không được gợi ý | BR-170 | — |
 | EC-104 | Thẻ đề xuất chưa được xác nhận thì tình huống đã đổi, ví dụ đơn đã bị hủy | Bấm xác nhận thì core kiểm lại và từ chối; thẻ được đánh dấu hết hiệu lực | BR-157 | — |
 | EC-105 | Gửi nhiều đơn trong một lần mà một đơn không qua luật | Không đơn nào được tạo; nhân viên thấy đơn nào lỗi và vì sao | BR-153 | — |
+| EC-106 | Phòng ban 4 người tăng từ 1 lên 2 ngày nghỉ trong tháng, tức tăng 100% | Không có tín hiệu vì tổng chỉ tăng 1 ngày, dưới `signal_min_increase` | BR-173 | — |
+| EC-107 | Phòng ban con có dưới `report_min_group_size` người | Không có tín hiệu dạng tỷ lệ riêng; số liệu nằm trong phòng ban cha, cả khi tính tín hiệu lẫn khi gửi cho AI | BR-173, BR-182 | — |
+| EC-108 | Số trên thẻ hoặc insight khác số trong báo cáo người xem mở ra | Thẻ và insight ghi thời điểm tính; báo cáo dùng dữ liệu tại lúc mở (BR-138). Lần tính sau cập nhật thẻ | BR-175, BR-189 | — |
+| EC-109 | HR mở lại bảng công của tháng mà một tín hiệu dùng | Thẻ ghi số liệu đang được sửa; tín hiệu được tính lại khi tháng được chốt lại | BR-179 | — |
+| EC-110 | Quản lý thôi làm trưởng phòng ban | Thẻ, insight và việc theo dõi của phạm vi cũ không còn hiện với người đó | BR-174, BR-183 | — |
+| EC-111 | Giám đốc là Quản lý của phòng ban gốc nên cùng phạm vi với HR | Insight tính riêng theo vai trò; insight của Quản lý không gồm tín hiệu chỉ HR thấy, như hợp đồng sắp hết hạn | BR-183, BR-189 | — |
+| EC-112 | Tín hiệu đơn chờ quá hạn xuất hiện khi người duyệt đã được nhắc theo BR-148 | Chỉ hiện thẻ, không gửi thêm thông báo | BR-177 | — |
+| EC-113 | Đầu ra của AI Report Analyst có tên nhân viên hoặc con số khác dữ kiện | Đầu ra bị bỏ; người xem thấy thẻ cảnh báo của rule | BR-162, BR-188 | — |
+| EC-114 | Giải thích của AI nêu nguyên nhân không có trong phân rã, ví dụ "nghỉ việc tăng vì lương thấp" | Code không bắt được mọi trường hợp. Eval chấm theo rubric trước khi phát hành (QA-010); người xem đánh giá Không hữu ích | BR-184 | — |
+| EC-115 | Người nhận của thẻ nhắc nhóm đổi trước khi bấm Gửi, ví dụ một người vừa gửi giải trình | Core chọn lại người nhận tại lúc bấm Gửi; người đã xử lý xong không nhận tin | BR-190 | — |
+| EC-116 | Tín hiệu đang được theo dõi đã hết rồi xuất hiện lại | Là tín hiệu mới; việc theo dõi kết thúc khi tín hiệu cũ hết, người xem theo dõi lại nếu muốn | BR-180 | — |
