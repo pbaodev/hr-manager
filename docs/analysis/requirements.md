@@ -10,8 +10,7 @@
 ## Goal
 
 Baseline mô tả đủ hành vi của sáu milestone M1–M6 trong [brief](../project/brief.md#scope) để thiết kế toàn hệ thống trước khi
-code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung cùng M1 tới M5; phần của M6 thêm khi phân tích
-AI. Bản phát hành đầu tiên là v1.0, gồm mọi story của M1 tới M6 trong [stories](stories.md#summary).
+code. Tài liệu được điền theo từng milestone và đã đủ phần dùng chung, M1 tới M5 và ba tính năng AI của M6. Bản phát hành đầu tiên là v1.0, gồm mọi story của M1 tới M6 trong [stories](stories.md#summary).
 
 ## Actors
 
@@ -88,6 +87,12 @@ Các story do Thời gian thực hiện (US-030, US-031, US-040) không có dòn
 | Xem tỷ lệ đánh giá hữu ích theo loại tín hiệu (US-093) | ❌ | ❌ | ✅ không thấy đánh giá của từng người (BR-178) |
 | Xem insight, cập nhật và tóm tắt tuần do AI viết (US-096, US-097, US-099, US-100) | ❌ | ✅ phạm vi; chỉ chỉ số và chiều thấy được trong báo cáo (BR-183) | ✅ mọi người |
 | Gửi thẻ nhắc nhóm từ insight (US-098) | ❌ | ✅ người nhận trong phạm vi (BR-190) | ✅ mọi người |
+| Đọc và tìm quy chế, câu hỏi thường gặp (US-102) | ✅ | ✅ | ✅ |
+| Đăng phiên bản quy chế; quản lý câu hỏi thường gặp (US-101, US-103) | ❌ | ❌ | ✅ |
+| Gửi câu hỏi cho HR; xem câu hỏi của mình và trả lời (US-104) | ✅ | ✅ | ✅ |
+| Xem và trả lời mọi câu hỏi gửi HR; nhận gợi ý mục câu hỏi thường gặp của AI (US-105, US-113) | ❌ | ❌ | ✅ |
+| So sánh phiếu lương với tháng trước (US-106) | ✅ của mình | ✅ của mình | ✅ mọi người |
+| Dùng AI HR Assistant (US-107 tới US-112) | ✅ chỉ dữ liệu mình được xem, trừ dữ liệu ở BR-199 | ✅ như Nhân viên, thêm phạm vi | ✅ mọi người, trừ dữ liệu ở BR-199 |
 
 ## User stories
 
@@ -124,10 +129,13 @@ flowchart LR
     R1(["M5: Xem báo cáo"])
     R2(["M5: Nhận cảnh báo, theo dõi tín hiệu"])
     I3(["M6: Nhận insight của AI"])
+    U8(["Đọc quy chế, gửi câu hỏi cho HR"])
+    U9(["Đăng quy chế, trả lời câu hỏi"])
+    I4(["M6: Hỏi đáp với AI HR Assistant"])
   end
-  NV --- U1 & U2 & U3 & L1 & A1 & P1 & I1
+  NV --- U1 & U2 & U3 & L1 & A1 & P1 & I1 & U8 & I4
   QL --- U4 & L2 & A3 & R1 & R2 & I2 & I3
-  HR --- U5 & U6 & U7 & L3 & A2 & P2 & R1 & R2 & I3
+  HR --- U5 & U6 & U7 & L3 & A2 & P2 & R1 & R2 & I3 & U9
 ```
 
 ### UC-001: Tiếp nhận nhân viên mới
@@ -395,7 +403,8 @@ flowchart LR
 ### UC-013: Tạo đơn nghỉ với AI Leave Coordinator
 
 Giai đoạn 1 và 2 của AI Leave Coordinator: tiếp nhận, hiểu yêu cầu và đề xuất phương án. Chạy cả khi nhân viên dùng
-form lẫn khi dùng chat.
+form lẫn khi dùng chat. Từ chat, AI HR Assistant chuyển câu của nhân viên vào bước 2 theo UC-019; bước 5 luôn ở SCR-020
+(BR-206, BR-207).
 
 - **Actor:** Nhân viên · **Stories:** US-082, US-083, US-084
 - **Trigger:** Nhân viên mô tả nhu cầu nghỉ bằng một câu, trong chat hoặc ở form, hoặc điền form.
@@ -522,6 +531,88 @@ của rule.
 - **Postconditions:** Tin chỉ tới người khác khi người xem bấm Gửi. Đánh giá được lưu để đo tỷ lệ hữu ích; không ai xem
   được đánh giá của từng người (BR-178).
 
+### UC-018: Hỏi đáp với AI HR Assistant
+
+Giai đoạn 1 và 2 của AI HR Assistant: tiếp nhận, phân loại, tra cứu và trả lời. Chat là lối vào hội thoại, không sở hữu
+nghiệp vụ riêng (BR-204).
+
+- **Actor:** Nhân viên, Quản lý, HR · **Stories:** US-107, US-108, US-109
+- **Trigger:** Người dùng gõ câu hỏi trong chat, hoặc mở chat từ một màn hình.
+- **Preconditions:** Người dùng chưa hết số câu hỏi trong ngày (BR-209).
+- **Main flow:**
+  1. Người dùng gõ câu hỏi. Mở chat từ một màn hình thì chat nhận ngữ cảnh màn hình (BR-211).
+  2. AI xếp câu hỏi vào một loại: quy chế, dữ liệu của mình, dữ liệu người khác, giải thích một con số, muốn làm một
+     việc, hoặc ngoài phạm vi. Câu thiếu thông tin thì AI hỏi lại.
+  3. AI gọi các công cụ đọc cần thiết, bằng phiên của người dùng (BR-198, mục Assistant tools của
+     [domain](domain.md#assistant-tools)).
+  4. AI soạn câu trả lời kèm nguồn: mục quy chế, mục câu hỏi thường gặp hoặc màn hình gốc (BR-200).
+  5. Code kiểm câu trả lời (BR-163, BR-210), rồi chat hiện câu trả lời theo BR-205.
+- **Alternative flows:**
+  - `2a`. Người dùng muốn làm một việc: sang UC-019.
+  - `2b`. Câu đòi xếp hạng hay nhận xét về từng người: AI không trả lời và dẫn tới báo cáo cố định nếu có (BR-201,
+    EC-121).
+  - `3a`. Dữ liệu ngoài quyền người dùng hoặc thuộc BR-199: AI trả lời không có quyền, hoặc dẫn tới màn hình gốc (EC-120,
+    EC-122).
+  - `4a`. Không có nguồn: AI nói không biết và đề nghị gửi câu hỏi cho HR theo UC-020 (EC-117).
+  - `4b`. Quy chế khác cấu hình: AI trả lời theo cấu hình và nêu chỗ khác nhau (BR-202, EC-118).
+- **Exceptions:**
+  - `3b`. Cần quá `assistant_max_tool_calls` lần gọi công cụ: AI dừng và đề nghị gửi câu hỏi cho HR (EC-124).
+  - `5a`. Câu trả lời không đạt kiểm tra, hoặc AI lỗi hay chậm: chat báo không trả lời được; người dùng vẫn dùng thư viện
+    quy chế, màn hình nghiệp vụ và hộp câu hỏi (BR-162, EC-131).
+- **Postconditions:** Không dữ liệu nghiệp vụ nào thay đổi. Hội thoại chỉ người hỏi xem được và bị xóa sau
+  `assistant_retention_days` ngày (BR-203).
+
+### UC-019: Chuyển ý định từ chat sang workflow nghiệp vụ
+
+Giai đoạn 3 của AI HR Assistant. Chat không hoàn tất thao tác nào; điểm xác nhận luôn là nút của màn hình nghiệp vụ
+(BR-204).
+
+- **Actor:** Nhân viên, Quản lý, HR · **Stories:** US-110, US-111
+- **Trigger:** Trong chat, người dùng muốn làm một việc (UC-018, bước `2a`).
+- **Preconditions:** Người dùng có quyền làm việc đó trên màn hình nghiệp vụ.
+- **Main flow:** xin nghỉ.
+  1. Assistant nhận ra ý định xin nghỉ, chuyển cho AI Leave Coordinator câu của người dùng và những câu trước liên quan
+     tới việc nghỉ (BR-206).
+  2. Coordinator chạy bước 2 tới 4 của UC-013. Chat hiện kết quả của Coordinator và ghi rõ nguồn: câu hỏi làm rõ, hoặc
+     tối đa `leave_option_count` thẻ phương án.
+  3. Người dùng chọn một phương án. SCR-020 mở với bản nháp và phần xem trước của core.
+  4. Người dùng kiểm rồi bấm Gửi ở SCR-020. Đây là điểm xác nhận, chung với đường form (BR-207).
+  5. Tiếp tục như UC-005 từ bước 4. Việc tiếp theo của đơn đi qua thông báo và SCR-019, không quay lại chat.
+- **Alternative flows:**
+  - `1a`. Đổi đơn: Assistant xác định đơn được nhắc tới, hỏi lại nếu chưa rõ (EC-128), rồi chuyển cho Coordinator.
+    Coordinator chỉ đề xuất phương án đổi. Chọn một phương án thì SCR-020 mở ở chế độ Đổi đơn với đơn gốc và giá trị
+    mới; người dùng kiểm rồi bấm Xác nhận đổi đơn (BR-152, BR-207, EC-127).
+  - `1b`. Hủy đơn: SCR-019 mở tại đơn đó; người dùng bấm Hủy (BR-061).
+  - `1c`. Giải trình chấm công, đăng ký làm thêm hay sửa thông tin liên hệ: Assistant mở SCR-029, SCR-030 hoặc SCR-004,
+    đã chọn sẵn ngày hoặc đối tượng; người dùng tự điền rồi bấm Gửi hoặc Lưu (BR-208).
+  - `1d`. Thao tác tầng 3, như duyệt đơn: Assistant mở màn hình tương ứng, không làm thay (BR-158, EC-125).
+- **Exceptions:**
+  - `2a`. Coordinator lỗi hoặc chậm: chat báo lỗi và có nút mở SCR-020, giữ câu đã gõ (BR-162, EC-096).
+  - `4a`. Dữ kiện đổi trước lúc bấm Gửi, như số dư: core từ chối như UC-005 (EC-097).
+- **Postconditions:** Không thao tác nào được hoàn tất trong chat. Đơn tạo từ chat có cờ hỗ trợ AI; AiOutput ghi lối vào
+  là chat (BR-165).
+
+### UC-020: Gửi câu hỏi cho HR
+
+Giai đoạn 4 của AI HR Assistant. Bước không ghi M6 là lớp rule của M1 và chạy cả khi không có AI.
+
+- **Actor:** Nhân viên, Quản lý, HR · **Stories:** US-104, US-105, US-112, US-113
+- **Trigger:** Người dùng gửi câu hỏi ở SCR-051, hoặc chọn gửi cho HR trong chat.
+- **Preconditions:** —
+- **Main flow:**
+  1. Người dùng nhập câu hỏi ở SCR-051. Từ chat (M6), AI soạn sẵn câu hỏi kèm tóm tắt hội thoại; người dùng xem và sửa
+     (BR-208).
+  2. Người dùng bấm Gửi. Câu hỏi ở trạng thái Chờ trả lời (BR-195).
+  3. HR mở SCR-051, đọc và trả lời. Người hỏi nhận thông báo (BR-195).
+  4. Người hỏi đọc trả lời; cần thì hỏi thêm trên cùng câu hỏi (EC-129).
+- **Alternative flows:**
+  - `3a`. Câu hỏi chờ quá `hr_question_reminder_days` ngày làm việc: HR được nhắc (BR-196).
+  - `4a`. (M6) AI gom các câu hỏi cùng ý và soạn nháp mục câu hỏi thường gặp; HR sửa rồi đăng ở SCR-049 (BR-194,
+    BR-212).
+- **Exceptions:**
+  - `1a`. AI lỗi khi soạn câu hỏi: người dùng tự nhập (BR-162).
+- **Postconditions:** HR chỉ thấy phần người hỏi đã gửi, không thấy hội thoại (BR-203).
+
 ## Quality attributes
 
 Mỗi dòng là một scenario có số đo. Importance và Difficulty xếp theo `H`, `M`, `L`; các dòng `H/H` và `H/M` là
@@ -538,10 +629,12 @@ Cột Verify by ghi cách đo dự kiến. Test hay lần đo cụ thể ghi ở
 | QA-004 | Performance | Công ty 300 nhân viên, dữ liệu 12 tháng, 30 người dùng cùng lúc | Mở danh sách, bảng công, báo cáo: p95 dưới 1 giây. Tính bảng lương 300 phiếu dưới 30 giây. Nhập file chấm công một tháng, khoảng 20.000 lượt chấm, dưới 60 giây (assumption) | Load test trên staging với dữ liệu giả | M / M |
 | QA-005 | Recoverability | Cơ sở dữ liệu hỏng hoặc bị xóa nhầm | Mất tối đa 24 giờ dữ liệu; hệ thống chạy lại trong 4 giờ | Diễn tập khôi phục từ bản sao lưu mỗi quý, ghi thời gian vào runbook | H / L |
 | QA-006 | Correctness (AI) | Diễn giải câu mô tả nghỉ tiếng Việt trên bộ ca có ngày tương đối, ngày lễ, lý do theo Điều 115 và câu thiếu thông tin | Ngày và buổi đúng ở ít nhất 95% số ca; lý do đúng mục ở ít nhất 90%; 100% ca thiếu thông tin được hỏi lại thay vì đoán (assumption) | Eval trên bộ ca tổng hợp, chạy khi đổi prompt, model hoặc pipeline | H / M |
-| QA-007 | Security (AI) | Câu mô tả, dữ liệu do người khác nhập hoặc câu hỏi nhằm lấy dữ liệu ngoài quyền người nhận, hay nhằm khiến AI tự thao tác | 0 đầu ra chứa dữ liệu ngoài quyền người nhận; 0 thao tác ghi do AI tự thực hiện | Bộ ca tấn công trong eval; test tự động cho ba tầng hành động của AI (BR-155 tới BR-158) | H / H |
-| QA-008 | Availability (AI) | Dịch vụ AI lỗi hoặc chậm | Mọi luồng nghỉ phép hoàn thành được bằng form và rule; gợi ý AI hiện trong 5 giây hoặc bị bỏ qua (assumption). Trang tổng quan hiện thẻ cảnh báo của rule; thông báo dùng nội dung mẫu | Test với AI bị tắt và bị làm chậm | H / L |
+| QA-007 | Security (AI) | Câu mô tả, dữ liệu do người khác nhập hoặc câu hỏi nhằm lấy dữ liệu ngoài quyền người nhận, hay nhằm khiến AI tự thao tác | 0 đầu ra chứa dữ liệu ngoài quyền người nhận; 0 thao tác ghi do AI tự thực hiện | Bộ ca tấn công trong eval; test tự động cho ba tầng hành động của AI (BR-155 tới BR-158) và cho mọi công cụ của AI HR Assistant với cả ba vai trò (BR-198, BR-199) | H / H |
+| QA-008 | Availability (AI) | Dịch vụ AI lỗi hoặc chậm | Mọi luồng nghỉ phép hoàn thành được bằng form và rule; gợi ý AI hiện trong 5 giây hoặc bị bỏ qua (assumption). Trang tổng quan hiện thẻ cảnh báo của rule; thông báo dùng nội dung mẫu. Chat báo không dùng được; thư viện quy chế và hộp câu hỏi vẫn dùng được | Test với AI bị tắt và bị làm chậm | H / L |
 | QA-009 | Cost (AI) | Công ty 300 nhân viên dùng các tính năng AI bình thường trong một tháng | Chi phí dịch vụ AI không vượt ngân sách ở Q-031; vượt giới hạn thì AI tạm tắt và nghiệp vụ chạy theo BR-162 | Đo chi phí trên staging với dữ liệu giả; giới hạn chi tiêu đặt ở dịch vụ AI | M / L |
 | QA-010 | Correctness (AI) | Tạo insight trên bộ ca tổng hợp gồm tín hiệu và phân rã của mọi loại tín hiệu, có ca gom nhiều tín hiệu và ca nhóm nhỏ | 0 insight được hiện có con số khác dữ kiện hoặc có tên người; ít nhất 90% giải thích nêu đúng thành phần đóng góp lớn nhất; ít nhất 95% không có khẳng định nguyên nhân ngoài phân rã (assumption) | Eval trên bộ ca tổng hợp: code chấm con số, tên và thành phần lớn nhất; LLM chấm theo rubric, kiểm lại một phần mẫu bằng tay. Chạy khi đổi prompt, model hoặc pipeline | H / M |
+| QA-011 | Correctness (AI) | Hỏi AI HR Assistant trên bộ ca tổng hợp: câu quy chế có và không có nguồn, câu tra dữ liệu một bước và nhiều bước, câu muốn xin hay đổi đơn | Ít nhất 90% câu trả lời đúng và dẫn đúng nguồn; 100% câu không có nguồn được trả lời là không biết; ít nhất 95% ý định nghỉ được chuyển cho Coordinator thay vì tự trả lời (assumption) | Eval: code chấm nguồn, con số và việc chuyển cho Coordinator; LLM chấm độ đúng theo rubric, kiểm lại một phần mẫu bằng tay. Chạy khi đổi prompt, model, công cụ hoặc pipeline | H / M |
+| QA-012 | Performance (AI) | Công ty 300 nhân viên, 30 người dùng chat cùng lúc | Câu hỏi cần một công cụ: câu trả lời trong 5 giây ở p95; câu nhiều bước trong 15 giây (assumption) | Load test trên staging với dịch vụ AI thật và dữ liệu giả | M / M |
 
 ## Non-goals
 
@@ -550,6 +643,8 @@ Phạm vi ngoài baseline nằm ở mục Scope của [brief](../project/brief.m
 - Đăng nhập bằng tài khoản Google hoặc Microsoft: một công ty nhỏ chưa cần.
 - Tự đặt lại mật khẩu qua email: HR đặt lại mật khẩu, vì chưa chắc mọi nhân viên có email công việc.
 - Đính kèm file vào hồ sơ và hợp đồng, như bản scan CCCD hay hợp đồng: để sau baseline.
+- Tải file quy chế như PDF hay Word để hệ thống tự chia mục: HR nhập hoặc dán từng mục (BR-192).
+- Trao đổi nhiều người trên một câu hỏi: câu hỏi gửi HR chỉ giữa người hỏi và HR.
 
 Riêng M2 không làm:
 
@@ -601,3 +696,13 @@ Riêng AI Report Analyst của M6 không làm:
 - Tự tìm điều bất thường ngoài danh mục tín hiệu: rule phát hiện, AI chỉ gom và giải thích (BR-172, BR-186).
 - Trả lời câu hỏi tự do về số liệu: để AI HR Assistant làm, dùng chung phân rã của core.
 - Gửi insight hay tóm tắt tuần qua email hoặc ứng dụng chat ngoài hệ thống.
+
+Riêng AI HR Assistant của M6 không làm:
+
+- Thay màn hình nghiệp vụ hay hoàn tất thao tác trong chat: chat chỉ là lối vào hội thoại (BR-204).
+- Soạn nháp giải trình, đơn làm thêm hay thông tin liên hệ: form đã đủ, Assistant chỉ mở đúng form (BR-208).
+- Trả lời quy chế từ hiểu biết riêng của model, hay tư vấn pháp lý cho trường hợp riêng (BR-200).
+- Đọc lương hay lý do nghỉ của người khác, kể cả khi người hỏi là HR (BR-199).
+- Xếp hạng, so sánh hay nhận xét về từng người (BR-201).
+- Cho HR hay bất kỳ ai đọc hội thoại của người khác (BR-203).
+- Trò chuyện ngoài công việc nhân sự, hay trả lời qua email và ứng dụng chat ngoài hệ thống.

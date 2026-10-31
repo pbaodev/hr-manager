@@ -7,7 +7,7 @@
 - **Related:** [requirements](requirements.md) · [questions](../project/questions.md) · [research](../project/research.md) ·
   [data design](../design/data.md) · [analysis guide](../playbook/analysis.md)
 
-Bản hiện tại có đủ phần dùng chung, M1 tới M5, cùng phần AI Leave Coordinator và AI Report Analyst của M6.
+Bản hiện tại có đủ phần dùng chung, M1 tới M5 và ba tính năng AI của M6.
 
 ## Glossary
 
@@ -83,6 +83,10 @@ Hệ thống có một bounded context.
 | Biến động nhân sự | Số người đầu kỳ, vào mới, nghỉ việc, chuyển đến, chuyển đi và cuối kỳ trong một kỳ báo cáo (BR-132) | `headcountMovement` | — |
 | Tỷ lệ nghỉ việc | Số người nghỉ việc trong kỳ chia số người bình quân của kỳ (BR-132) | `turnoverRate` | — |
 | Kỳ báo cáo | Khoảng tháng hoặc khoảng ngày người xem chọn cho một báo cáo | `reportPeriod` | Kỳ công, kỳ lương |
+| Quy chế | Một văn bản quy định của công ty dành cho mọi nhân viên, như nội quy lao động hay quy chế lương thưởng (BR-192) | `Policy` | Cấu hình: loại nghỉ, lý do nghỉ, tham số do HR khai trên hệ thống |
+| Phiên bản quy chế | Nội dung của một quy chế từ một ngày hiệu lực, chia theo mục (BR-192) | `PolicyVersion` | — |
+| Câu hỏi thường gặp | Một cặp câu hỏi và trả lời do HR đăng, có thể gắn với mục quy chế (BR-194) | `FaqEntry` | Câu hỏi gửi HR |
+| Câu hỏi gửi HR | Câu hỏi một người dùng gửi cho HR trong hệ thống, kèm các lượt trả lời (BR-195) | `HrQuestion` | Câu hỏi thường gặp |
 | Tín hiệu | Một điều đáng chú ý do rule phát hiện từ số liệu báo cáo, theo danh mục ở mục Default signal types (BR-172) | `Signal` | Insight |
 | Mức độ của tín hiệu | Cao hoặc Thường; tín hiệu mức Cao được thông báo ngay (BR-177) | `severity` | — |
 | Thẻ cảnh báo | Thẻ trên trang tổng quan hiện một tín hiệu với nội dung mẫu (BR-175) | `signalCard` | Thẻ đề xuất |
@@ -94,6 +98,9 @@ Hệ thống có một bounded context.
 | Phương án nghỉ | Một cách nghỉ hợp lệ do core sinh và AI chọn, kèm hệ quả (BR-168) | `LeaveOption` | — |
 | AI Report Analyst | Phần AI trên trang tổng quan: gom tín hiệu thành insight, giải thích, soạn việc tiếp theo, viết cập nhật và tóm tắt tuần | `ReportAnalyst` | Thẻ cảnh báo: phần rule, chạy cả khi không có AI |
 | Insight | Một điều đáng chú ý do AI gom từ một hoặc nhiều tín hiệu của một phạm vi, kèm tiêu đề và giải thích (BR-186) | `Insight` | Tín hiệu |
+| AI HR Assistant | Lối vào hội thoại của hệ thống: hỏi đáp, nhận ra ý định và chuyển người dùng sang workflow nghiệp vụ đã có (BR-204) | `HrAssistant` | Màn hình nghiệp vụ: nơi mọi thao tác được xác nhận |
+| Hội thoại | Các lượt hỏi và trả lời giữa một người dùng và AI HR Assistant (BR-203) | `Conversation` | Câu hỏi gửi HR |
+| Ngữ cảnh màn hình | Loại và mã của đối tượng người dùng đang xem khi mở chat, như phiếu lương tháng 5 (BR-211) | `screenContext` | — |
 
 ## Entities
 
@@ -123,6 +130,19 @@ classDiagram
 | UserAccount | Entity | Tên đăng nhập, có vai trò HR hay không, có phải đổi mật khẩu không, số lần đăng nhập sai liên tiếp, trạng thái | Thuộc một Employee |
 | AuditEntry | Entity | Thời điểm, người làm, đối tượng, thao tác, giá trị trước và sau, lý do | — |
 | DateRange | Value object | Ngày bắt đầu, ngày kết thúc có thể trống; ngày kết thúc không trước ngày bắt đầu | — |
+
+**M1: quy chế và câu hỏi gửi HR**
+
+Phần này là lớp rule mà AI HR Assistant ở M6 dựa vào, và dùng được khi không có AI.
+
+| Name | Kind | Key attributes | Relations |
+|---|---|---|---|
+| Policy | Entity | Tên, trạng thái (đang dùng, ngừng dùng) | Có nhiều PolicyVersion |
+| PolicyVersion | Entity | Số phiên bản, ngày hiệu lực, trạng thái (nháp, đã đăng), người đăng, thời điểm đăng | Thuộc một Policy; có nhiều PolicySection |
+| PolicySection | Value object | Số thứ tự, tiêu đề, nội dung | Thuộc một PolicyVersion |
+| FaqEntry | Entity | Câu hỏi, trả lời, trạng thái (nháp, đã đăng, ẩn), cờ cần rà lại, người tạo | Có thể gắn với một PolicySection |
+| HrQuestion | Entity | Người hỏi, nội dung, nguồn (form hoặc chat), trạng thái, thời điểm gửi | Có nhiều HrQuestionMessage |
+| HrQuestionMessage | Value object | Người viết, nội dung, thời điểm | Thuộc một HrQuestion |
 
 **M2: nghỉ phép**
 
@@ -228,9 +248,10 @@ hiệu, vì tín hiệu cần được lưu để theo dõi và để không bá
 
 | Name | Kind | Key attributes | Relations |
 |---|---|---|---|
-| AiOutput | Entity | Thời điểm, tính năng, tình huống, người nhận, dữ liệu đã gửi tới dịch vụ AI, đầu ra, kết quả kiểm (BR-163), lựa chọn cuối của người dùng | Có thể gắn với một LeaveRequest, một ActionProposal hoặc một Insight |
+| AiOutput | Entity | Thời điểm, tính năng, lối vào (form, chat, thông báo, trang tổng quan), tình huống, người nhận, dữ liệu đã gửi tới dịch vụ AI, đầu ra, kết quả kiểm (BR-163), lựa chọn cuối của người dùng | Có thể gắn với một LeaveRequest, một ActionProposal, một Insight hoặc một Conversation |
 | ActionProposal | Entity | Thao tác đề xuất, người được xác nhận, trạng thái (chờ, đã xác nhận, bỏ qua, hết hiệu lực) | Có thể gắn với một LeaveRequest hoặc một Insight |
 | Insight | Entity | Phạm vi, vai trò người xem, tiêu đề, giải thích, việc tiếp theo, thời điểm tính | Gom một hoặc nhiều Signal; nội dung là một AiOutput |
+| Conversation | Entity | Người hỏi, các lượt hỏi và trả lời, công cụ đã gọi ở mỗi lượt, ngữ cảnh màn hình, thời điểm | Thuộc một UserAccount; mỗi câu trả lời là một AiOutput; có thể sinh một HrQuestion |
 
 ## Aggregates and invariants
 
@@ -258,6 +279,8 @@ hiệu, vì tín hiệu cần được lưu để theo dõi và để không bá
 | PayrollRun | PayrollRun, Payslip, PayslipLine | Thực lĩnh của phiếu bằng tổng các dòng (BR-114); không đổi khi đã chốt (BR-118) | Chỉ tính khi bảng công đã chốt (BR-102); điều kiện chốt (BR-117); hai thao tác chốt cùng lúc chỉ một thành công (EC-072) |
 | Signal | Signal | Số liệu và phân rã là bản chụp tại lúc tính gần nhất | Mỗi loại tín hiệu, phòng ban và kỳ có tối đa một tín hiệu Đang có (BR-172) |
 | SignalReaction | SignalReaction | — | Mỗi người xem có tối đa một SignalReaction cho một thẻ |
+| Policy | Policy, PolicyVersion, PolicySection | Phiên bản đã đăng không sửa được (BR-192) | Tại một ngày, mỗi quy chế có tối đa một phiên bản hiệu lực (BR-192) |
+| HrQuestion | HrQuestion, HrQuestionMessage | Lượt trả lời không sửa, không xóa | — |
 
 ## Lifecycles
 
@@ -493,6 +516,23 @@ stateDiagram-v2
 
 Tín hiệu đã hết không quay lại Đang có; điều kiện xuất hiện lại thì rule tạo tín hiệu mới.
 
+**HrQuestion**
+
+```mermaid
+stateDiagram-v2
+  state "Chờ trả lời" as pending
+  state "Đã trả lời" as answered
+  [*] --> pending: người dùng gửi
+  pending --> answered: HR trả lời
+  answered --> pending: người hỏi hỏi thêm
+```
+
+| From | To | Trigger and actor | Guard |
+|---|---|---|---|
+| — | `pending` | Người dùng gửi câu hỏi, từ form hoặc từ chat | Nội dung không trống (BR-195) |
+| `pending` | `answered` | HR trả lời | Nội dung không trống |
+| `answered` | `pending` | Người hỏi hỏi thêm trên cùng câu hỏi | — (BR-195, EC-129) |
+
 ## Business rules
 
 - **Status:** `Confirmed` khi có nguồn xác nhận; `Assumed` khi dựa trên assumption; `Disputed` khi các nguồn mâu thuẫn và
@@ -541,7 +581,7 @@ Tín hiệu đã hết không quay lại Đang có; điều kiện xuất hiện
 | BR-022 | Lưu số CCCD | Số CCCD không trùng giữa các hồ sơ chưa bị hủy tiếp nhận | A-003 | Assumed |
 | BR-139 | HR tuyển lại nhân viên ở trạng thái Đã nghỉ việc | Dùng lại hồ sơ và mã nhân viên cũ, thêm một khoảng làm việc mới với ngày vào làm sau ngày làm việc cuối cùng của khoảng trước. Quá trình công tác, hợp đồng, ca và bản ghi lương được nhập mới cho khoảng đó. Tài khoản cũ được mở khóa lại. Phép năm bắt đầu từ 0 vì phép chưa nghỉ đã được trả khi nghỉ việc (BR-120); thâm niên ở BR-048 chỉ tính từ ngày vào làm mới | Chủ dự án, 2026-10-30 | Confirmed |
 | BR-140 | Nhân viên đã nghỉ việc quá `contact_retention_months` tháng | Hệ thống đưa người đó vào danh sách cần xóa thông tin liên hệ. HR xác nhận thì xóa điện thoại, email, địa chỉ cá nhân, người liên hệ khẩn cấp và tài khoản ngân hàng. Hệ thống không tự xóa khi chưa có xác nhận. Nhật ký ghi việc xóa nhưng không chép lại giá trị đã xóa | Chủ dự án, 2026-10-30; Luật Bảo vệ dữ liệu cá nhân 2025 | Confirmed |
-| BR-141 | Nhân viên đã nghỉ việc quá `retention_years` năm | Hệ thống đưa người đó vào danh sách cần ẩn danh. HR xác nhận thì xóa mọi thông tin cá nhân, người phụ thuộc, lý do nghỉ và nội dung các đơn; hồ sơ chỉ còn mã nhân viên. Số liệu đã chốt trong bảng công, bảng lương và báo cáo tổng hợp được giữ | Chủ dự án, 2026-10-30; Luật Kế toán về thời hạn lưu tài liệu kế toán | Assumed |
+| BR-141 | Nhân viên đã nghỉ việc quá `retention_years` năm | Hệ thống đưa người đó vào danh sách cần ẩn danh. HR xác nhận thì xóa mọi thông tin cá nhân, người phụ thuộc, lý do nghỉ, nội dung các đơn và câu hỏi gửi HR; hồ sơ chỉ còn mã nhân viên. Số liệu đã chốt trong bảng công, bảng lương và báo cáo tổng hợp được giữ | Chủ dự án, 2026-10-30; Luật Kế toán về thời hạn lưu tài liệu kế toán | Assumed |
 
 **Hợp đồng lao động**
 
@@ -564,6 +604,19 @@ Tín hiệu đã hết không quay lại Đang có; điều kiện xuất hiện
 | BR-031 | Bất kỳ ai cố sửa hoặc xóa nhật ký | Hệ thống không có thao tác nào cho phép việc đó | A-003 | Assumed |
 | BR-032 | Hiển thị danh bạ | Chỉ gồm nhân viên đang làm; chỉ hiện họ tên, chức danh, phòng ban, email và điện thoại công việc | A-003 | Assumed |
 | BR-033 | Quản lý xem nhân viên trong phạm vi | Xem được thông tin công việc, liên hệ công việc và quá trình công tác; không xem được CCCD, ngày sinh, giới tính, địa chỉ, tài khoản ngân hàng, liên hệ khẩn cấp và hợp đồng | A-003 | Assumed |
+
+**Quy chế và câu hỏi gửi HR**
+
+Các luật này thuộc lớp rule của M1 và chạy cả khi không có AI. AI HR Assistant ở M6 dùng chúng làm nguồn và làm đường
+chuyển câu hỏi cho HR.
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-192 | HR đăng một phiên bản quy chế | Phiên bản gồm các mục, mỗi mục có tiêu đề và nội dung; phiên bản có ngày hiệu lực. Phiên bản đã đăng không sửa được: sửa thì tạo phiên bản mới, phiên bản cũ được giữ để xem lại. Hai phiên bản đã đăng của cùng quy chế không có cùng ngày hiệu lực. Tại một ngày, mỗi quy chế có tối đa một phiên bản hiệu lực: phiên bản đã đăng có ngày hiệu lực gần nhất không sau ngày đó | A-003 | Assumed |
+| BR-193 | Người dùng xem hoặc tìm quy chế | Mọi người dùng đọc được phiên bản đang hiệu lực và các phiên bản trước của mọi quy chế đang dùng. Tìm theo từ khóa trong tiêu đề và nội dung các mục của phiên bản đang hiệu lực. Thư viện chỉ chứa văn bản dành cho mọi nhân viên | A-003 | Assumed |
+| BR-194 | HR quản lý câu hỏi thường gặp | HR tạo, sửa, đăng hoặc ẩn một mục; mục có thể gắn với một mục quy chế. Quy chế được gắn có phiên bản mới thì mục câu hỏi thường gặp có cờ cần rà lại cho tới khi HR sửa hoặc xác nhận | A-003 | Assumed |
+| BR-195 | Người dùng gửi câu hỏi cho HR | Người hỏi chỉ xem câu hỏi của mình; mọi HR xem và trả lời được mọi câu hỏi. HR trả lời thì người hỏi nhận thông báo trong hệ thống. Người hỏi hỏi thêm trên cùng câu hỏi thì câu hỏi quay lại Chờ trả lời | A-003 | Assumed |
+| BR-196 | Câu hỏi ở trạng thái Chờ trả lời quá `hr_question_reminder_days` ngày làm việc | Mọi HR được nhắc mỗi ngày làm việc cho tới khi có trả lời | A-003 | Assumed |
 
 **Lịch làm việc và loại nghỉ**
 
@@ -718,6 +771,7 @@ Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. 
 | BR-124 | Tạo, sửa hoặc xóa bản ghi lương, người phụ thuộc, thông tin thuế và bảo hiểm, loại phụ cấp, tham số lương, khoản điều chỉnh; tính hoặc chốt bảng lương | Ghi nhật ký như BR-030 | A-003 | Assumed |
 | BR-125 | Bảng lương được chốt | Mỗi nhân viên có phiếu lương nhận thông báo trong hệ thống | A-003 | Assumed |
 | BR-126 | Xuất danh sách chuyển khoản | Chỉ xuất được khi bảng lương đã chốt. Mỗi nhân viên có thực lĩnh lớn hơn 0 một dòng gồm họ tên, số tài khoản, ngân hàng, số tiền. Nhân viên thiếu số tài khoản không có trong file và được cảnh báo khi chốt | A-003 | Assumed |
+| BR-197 | Xem phiếu lương so với tháng trước | Chỉ so hai phiếu đã chốt của hai tháng liền nhau. Mỗi dòng cùng tên có số của hai tháng và chênh lệch; dòng chỉ có ở một tháng được ghi là mới hoặc không còn. Nhân viên chỉ so phiếu của mình; HR so được phiếu của mọi người (BR-122) | A-003 | Assumed |
 
 **Báo cáo**
 
@@ -797,6 +851,26 @@ Các luật này thuộc lớp rule của M5 và chạy cả khi không có AI. 
 | BR-190 | AI đề xuất nhắc một nhóm người từ insight | Chỉ với loại tín hiệu có việc nhắc ở mục Default signal types. Core chọn người nhận theo tín hiệu và phạm vi người xem tại lúc bấm Gửi. AI soạn nội dung chung, không chứa số liệu của từng người; người xem sửa rồi bấm Gửi (BR-157) | A-003 | Assumed |
 | BR-191 | AI viết cập nhật theo dõi và tóm tắt tuần | Cập nhật so số liệu lúc bắt đầu theo dõi với số liệu hiện tại (BR-180). Tóm tắt tuần là một đoạn ngắn viết từ các tín hiệu trong thông báo (BR-181). AI lỗi hoặc đầu ra không đạt kiểm tra thì gửi nội dung mẫu của rule (BR-162) | A-003 | Assumed |
 
+**AI HR Assistant**
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-198 | AI HR Assistant đọc dữ liệu hoặc mở màn hình | Assistant chạy bằng phiên của người hỏi, không có vai trò hệ thống riêng. Assistant chỉ gọi công cụ ở mục Assistant tools; mỗi công cụ là một thao tác đọc trong Permission matrix của [requirements](requirements.md#permission-matrix) hoặc một lệnh mở màn hình. Không có công cụ ghi. Người hỏi không có quyền thì Assistant trả lời là không có quyền | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-199 | Dữ liệu đi qua AI HR Assistant | Không đọc và không gửi tới dịch vụ AI: các trường ở BR-161; lương, phụ cấp và phiếu lương của người khác; lý do nghỉ và mô tả thêm của người khác. Điều này áp dụng cả khi người hỏi là HR; Assistant dẫn tới màn hình gốc. Phiếu lương đã chốt của chính người hỏi được gửi, chỉ các dòng cần cho câu hỏi | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-200 | Assistant trả lời câu hỏi về quy chế | Chỉ dùng phiên bản quy chế hiệu lực tại ngày được hỏi (BR-192), câu hỏi thường gặp đã đăng và cấu hình của hệ thống; không dùng hiểu biết riêng của model. Mỗi câu trả lời dẫn nguồn là mục quy chế, mục câu hỏi thường gặp hoặc màn hình cấu hình. Không có nguồn thì nói không biết và đề nghị gửi câu hỏi cho HR | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-201 | Câu hỏi đòi xếp hạng, so sánh hay nhận xét về từng người | Assistant không trả lời. Nếu báo cáo cố định có số liệu đó, như xếp hạng đi muộn ở US-068, Assistant dẫn tới báo cáo | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-202 | Nội dung quy chế khác cấu hình của hệ thống, ví dụ quy chế ghi 14 ngày phép còn cấu hình là 12 | Assistant trả lời theo cấu hình vì hệ thống tính theo cấu hình, nêu chỗ khác nhau và đề nghị hỏi HR | A-003 | Assumed |
+| BR-203 | Lưu hội thoại | Chỉ người hỏi xem được hội thoại của mình, kể cả HR không xem được hội thoại của người khác. Hội thoại bị xóa sau `assistant_retention_days` ngày. HR chỉ thấy phần người hỏi gửi qua hộp câu hỏi (BR-195) | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-204 | Vai trò của chat | Chat không sở hữu nghiệp vụ riêng. Chat chỉ là lối vào hội thoại để hỏi đáp, nhận ra ý định và chuyển người dùng sang workflow nghiệp vụ đã có. Không thao tác nào được hoàn tất trong chat: thẻ trong chat chỉ mở màn hình nghiệp vụ, và điểm xác nhận là nút của màn hình đó | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-205 | Assistant trình bày câu trả lời | Câu trả lời ngắn hiện trực tiếp. Kết quả có nhiều bản ghi, bảng hay danh sách thì hiện phần tổng quan và đường dẫn tới màn hình đã lọc sẵn. Giải thích dài thì hiện bản tóm tắt, cho mở rộng hoặc xem chi tiết ở màn hình liên quan. Luật này theo loại nội dung, không theo số dòng hiển thị | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-206 | Người dùng muốn xin, đổi hoặc hủy đơn nghỉ trong chat | Assistant chuyển cho AI Leave Coordinator câu của người dùng và những câu trước đó liên quan tới việc nghỉ; không thêm dữ liệu khác. Assistant không tự diễn giải ngày, buổi, lý do và không tính phương án. Coordinator chạy như khi người dùng gõ ở form (UC-013), bằng phiên của người dùng. Câu không rõ là đơn nào thì Assistant hỏi lại | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-207 | Xác nhận một đơn nghỉ bắt đầu từ chat | Tạo đơn: chọn một phương án thì SCR-020 mở với bản nháp và xem trước của core; nhân viên bấm Gửi. Đổi đơn: Coordinator chỉ đề xuất phương án đổi; chọn một phương án thì SCR-020 mở ở chế độ Đổi đơn với đơn gốc và giá trị mới; nhân viên bấm Xác nhận đổi đơn (BR-152). Hủy đơn: SCR-019 mở tại đơn đó; nhân viên bấm Hủy (BR-061). Sau khi xác nhận, việc tiếp theo của đơn đi qua thông báo và SCR-019, không quay lại chat | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-208 | Assistant soạn nháp | Chỉ soạn câu hỏi gửi HR, kèm tóm tắt hội thoại; người hỏi xem, sửa rồi bấm Gửi. Với giải trình chấm công, đăng ký làm thêm và sửa thông tin liên hệ, Assistant chỉ mở đúng form, đã chọn sẵn ngày hoặc đối tượng, không điền nội dung | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-209 | Giới hạn của Assistant | Tối đa `assistant_max_tool_calls` lần gọi công cụ cho một câu hỏi; quá thì dừng và đề nghị gửi câu hỏi cho HR. Mỗi người dùng tối đa `assistant_daily_question_limit` câu hỏi mỗi ngày; quá thì chat báo, và người dùng vẫn dùng màn hình nghiệp vụ, thư viện quy chế và hộp câu hỏi | A-003 | Assumed |
+| BR-210 | Kiểm câu trả lời của Assistant | Ngoài BR-163: mọi nguồn được dẫn phải là mục đã tra được trong lượt đó; câu trả lời không chứa trường nào ở BR-161 hay dữ liệu ở BR-199. Không đạt thì câu trả lời bị bỏ; chat báo không trả lời được và đề nghị gửi câu hỏi cho HR | A-003 | Assumed |
+| BR-211 | Người dùng mở chat từ một màn hình | Chat nhận ngữ cảnh màn hình: loại và mã của đối tượng đang xem, không nhận nội dung khác của màn hình. Công cụ đọc đối tượng đó qua kiểm quyền như thường | A-003 | Assumed |
+| BR-212 | AI gợi ý mục câu hỏi thường gặp | AI gom các câu đã gửi cho HR có cùng ý, soạn nháp mục câu hỏi thường gặp kèm số câu đã gom; HR sửa rồi bấm đăng (BR-157). Chỉ nội dung câu hỏi được gửi tới dịch vụ AI, không có tên người hỏi. AI không đọc hội thoại chưa được gửi cho HR | A-003 | Assumed |
+
 ### Parameters
 
 Giá trị lấy từ Bộ luật Lao động và Nghị định 145/2020/NĐ-CP chưa được đối chiếu văn bản gốc, xem
@@ -866,6 +940,10 @@ chiếu theo Q-008 và Q-023.
 | `payroll_change_ratio` | Mức tăng hoặc giảm của chi phí lương so với tháng trước để có tín hiệu | 5% (A-020) | BR-172 |
 | `insight_max_count` | Số thẻ cảnh báo hoặc insight tối đa trên trang tổng quan | 5 | BR-175, BR-186 |
 | `signal_follow_up_days` | Số ngày giữa hai lần nhắc người theo dõi một tín hiệu còn Đang có | 14 | BR-180 |
+| `hr_question_reminder_days` | Số ngày làm việc câu hỏi chờ trả lời trước khi nhắc HR | 2 | BR-196 |
+| `assistant_retention_days` | Số ngày lưu hội thoại với AI HR Assistant | 90 | BR-203 |
+| `assistant_max_tool_calls` | Số lần gọi công cụ tối đa cho một câu hỏi | 6 | BR-209 |
+| `assistant_daily_question_limit` | Số câu hỏi tối đa một người dùng gửi cho AI HR Assistant mỗi ngày; chờ ngân sách ở Q-031 | 30 | BR-209 |
 | `contact_retention_months` | Số tháng sau ngày làm việc cuối cùng để xóa thông tin liên hệ và tài khoản ngân hàng | 12 | BR-140 |
 | `retention_years` | Số năm sau ngày làm việc cuối cùng để ẩn danh hồ sơ; theo thời hạn lưu tài liệu kế toán, chờ đối chiếu | 10 | BR-141 |
 
@@ -933,6 +1011,25 @@ AI Report Analyst (BR-190); các việc còn lại là đường dẫn, không c
 | Ngày chưa xử lý | Kỳ công trước chưa chốt và còn ngày chưa xử lý (BR-089) | Cao | HR | Số ngày và số người theo phòng ban | Mở bảng công của nhóm đã lọc; nhắc người có ngày chưa xử lý gửi giải trình (M6) |
 | Chi phí lương đổi lớn | Chi phí lương của tháng vừa chốt, của một phòng ban hay cả công ty, tăng hoặc giảm từ `payroll_change_ratio` so với tháng trước (BR-131) | Cao | Quản lý, chỉ số tổng hợp (BR-128); HR | Người vào mới, người nghỉ việc, thay đổi lương, làm thêm, phụ cấp, khoản điều chỉnh, phần công ty đóng | Mở báo cáo chi phí lương đã lọc |
 
+### Assistant tools
+
+Danh sách đóng các công cụ của AI HR Assistant (BR-198). Mọi công cụ chạy bằng phiên của người hỏi và qua kiểm quyền
+như giao diện; cột Who may use chép từ Permission matrix của [requirements](requirements.md#permission-matrix). Không
+công cụ nào đọc dữ liệu ở BR-199.
+
+| Tool | Reads or opens | Who may use |
+|---|---|---|
+| Tra quy chế | Mục quy chế hiệu lực tại ngày được hỏi, câu hỏi thường gặp đã đăng; cấu hình loại nghỉ, lý do nghỉ, ngày lễ, ca | Mọi vai trò |
+| Phép và đơn nghỉ | Số dư, biến động phép, đơn nghỉ kèm loại nghỉ và trạng thái, giải thích AI đã gửi về đơn | Dữ liệu của mình; Quản lý với phạm vi, không có lý do nghỉ; HR với mọi người, không có lý do nghỉ |
+| Bảng công | Công, vắng, đi muộn, làm thêm theo tháng | Dữ liệu của mình; Quản lý với phạm vi; HR với mọi người |
+| Phiếu lương | Các dòng của phiếu đã chốt và so sánh với tháng trước (BR-197) | Chỉ phiếu của mình |
+| Lịch nghỉ của nhóm | Ai nghỉ buổi nào, kèm loại nghỉ | Quản lý với phạm vi, HR. Nhân viên chỉ thấy buổi nhóm thiếu người (BR-146) |
+| Hồ sơ công việc và danh bạ | Phòng ban, chức danh, quản lý trực tiếp, liên hệ công việc | Theo BR-032 và BR-033 |
+| Tín hiệu và phân rã | Tín hiệu đang có và phân rã (BR-176) | Quản lý, HR, theo BR-174 |
+| Chuyển cho Coordinator | Câu về việc nghỉ, theo BR-206 | Đơn của mình |
+| Mở màn hình | Một màn hình nghiệp vụ, đã chọn sẵn đối tượng, ngày hoặc bộ lọc (BR-204, BR-208) | Màn hình người hỏi có quyền mở |
+| Soạn câu hỏi gửi HR | Nháp câu hỏi kèm tóm tắt hội thoại (BR-208) | Mọi vai trò |
+
 ## Sensitive data
 
 | Data | Purpose | Who may see | Retention |
@@ -948,6 +1045,8 @@ AI Report Analyst (BR-190); các việc còn lại là đường dẫn, không c
 | Lương, phụ cấp, phiếu lương, bảng lương | Trả lương | HR; chính nhân viên, chỉ phiếu đã chốt (BR-122) | `retention_years` năm sau nghỉ việc; số liệu tổng hợp giữ lâu hơn (BR-141) |
 | Mã số thuế, mã số BHXH, cam kết thu nhập | Khấu trừ thuế, đóng bảo hiểm | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
 | Người phụ thuộc: họ tên, ngày sinh, số định danh, quan hệ | Giảm trừ gia cảnh | HR; chính nhân viên | `retention_years` năm sau nghỉ việc (BR-141) |
+| Hội thoại với AI HR Assistant | Trả lời câu hỏi, đo chất lượng AI | Chỉ người hỏi; HR không xem được (BR-203) | `assistant_retention_days` ngày |
+| Câu hỏi gửi HR và các lượt trả lời | Trả lời câu hỏi, bổ sung câu hỏi thường gặp | Người hỏi, HR. Chỉ nội dung câu hỏi được gửi tới dịch vụ AI, không có tên người hỏi (BR-212) | `retention_years` năm sau nghỉ việc (BR-141) |
 | File báo cáo xuất ra | Trình ký, lưu trữ | Người xuất; nằm ngoài hệ thống sau khi tải về, nên chỉ ghi nhật ký được (BR-136) | Ngoài kiểm soát của hệ thống |
 
 ## Edge cases
@@ -1070,3 +1169,18 @@ AI Report Analyst (BR-190); các việc còn lại là đường dẫn, không c
 | EC-114 | Giải thích của AI nêu nguyên nhân không có trong phân rã, ví dụ "nghỉ việc tăng vì lương thấp" | Code không bắt được mọi trường hợp. Eval chấm theo rubric trước khi phát hành (QA-010); người xem đánh giá Không hữu ích | BR-184 | — |
 | EC-115 | Người nhận của thẻ nhắc nhóm đổi trước khi bấm Gửi, ví dụ một người vừa gửi giải trình | Core chọn lại người nhận tại lúc bấm Gửi; người đã xử lý xong không nhận tin | BR-190 | — |
 | EC-116 | Tín hiệu đang được theo dõi đã hết rồi xuất hiện lại | Là tín hiệu mới; việc theo dõi kết thúc khi tín hiệu cũ hết, người xem theo dõi lại nếu muốn | BR-180 | — |
+| EC-117 | Hỏi quy chế mà thư viện, câu hỏi thường gặp và cấu hình không có mục liên quan | Assistant nói không biết và đề nghị gửi câu hỏi cho HR; không trả lời từ hiểu biết riêng của model | BR-200 | — |
+| EC-118 | Quy chế ghi khác cấu hình, ví dụ 14 ngày phép so với 12 | Assistant trả lời theo cấu hình, nêu chỗ khác và đề nghị hỏi HR | BR-202 | — |
+| EC-119 | Hỏi về một ngày trước khi phiên bản quy chế mới có hiệu lực | Trả lời theo phiên bản hiệu lực tại ngày đó và ghi rõ phiên bản | BR-192, BR-200 | — |
+| EC-120 | HR hỏi lương hay số tài khoản của một nhân viên | Assistant không đọc dữ liệu đó và dẫn tới màn hình gốc | BR-199 | — |
+| EC-121 | Quản lý hỏi "ai đi muộn nhiều nhất tháng này" | Assistant không xếp hạng; dẫn tới báo cáo chấm công | BR-201 | — |
+| EC-122 | Nhân viên hỏi số dư phép của đồng nghiệp | Assistant trả lời là không có quyền | BR-198 | — |
+| EC-123 | Mục quy chế, lý do từ chối hay nội dung khác chứa câu nhằm điều khiển AI | AI coi đó là dữ liệu. Assistant không có công cụ ghi, nên không thao tác nào xảy ra | BR-198, BR-204 | — |
+| EC-124 | Câu hỏi cần quá `assistant_max_tool_calls` lần gọi công cụ | Assistant dừng và đề nghị gửi câu hỏi cho HR | BR-209 | — |
+| EC-125 | Quản lý gõ "duyệt hết đơn chờ của tôi" | Assistant mở SCR-021, không duyệt | BR-158, BR-204 | — |
+| EC-126 | Kết quả tra có nhiều bản ghi, ví dụ lịch nghỉ cả tháng của nhóm 20 người | Chat hiện tổng quan và đường dẫn tới SCR-022 đã lọc sẵn | BR-205 | — |
+| EC-127 | Nhân viên muốn đổi một đơn đã duyệt qua chat | Coordinator đề xuất phương án đổi; SCR-020 ở chế độ Đổi đơn ghi rõ đơn mới phải được duyệt lại; đơn chỉ đổi khi nhân viên bấm Xác nhận đổi đơn | BR-152, BR-207 | — |
+| EC-128 | Câu trong chat không rõ là đơn nào, ví dụ nhân viên có hai đơn tháng 11 | Assistant liệt kê các đơn để nhân viên chọn, rồi mới chuyển cho Coordinator | BR-206 | — |
+| EC-129 | Người hỏi hỏi thêm sau khi HR đã trả lời | Câu hỏi quay lại Chờ trả lời | BR-195 | — |
+| EC-130 | Hội thoại tới hạn xóa sau khi đã gửi một câu hỏi cho HR | Hội thoại bị xóa; câu hỏi gửi HR vẫn còn trong hộp câu hỏi | BR-203 | — |
+| EC-131 | Assistant lỗi, chậm, hoặc người dùng hết số câu hỏi trong ngày | Chat báo không dùng được; người dùng vẫn dùng màn hình nghiệp vụ, thư viện quy chế và hộp câu hỏi | BR-162, BR-209 | — |
