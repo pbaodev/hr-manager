@@ -1,7 +1,7 @@
 # Project: hr-manager
 
 - **Status:** Accepted
-- **Updated:** 2026-10-31
+- **Updated:** 2026-11-01
 
 > Điền ở Phase 0. Default nằm ở [working-agreement.md](../playbook/working-agreement.md), [hats.md](../playbook/hats.md) và
 > [phases.md](../playbook/phases.md); file này chỉ ghi mục tiêu, nhịp làm việc, công cụ và những chỗ làm khác default.
@@ -50,6 +50,7 @@
 | AI agent | Claude Code, Codex |
 | Diagrams | Mermaid trong Markdown |
 | Hosting | Chưa chọn; chọn ở Phase 3, sau prototype |
+| Prototype | claude.ai: Artifact loại Design cho canvas và Design System cho design system; link ở mục Design sources của [ui](../design/ui.md) |
 | Secrets | `.env` ở local; nơi lưu ở môi trường deploy chọn cùng hosting |
 
 ## Deviations from default
