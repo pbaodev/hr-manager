@@ -72,7 +72,7 @@ Skill của agent-skills có nơi lưu mặc định riêng. Trong repo này, th
 | `/spec` | `SPEC.md` theo cấu trúc của skill | Story vào [stories](docs/analysis/stories.md); actor và quality attribute vào [requirements](docs/analysis/requirements.md); luật vào [domain](docs/analysis/domain.md); module và traceability vào [docs/build/SPEC.md](docs/build/SPEC.md), theo mẫu sẵn có |
 | `/plan` | `tasks/plan.md`, `tasks/todo.md` | Issue Feature và Task trên tracker. Quyết định ghi ADR, câu hỏi ghi `questions.md`, thứ tự theo milestone |
 | `/build` | Lấy task kế tiếp trong `tasks/todo.md` | Làm task được giao, hoặc Task ở cột `Ready` trên tracker |
-| `/review` | Theo skill | Sửa hết phát hiện mức Critical và Required trước khi merge, theo [git-workflow.md](docs/playbook/git-workflow.md) |
+| `/review` | Theo skill | Chỉ chủ dự án gõ được, agent không gọi. AI review cho mọi PR: agent chạy subagent `agent-skills:code-reviewer` theo mục Tools trong [project.md](docs/project/project.md), rồi sửa hết phát hiện mức Critical và Required trước khi merge, theo [git-workflow.md](docs/playbook/git-workflow.md). AI phản biện bằng Codex do chủ dự án quyết định, theo mục Deviations from default trong project.md |
 | `/ship` | Checklist của skill | Release gate ở Phase 4 trong [phases.md](docs/playbook/phases.md) và mục Releases trong git-workflow |
 | `/constraints` | `CONSTRAINTS.md` | Boundaries trong SPEC, quality attribute trong requirements, quy tắc code trong `docs/build/conventions/` |
 | API and interface design | Theo skill | Kết quả ghi vào [API design](docs/design/api.md) và file contract |
