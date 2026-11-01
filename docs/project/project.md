@@ -31,7 +31,7 @@
 | Milestone | Target date | Scope |
 |---|---|---|
 | Baseline | — | Phase 1–3: phân tích chi tiết M1–M6, prototype, rồi thiết kế kiến trúc, dữ liệu, API và giao diện |
-| Prototype | — | UI prototype dùng dữ liệu giả, có design system, gồm màn hình của ba tính năng AI; nằm trong Baseline, trước Phase 3 |
+| Prototype | — | UI prototype dùng dữ liệu giả, có design system, gồm màn hình của ba tính năng AI; nằm trong Baseline, trước Phase 3. Kế hoạch ở [prototype](../design/prototype.md) |
 | v1.0 | — | Bản phát hành đầu tiên cho công ty: mọi story của M1–M6 |
 | M1 | — | Walking skeleton: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; chạy trên staging. Gồm thư viện quy chế và hộp câu hỏi gửi HR mà AI HR Assistant dựa vào (US-101 tới US-105) |
 | M2 | — | Nghỉ phép, gồm phần rule mà AI Leave Coordinator dựa vào (US-073 tới US-081) |
