@@ -46,6 +46,7 @@ docs/
 | [flows.md](design/flows.md) | Sequence diagram của luồng chính và job | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [ui.md](design/ui.md) | Design system, trạng thái màn hình, định dạng, accessibility | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [prototype.md](design/prototype.md) | Prototype vẽ màn hình nào, ở đâu, với dữ liệu giả nào; khi nào được duyệt | Architect | Prototype | Draft |
+| [prototype-data.md](design/prototype-data.md) | Dữ liệu giả của prototype: nhân viên, đơn, chấm công, lương, tín hiệu | Architect | Prototype | Draft |
 | [ai.md](design/ai.md) | Component AI của ba tính năng ở M6 | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [decisions/](decisions/README.md) | Vì sao chọn phương án này, đã cân nhắc phương án nào | Architect | 1 trở đi | Chưa có ADR; ADR-0001 tới 0006 đã bỏ |
 
