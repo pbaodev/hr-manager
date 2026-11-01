@@ -44,7 +44,7 @@ docs/
 | [api.md](design/api.md) | Quy ước API, lỗi, xác thực, danh sách operation | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [openapi.yaml](../contracts/openapi.yaml) | Contract chính xác của API | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [flows.md](design/flows.md) | Sequence diagram của luồng chính và job | Architect | 3 | Mẫu, điền ở Phase 3 |
-| [ui.md](design/ui.md) | Design system, trạng thái màn hình, định dạng, accessibility | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [ui.md](design/ui.md) | Design system, trạng thái màn hình, định dạng, accessibility | Architect | 3 | Mẫu, điền ở Phase 3; Design sources đã có design system của prototype |
 | [prototype.md](design/prototype.md) | Prototype vẽ màn hình nào, ở đâu, với dữ liệu giả nào; khi nào được duyệt | Architect | Prototype | Draft |
 | [prototype-data.md](design/prototype-data.md) | Dữ liệu giả của prototype: nhân viên, đơn, chấm công, lương, tín hiệu | Architect | Prototype | Draft |
 | [ai.md](design/ai.md) | Component AI của ba tính năng ở M6 | Architect | 3 | Mẫu, điền ở Phase 3 |
