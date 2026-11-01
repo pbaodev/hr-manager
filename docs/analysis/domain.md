@@ -24,6 +24,7 @@ Hệ thống có một bounded context.
 | Trưởng phòng ban | Nhân viên được bổ nhiệm phụ trách một phòng ban trong một khoảng thời gian | `HeadAssignment` | Quản lý trực tiếp |
 | Quản lý trực tiếp | Người theo dõi và duyệt yêu cầu của một nhân viên, suy ra từ trưởng phòng ban theo BR-012 | `lineManager` | Trưởng phòng ban |
 | Phạm vi quản lý | Tập nhân viên mà một Quản lý được xem, theo BR-013 | `managerScope` | — |
+| Thông báo | Tin gửi tới một người dùng trong hệ thống, dẫn tới đối tượng liên quan (BR-213) | `Notification` | Email hay tin nhắn ngoài hệ thống: không làm |
 | Quá trình công tác | Một khoảng thời gian nhân viên thuộc một phòng ban với một chức danh | `Assignment` | Hợp đồng lao động |
 | Ngày hiệu lực | Ngày một thay đổi bắt đầu có tác dụng; có thể trước hoặc sau ngày ghi nhận | `effectiveDate` | Ngày ghi nhận: ngày HR nhập thay đổi |
 | Khoảng hiệu lực | Từ ngày tới ngày, tính cả hai đầu; ngày kết thúc trống nghĩa là chưa kết thúc | `DateRange` | — |
@@ -50,6 +51,8 @@ Hệ thống có một bounded context.
 | Giai đoạn hạn chế nghỉ | Khoảng ngày công ty hạn chế nghỉ, như mùa cao điểm (BR-147) | `LeaveRestrictionPeriod` | Ngày nghỉ lễ |
 | Người duyệt thay | Người được giao thêm một đơn khi người duyệt đang nghỉ (BR-149) | `delegateApprover` | HR duyệt thay (BR-058): HR chủ động duyệt bất kỳ đơn nào |
 | Đề nghị đổi ngày | Khoảng ngày khác mà người duyệt đề nghị cho một đơn đang chờ (BR-150) | `ChangeProposal` | Đổi đơn: nhân viên tự đổi đơn của mình (BR-152) |
+| Hạn chốt công | Ngày HR dự kiến chốt bảng công của tháng trước, đặt bằng `attendance_close_day`; chỉ dùng để nhắc (BR-218) | `attendanceCloseDeadline` | Chốt bảng công: thao tác của HR (BR-089) |
+| Ngày chưa xử lý | Ngày Thiếu chấm công hoặc Vắng chưa xử lý (BR-077) chưa có giải trình hay đơn nghỉ đang chờ phủ ngày đó (BR-216) | `unresolvedDay` | — |
 | Ca làm việc | Khung giờ làm việc lặp lại theo tuần, gồm giờ bắt đầu, giờ kết thúc, nghỉ giữa ca và các ngày làm việc trong tuần | `Shift` | — |
 | Giờ làm chuẩn | Số giờ làm việc bình thường của một ca trong một ngày | `standardHours` | Giờ làm thực tế |
 | Mã chấm công | Số định danh của nhân viên trên máy chấm công | `deviceUserId` | Mã nhân viên |
@@ -129,6 +132,7 @@ classDiagram
 | EmploymentContract | Entity | Số hợp đồng, loại, nhóm công việc khi thử việc, ngày ký, ngày bắt đầu, ngày kết thúc, trạng thái | Thuộc một Employee |
 | UserAccount | Entity | Tên đăng nhập, có vai trò HR hay không, có phải đổi mật khẩu không, số lần đăng nhập sai liên tiếp, trạng thái | Thuộc một Employee |
 | AuditEntry | Entity | Thời điểm, người làm, đối tượng, thao tác, giá trị trước và sau, lý do | — |
+| Notification | Entity | Người nhận, loại, nội dung, đối tượng liên quan, thời điểm gửi, thời điểm đọc | Thuộc một UserAccount |
 | DateRange | Value object | Ngày bắt đầu, ngày kết thúc có thể trống; ngày kết thúc không trước ngày bắt đầu | — |
 
 **M1: quy chế và câu hỏi gửi HR**
@@ -195,7 +199,7 @@ classDiagram
 | ShiftAssignment | Entity | Khoảng hiệu lực, ca | Thuộc một Employee |
 | PunchImport | Entity | Tên file, người nhập, thời điểm, số dòng đã lưu, số dòng trùng, các dòng bị bỏ qua kèm lý do | Tạo nhiều PunchRecord |
 | PunchRecord | Entity | Mã chấm công, thời điểm | Thuộc một PunchImport; ghép với Employee theo mã chấm công |
-| AttendanceDay | Entity | Ngày, ca, giờ vào, giờ ra, phút đi muộn, phút về sớm, công, loại nghỉ nếu có, giờ làm thêm theo loại, giờ làm ban đêm, trạng thái, đánh dấu cần xem | Thuộc một Employee; được tính từ lượt chấm, đơn nghỉ, đơn làm thêm và giải trình |
+| AttendanceDay | Entity | Ngày, ca, giờ vào, giờ ra, phút đi muộn, phút về sớm, công, loại nghỉ nếu có, giờ làm thêm theo loại, giờ làm ban đêm, trạng thái, đánh dấu cần xem, thời điểm đã báo cho nhân viên (BR-216) | Thuộc một Employee; được tính từ lượt chấm, đơn nghỉ, đơn làm thêm và giải trình |
 | AttendanceAdjustment | Entity | Ngày, giờ vào đề nghị, giờ ra đề nghị, lý do, người duyệt, trạng thái | Thuộc một Employee |
 | OvertimeRequest | Entity | Ngày, giờ bắt đầu, giờ kết thúc, lý do, người duyệt, trạng thái | Thuộc một Employee |
 | AttendancePeriod | Entity | Tháng, trạng thái, người chốt, thời điểm chốt, lý do mở lại | Một kỳ công cho cả công ty |
@@ -605,6 +609,14 @@ stateDiagram-v2
 | BR-032 | Hiển thị danh bạ | Chỉ gồm nhân viên đang làm; chỉ hiện họ tên, chức danh, phòng ban, email và điện thoại công việc | A-003 | Assumed |
 | BR-033 | Quản lý xem nhân viên trong phạm vi | Xem được thông tin công việc, liên hệ công việc và quá trình công tác; không xem được CCCD, ngày sinh, giới tính, địa chỉ, tài khoản ngân hàng, liên hệ khẩn cấp và hợp đồng | A-003 | Assumed |
 
+**Thông báo**
+
+Cơ chế chung từ M1. Luật của từng module nói ai nhận thông báo khi nào.
+
+| ID | When | Then | Source | Status |
+|---|---|---|---|---|
+| BR-213 | Hệ thống gửi một thông báo trong hệ thống | Thông báo có người nhận, nội dung, thời điểm và đường dẫn tới đối tượng liên quan; chỉ người nhận thấy. Bấm thông báo thì mở đối tượng, quyền được kiểm lại như khi mở trực tiếp; không còn quyền thì chỉ thấy nội dung thông báo. Thông báo đã mở không còn tính vào số chưa đọc | Chủ dự án, 2026-10-31 | Confirmed |
+
 **Quy chế và câu hỏi gửi HR**
 
 Các luật này thuộc lớp rule của M1 và chạy cả khi không có AI. AI HR Assistant ở M6 dùng chúng làm nguồn và làm đường
@@ -679,7 +691,7 @@ Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. 
 | BR-149 | Người duyệt của một đơn đang chờ có đơn nghỉ đã duyệt phủ hôm nay | Đơn được giao thêm cho người duyệt thay: quản lý trực tiếp của người duyệt, không có thì HR. Người duyệt gốc vẫn thao tác được; thao tác đến trước có hiệu lực. Hết thời gian nghỉ của người duyệt gốc thì người duyệt thay không còn được giao đơn | A-019 | Assumed |
 | BR-150 | Người duyệt, người duyệt thay hoặc HR đề nghị đổi ngày cho một đơn đang chờ | Nhập khoảng ngày, buổi đề nghị và lời nhắn. Khoảng đề nghị phải qua BR-044 tới BR-047 và BR-053 tại lúc đề nghị. Đơn chuyển sang Chờ phản hồi; nhân viên được thông báo | A-003 | Assumed |
 | BR-151 | Nhân viên phản hồi đề nghị đổi ngày | Chấp nhận: hệ thống kiểm lại BR-045 và BR-053; đạt thì đơn mang ngày đề nghị và chuyển sang Đã duyệt, nhật ký ghi người đề nghị là người duyệt; không đạt thì báo lỗi và đơn giữ trạng thái. Không đồng ý: đơn quay lại Chờ duyệt với ngày cũ, kèm phản hồi nếu có | A-003 | Assumed |
-| BR-152 | Nhân viên đổi một đơn đang chờ, hoặc đã duyệt mà chưa tới ngày bắt đầu | Hệ thống hủy đơn cũ và tạo đơn mới ở trạng thái Chờ duyệt trong một thao tác. Đơn mới phải qua mọi luật như đơn gửi mới; không qua thì đơn cũ giữ nguyên | A-003 | Assumed |
+| BR-152 | Nhân viên đổi một đơn đang chờ, hoặc đã duyệt mà chưa tới ngày bắt đầu | Hệ thống hủy đơn cũ và tạo đơn mới ở trạng thái Chờ duyệt trong một thao tác. Đơn mới phải qua mọi luật như đơn gửi mới; không qua thì đơn cũ giữ nguyên. Đơn cũ đổi thành nhiều đơn thì áp thêm BR-153 | A-003 | Assumed |
 | BR-153 | Nhân viên gửi nhiều đơn trong một lần xác nhận, ví dụ 3 ngày Kết hôn và 2 ngày Phép năm liền nhau | Mọi đơn qua luật thì tạo cả; một đơn không qua thì không tạo đơn nào | A-003 | Assumed |
 | BR-154 | Nhân viên chọn người nhận bàn giao cho đơn | Chỉ chọn được nhân viên đang làm trong cùng phòng ban. Khi đơn được duyệt, người đó được thông báo ngày nghỉ, không thấy loại nghỉ hay lý do | A-003 | Assumed |
 
@@ -712,6 +724,10 @@ Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. 
 | BR-085 | Tính giờ làm thêm thực tế | Bằng phần giao giữa khoảng đã duyệt và khoảng từ giờ vào tới giờ ra. Giờ làm thêm được phân loại theo ngày làm việc, ngày nghỉ hằng tuần hoặc ngày nghỉ lễ, và tách phần ban đêm theo BR-071 | Chủ dự án, 2026-10-30; Bộ luật Lao động 2019, Điều 98 | Confirmed |
 | BR-086 | Đăng ký làm thêm vào ngày làm việc | Khoảng làm thêm phải nằm ngoài giờ ca của ngày đó và không chồng đơn làm thêm khác | A-003 | Assumed |
 | BR-087 | Đăng ký làm thêm vào ngày có đơn nghỉ cả ngày đã duyệt | Từ chối | A-003 | Assumed |
+| BR-214 | Đơn làm thêm giờ hoặc giải trình chấm công được gửi, duyệt, từ chối hoặc hủy | Gửi thông báo trong hệ thống như BR-066: cho người duyệt khi đơn được gửi; cho người gửi trong các trường hợp còn lại, kèm lý do từ chối nếu có | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-215 | Đơn làm thêm giờ hoặc giải trình chấm công chờ duyệt chưa được xử lý | Sau `approval_reminder_days` ngày làm việc, người duyệt được nhắc mỗi ngày làm việc. Sau `approval_escalation_days` ngày làm việc, HR được thông báo để duyệt thay (BR-058). Luật này không cần hạn chốt công; khi HR đặt hạn thì áp thêm BR-218 | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-216 | HR xác nhận một lần nhập file chấm công và công được tính lại | Mỗi nhân viên có ngày chưa xử lý chưa từng được báo nhận một thông báo liệt kê các ngày đó, kèm đường dẫn gửi giải trình. Ngày chưa xử lý là ngày Thiếu chấm công hoặc Vắng chưa xử lý (BR-077) chưa có giải trình hay đơn nghỉ đang chờ phủ ngày đó. Mỗi ngày chỉ được báo một lần theo luật này: nhập lại file, hay nhập file chồng khoảng ngày, không báo lại ngày đã báo. Không có ngày mới thì không gửi | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-217 | HR bấm Nhắc lại cho các nhân viên đã chọn, trong một tháng chưa chốt | Người còn ngày chưa xử lý (BR-216) trong tháng đó nhận một thông báo mẫu liệt kê các ngày đó; người đã xử lý xong không nhận. Mỗi nhân viên nhận tối đa một lần nhắc như vậy mỗi ngày, kể cả khi nhiều HR cùng bấm | Chủ dự án, 2026-11-01 | Confirmed |
 
 **Bảng công**
 
@@ -722,6 +738,7 @@ Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. 
 | BR-090 | Tháng đã chốt | Không tạo, duyệt, hủy hay sửa đơn nghỉ, đơn làm thêm, giải trình có ngày trong tháng; không nhập lượt chấm; không thêm hay bỏ ngày nghỉ lễ, ngày làm bù. Gán ca hay thay đổi công tác có hiệu lực trong tháng đó vẫn lưu được, nhưng không đổi bảng công đã chốt, và HR được cảnh báo | A-003 | Assumed |
 | BR-091 | HR mở lại bảng công đã chốt | Lý do là bắt buộc; chỉ được khi bảng lương của tháng đó chưa chốt | A-003 | Assumed |
 | BR-092 | Tổng hợp bảng công tháng của một nhân viên | Gồm số ngày làm việc chuẩn, số công, số ngày nghỉ theo từng loại nghỉ, số ngày vắng không lý do, số lần và tổng phút đi muộn, về sớm, số giờ làm thêm theo từng loại, số giờ làm ban đêm. Chỉ tính các ngày trong khoảng làm việc của nhân viên | A-003 | Assumed |
+| BR-218 | HR đặt `attendance_close_day` | Tham số tùy chọn, từ 1 tới 28. Có giá trị thì hạn chốt công của tháng T là ngày đó của tháng T+1. Thông báo theo BR-214 tới BR-217 về một ngày của tháng T ghi kèm hạn này. Khi chỉ còn một ngày làm việc tới hạn, HR được thông báo ngay về đơn làm thêm và giải trình của tháng T còn chờ duyệt, không chờ đủ `approval_escalation_days`. Hạn không chặn thao tác nào. Để trống thì các luật trên chạy như không có hạn | Chủ dự án, 2026-10-31 | Confirmed |
 
 **Lương và phụ cấp**
 
@@ -733,6 +750,8 @@ Các luật này thuộc lớp rule của M2 và chạy cả khi không có AI. 
 | BR-096 | Lưu lương đóng bảo hiểm thấp hơn lương tối thiểu vùng tại ngày hiệu lực | Từ chối | Luật Bảo hiểm xã hội 2024, Điều 31 | Assumed |
 | BR-097 | Tạo hoặc sửa loại phụ cấp | Tên không trùng, không phân biệt hoa thường. Cách tính là theo công hoặc cố định theo tháng. Chế độ thuế là chịu thuế, miễn thuế, hoặc miễn thuế trong mức kèm mức miễn mỗi tháng | A-003 | Assumed |
 | BR-098 | Ghi bản ghi lương có ngày hiệu lực thuộc tháng có bảng lương đã chốt | Được lưu; bảng lương đã chốt không đổi. Hệ thống hiện chênh lệch thực lĩnh ước tính của từng tháng đã chốt bị ảnh hưởng, để HR thêm khoản truy lĩnh hoặc truy thu vào bảng lương chưa chốt | A-003 | Assumed |
+| BR-219 | HR lưu giá trị mới của `regional_min_wage` với ngày hiệu lực E | Hệ thống liệt kê nhân viên còn trong khoảng làm việc từ E có bản ghi lương mà, ở một ngày từ E trở đi, lương cơ bản (BR-094) hoặc lương đóng bảo hiểm (BR-096) thấp hơn lương tối thiểu vùng của `company_region` có hiệu lực tại ngày đó. Mỗi dòng ghi nhân viên, khoảng ngày bị ảnh hưởng, trường bị thấp và mức chênh. Hệ thống không tự sửa bản ghi lương; HR ghi bản ghi lương mới theo BR-093. Dòng mất khỏi danh sách khi khoảng ngày đó không còn dưới mức sàn | Chủ dự án, 2026-10-31 | Confirmed |
+| BR-220 | Tính bảng lương của một tháng | Phiếu có ngày trong tháng mà bản ghi lương có hiệu lực có lương cơ bản hoặc lương đóng bảo hiểm thấp hơn lương tối thiểu vùng của `company_region` tại ngày đó thì có cảnh báo dưới mức sàn, ghi khoảng ngày và trường bị thấp. Lương vẫn tính theo bản ghi, không tự nâng. Cảnh báo không chặn việc chốt (BR-117) | Chủ dự án, 2026-10-31 | Confirmed |
 
 **Thông tin thuế và bảo hiểm**
 
@@ -806,6 +825,7 @@ Các luật này thuộc lớp rule của M5 và chạy cả khi không có AI. 
 | BR-179 | Tính lại một tín hiệu Đang có | Không còn đạt điều kiện thì tín hiệu sang Đã hết và thẻ không hiện nữa. HR mở lại bảng công của tháng tín hiệu dùng thì tín hiệu có cờ số liệu đang sửa cho tới khi tháng được chốt lại và tính lại | A-003 | Assumed |
 | BR-180 | Người xem theo dõi một tín hiệu | Tín hiệu sang Đã hết thì người theo dõi nhận thông báo kèm số liệu lúc bắt đầu theo dõi và lúc hết. Sau mỗi `signal_follow_up_days` ngày tín hiệu vẫn Đang có, người theo dõi nhận nhắc kèm số liệu hiện tại. Người xem bỏ theo dõi được bất cứ lúc nào | A-003 | Assumed |
 | BR-181 | Ngày làm việc đầu tiên của tuần | Mỗi Quản lý và HR nhận một thông báo tóm tắt tuần, liệt kê theo mức độ các tín hiệu Đang có mà mình xem được, trừ loại đã tắt. Không có tín hiệu nào thì không gửi | A-003 | Assumed |
+| BR-221 | Xét nhân viên có thiếu dữ liệu tính lương của một tháng chưa có bảng lương đã chốt không | Thiếu khi nhân viên có một ngày trong khoảng làm việc thuộc tháng đó, không sau hôm nay, mà ngày đó không có bản ghi lương hoặc hợp đồng hiệu lực; hoặc khi nhân viên có ngày như vậy mà chưa có số tài khoản ngân hàng. Dữ liệu chỉ cần cho ngày sau hôm nay, như của người vào làm sau hôm nay, là chưa đến hạn và không tính là thiếu | Chủ dự án, 2026-10-31 | Confirmed |
 
 **AI: nguyên tắc chung**
 
@@ -848,7 +868,7 @@ Các luật này thuộc lớp rule của M5 và chạy cả khi không có AI. 
 | BR-187 | AI giải thích một insight | Giải thích dài 2 tới 3 câu, dựa trên phân rã của core: nêu thành phần đóng góp lớn nhất và điểm khác so với kỳ trước hoặc cùng kỳ năm trước. Mọi con số lấy từ dữ kiện | A-003 | Assumed |
 | BR-188 | Kiểm đầu ra của AI Report Analyst | Ngoài BR-163: không chứa tên nhân viên nào trong danh bạ; mọi tín hiệu nguồn thuộc phạm vi và vai trò của insight; việc tiếp theo nằm trong danh sách của loại tín hiệu. Không đạt thì người xem thấy thẻ cảnh báo của rule (BR-162) | A-003 | Assumed |
 | BR-189 | Tính insight | Chạy sau mỗi lần tính tín hiệu có thay đổi (BR-172), theo phạm vi và vai trò người xem; những người cùng phạm vi và vai trò dùng chung insight. Insight ghi thời điểm tính; tín hiệu nguồn đổi số liệu thì insight được viết lại. Trang tổng quan đọc insight đã tính, không gọi AI khi mở trang | A-003 | Assumed |
-| BR-190 | AI đề xuất nhắc một nhóm người từ insight | Chỉ với loại tín hiệu có việc nhắc ở mục Default signal types. Core chọn người nhận theo tín hiệu và phạm vi người xem tại lúc bấm Gửi. AI soạn nội dung chung, không chứa số liệu của từng người; người xem sửa rồi bấm Gửi (BR-157) | A-003 | Assumed |
+| BR-190 | AI đề xuất nhắc một nhóm người từ insight | Chỉ với loại tín hiệu có việc nhắc ở mục Default signal types. Core chọn người nhận theo tín hiệu và phạm vi người xem tại lúc bấm Gửi; bỏ người đã nhận gợi ý của BR-170 hoặc tin nhắc cùng loại trong `reminder_quiet_days` ngày gần nhất, và thẻ ghi số người bị bỏ cùng lý do. AI soạn nội dung chung, dẫn tới màn hình nghỉ phép của người nhận; không chứa số liệu của từng người và không đề xuất khoảng ngày, vì việc đó thuộc BR-170. Người xem sửa rồi bấm Gửi (BR-157) | Chủ dự án, 2026-10-31 | Confirmed |
 | BR-191 | AI viết cập nhật theo dõi và tóm tắt tuần | Cập nhật so số liệu lúc bắt đầu theo dõi với số liệu hiện tại (BR-180). Tóm tắt tuần là một đoạn ngắn viết từ các tín hiệu trong thông báo (BR-181). AI lỗi hoặc đầu ra không đạt kiểm tra thì gửi nội dung mẫu của rule (BR-162) | A-003 | Assumed |
 
 **AI HR Assistant**
@@ -888,7 +908,7 @@ chiếu theo Q-008 và Q-023.
 | `contract_auto_convert_days` | Số ngày sau khi hợp đồng xác định thời hạn hết hạn mà luật coi là không xác định thời hạn, nếu chưa ký hợp đồng mới | 30 | BR-027 |
 | `probation_max_days` | Thời gian thử việc tối đa theo nhóm công việc | Quản lý doanh nghiệp: 180 ngày. Cần trình độ cao đẳng trở lên: 60 ngày. Trung cấp, công nhân kỹ thuật, nhân viên nghiệp vụ: 30 ngày. Công việc khác: 6 ngày làm việc | BR-028 |
 | `contract_expiry_warning_days` | Số ngày trước ngày kết thúc hợp đồng để đưa vào danh sách sắp hết hạn | 30 | BR-029 |
-| `default_shift` | Ca gán cho nhân viên mới | Ca hành chính 8:00–17:00, nghỉ 12:00–13:00 không tính giờ làm, thứ Hai tới thứ Sáu | BR-038, BR-070 |
+| `default_shift` | Ca gán cho nhân viên mới. Từ M2 tới khi M3 có quản lý ca, đây là ca của mọi nhân viên | Ca hành chính 8:00–17:00, nghỉ 12:00–13:00 không tính giờ làm, thứ Hai tới thứ Sáu | BR-038, BR-070 |
 | `annual_leave_base_days` | Phép năm cơ bản mặc định, ngày | 12 | BR-048 |
 | `seniority_step_years` | Số năm làm việc để được thêm 1 ngày phép năm | 5 | BR-048 |
 | `accrual_min_month_ratio` | Tỷ lệ ngày làm việc tối thiểu để tháng vào làm hoặc nghỉ việc được cộng phép | 50% | BR-050 |
@@ -898,8 +918,9 @@ chiếu theo Q-008 và Q-023.
 | `carryover_expiry` | Ngày cuối cùng dùng được phép tồn, tính trong năm mới | 31/3 | BR-051 |
 | `leave_backdate_days` | Số ngày tối đa nhân viên được gửi đơn cho ngày đã qua | 7 | BR-062 |
 | `min_staff_ratio` | Mức phủ tối thiểu mặc định của một phòng ban ở mỗi buổi | 50% (A-017) | BR-146 |
-| `approval_reminder_days` | Số ngày làm việc đơn chờ trước khi nhắc người duyệt | 2 | BR-148 |
-| `approval_escalation_days` | Số ngày làm việc đơn chờ trước khi báo HR | 4 | BR-148 |
+| `approval_reminder_days` | Số ngày làm việc đơn chờ trước khi nhắc người duyệt | 2 | BR-148, BR-215 |
+| `approval_escalation_days` | Số ngày làm việc đơn chờ trước khi báo HR | 4 | BR-148, BR-215 |
+| `attendance_close_day` | Ngày trong tháng kế tiếp mà HR dự kiến chốt bảng công của tháng trước; tùy chọn | Để trống | BR-218 |
 | `carryover_reminder_days` | Số ngày trước `carryover_expiry` để gợi ý dùng phép tồn | 30 | BR-170 |
 | `peak_planning_days` | Số ngày trước một giai đoạn hạn chế để gửi tổng hợp cho quản lý | 14 | BR-171 |
 | `leave_option_count` | Số phương án hoặc khoảng ngày tối đa AI đề xuất một lần | 3 | BR-168, BR-170, BR-171 |
@@ -913,8 +934,8 @@ chiếu theo Q-008 và Q-023.
 | `ot_max_hours_non_working_day` | Giờ làm thêm tối đa trong một ngày không phải ngày làm việc | 12 | BR-084 |
 | `ot_max_hours_per_month` | Giờ làm thêm tối đa trong một tháng | 40 | BR-084 |
 | `ot_max_hours_per_year` | Giờ làm thêm tối đa trong một năm; một số ngành được tới 300 giờ theo Điều 107 | 200 | BR-084 |
-| `company_region` | Vùng lương tối thiểu của công ty | Vùng I (A-008) | BR-094, BR-096, BR-110 |
-| `regional_min_wage` | Tham số lương. Lương tối thiểu tháng theo vùng, đồng | Từ 01/01/2026: vùng I 5.310.000; vùng II 4.730.000; vùng III 4.140.000; vùng IV 3.700.000 | BR-094, BR-096, BR-110 |
+| `company_region` | Vùng lương tối thiểu của công ty | Vùng I (A-008) | BR-094, BR-096, BR-110, BR-219, BR-220 |
+| `regional_min_wage` | Tham số lương. Lương tối thiểu tháng theo vùng, đồng | Từ 01/01/2026: vùng I 5.310.000; vùng II 4.730.000; vùng III 4.140.000; vùng IV 3.700.000 | BR-094, BR-096, BR-110, BR-219, BR-220 |
 | `reference_wage` | Tham số lương. Mức tham chiếu, đồng | 2.340.000 | BR-110 |
 | `insurance_cap_multiplier` | Số lần mức tham chiếu hoặc lương tối thiểu vùng làm trần mức đóng bảo hiểm | 20 | BR-110 |
 | `employee_insurance_rates` | Tham số lương. Tỷ lệ nhân viên đóng | BHXH 8%; BHYT 1,5%; BHTN 1% | BR-110 |
@@ -940,6 +961,7 @@ chiếu theo Q-008 và Q-023.
 | `payroll_change_ratio` | Mức tăng hoặc giảm của chi phí lương so với tháng trước để có tín hiệu | 5% (A-020) | BR-172 |
 | `insight_max_count` | Số thẻ cảnh báo hoặc insight tối đa trên trang tổng quan | 5 | BR-175, BR-186 |
 | `signal_follow_up_days` | Số ngày giữa hai lần nhắc người theo dõi một tín hiệu còn Đang có | 14 | BR-180 |
+| `reminder_quiet_days` | Số ngày sau một gợi ý dùng phép tồn hay một tin nhắc nhóm mà người đó không nhận thêm tin nhắc cùng loại | 7 | BR-190 |
 | `hr_question_reminder_days` | Số ngày làm việc câu hỏi chờ trả lời trước khi nhắc HR | 2 | BR-196 |
 | `assistant_retention_days` | Số ngày lưu hội thoại với AI HR Assistant | 90 | BR-203 |
 | `assistant_max_tool_calls` | Số lần gọi công cụ tối đa cho một câu hỏi | 6 | BR-209 |
@@ -1008,8 +1030,9 @@ AI Report Analyst (BR-190); các việc còn lại là đường dẫn, không c
 | Làm thêm gần giới hạn | Có người đã dùng từ 80% giới hạn làm thêm tháng hoặc năm (BR-084) | Thường | Quản lý, HR | Số người và số giờ theo phòng ban con | Mở danh sách người gần giới hạn ở báo cáo chấm công |
 | Đơn chờ quá hạn | Có đơn chờ quá `approval_reminder_days` ngày làm việc (BR-148) | Thường | Quản lý với đơn mình là người duyệt hoặc người duyệt thay; HR | Số đơn theo phòng ban và theo số ngày đã chờ | Mở đơn chờ duyệt |
 | Hợp đồng sắp hết hạn | Có hợp đồng hết hạn trong `contract_expiry_warning_days` ngày mà chưa có hợp đồng mới (BR-029) | Cao | HR | Số hợp đồng theo phòng ban và theo tuần hết hạn | Mở danh sách hợp đồng sắp hết hạn |
-| Ngày chưa xử lý | Kỳ công trước chưa chốt và còn ngày chưa xử lý (BR-089) | Cao | HR | Số ngày và số người theo phòng ban | Mở bảng công của nhóm đã lọc; nhắc người có ngày chưa xử lý gửi giải trình (M6) |
+| Ngày chưa xử lý | Kỳ công trước chưa chốt và còn ngày chưa xử lý (BR-089) | Cao | HR | Số ngày và số người theo phòng ban | Mở bảng công của nhóm đã lọc, nơi HR nhắc lại người còn ngày chưa xử lý (BR-217) |
 | Chi phí lương đổi lớn | Chi phí lương của tháng vừa chốt, của một phòng ban hay cả công ty, tăng hoặc giảm từ `payroll_change_ratio` so với tháng trước (BR-131) | Cao | Quản lý, chỉ số tổng hợp (BR-128); HR | Người vào mới, người nghỉ việc, thay đổi lương, làm thêm, phụ cấp, khoản điều chỉnh, phần công ty đóng | Mở báo cáo chi phí lương đã lọc |
+| Hồ sơ thiếu dữ liệu tính lương | Có nhân viên thiếu dữ liệu tính lương của một tháng chưa có bảng lương đã chốt (BR-221) | Cao | HR | Số người theo loại dữ liệu thiếu (bản ghi lương, hợp đồng, tài khoản ngân hàng) và theo phòng ban | Mở danh sách nhân viên đã lọc theo dữ liệu thiếu |
 
 ### Assistant tools
 
@@ -1167,7 +1190,7 @@ công cụ nào đọc dữ liệu ở BR-199.
 | EC-112 | Tín hiệu đơn chờ quá hạn xuất hiện khi người duyệt đã được nhắc theo BR-148 | Chỉ hiện thẻ, không gửi thêm thông báo | BR-177 | — |
 | EC-113 | Đầu ra của AI Report Analyst có tên nhân viên hoặc con số khác dữ kiện | Đầu ra bị bỏ; người xem thấy thẻ cảnh báo của rule | BR-162, BR-188 | — |
 | EC-114 | Giải thích của AI nêu nguyên nhân không có trong phân rã, ví dụ "nghỉ việc tăng vì lương thấp" | Code không bắt được mọi trường hợp. Eval chấm theo rubric trước khi phát hành (QA-010); người xem đánh giá Không hữu ích | BR-184 | — |
-| EC-115 | Người nhận của thẻ nhắc nhóm đổi trước khi bấm Gửi, ví dụ một người vừa gửi giải trình | Core chọn lại người nhận tại lúc bấm Gửi; người đã xử lý xong không nhận tin | BR-190 | — |
+| EC-115 | Người nhận của thẻ nhắc nhóm đổi trước khi bấm Gửi, ví dụ một người vừa gửi đơn dùng hết phép tồn | Core chọn lại người nhận tại lúc bấm Gửi; người đã xử lý xong không nhận tin | BR-190 | — |
 | EC-116 | Tín hiệu đang được theo dõi đã hết rồi xuất hiện lại | Là tín hiệu mới; việc theo dõi kết thúc khi tín hiệu cũ hết, người xem theo dõi lại nếu muốn | BR-180 | — |
 | EC-117 | Hỏi quy chế mà thư viện, câu hỏi thường gặp và cấu hình không có mục liên quan | Assistant nói không biết và đề nghị gửi câu hỏi cho HR; không trả lời từ hiểu biết riêng của model | BR-200 | — |
 | EC-118 | Quy chế ghi khác cấu hình, ví dụ 14 ngày phép so với 12 | Assistant trả lời theo cấu hình, nêu chỗ khác và đề nghị hỏi HR | BR-202 | — |
@@ -1184,3 +1207,14 @@ công cụ nào đọc dữ liệu ở BR-199.
 | EC-129 | Người hỏi hỏi thêm sau khi HR đã trả lời | Câu hỏi quay lại Chờ trả lời | BR-195 | — |
 | EC-130 | Hội thoại tới hạn xóa sau khi đã gửi một câu hỏi cho HR | Hội thoại bị xóa; câu hỏi gửi HR vẫn còn trong hộp câu hỏi | BR-203 | — |
 | EC-131 | Assistant lỗi, chậm, hoặc người dùng hết số câu hỏi trong ngày | Chat báo không dùng được; người dùng vẫn dùng màn hình nghiệp vụ, thư viện quy chế và hộp câu hỏi | BR-162, BR-209 | — |
+| EC-132 | HR nhập lại cùng file, hoặc nhập file mới chồng khoảng ngày với lần trước | Ngày đã được báo không được báo lại; nhân viên chỉ nhận thông báo khi có ngày chưa xử lý mới | BR-216 | — |
+| EC-133 | Nhân viên đã gửi giải trình, hoặc có đơn nghỉ đang chờ phủ ngày đó, trước khi HR nhập file | Ngày đó không có trong thông báo | BR-216 | — |
+| EC-134 | Giải trình của một ngày bị từ chối | Ngày quay lại chưa xử lý. Nhân viên đã nhận thông báo từ chối (BR-214) nên lần nhập file sau không báo lại ngày đó; HR nhắc lại được theo BR-217 | BR-214, BR-216, BR-217 | — |
+| EC-135 | Hai HR cùng bấm Nhắc lại cho một nhân viên trong cùng ngày | Nhân viên nhận một lần nhắc | BR-217 | — |
+| EC-136 | `attendance_close_day` là 5; ngày 4/12 còn giải trình của tháng 11 chờ duyệt mới được 1 ngày làm việc | HR nhận thông báo ngay ngày 4/12, không chờ đủ `approval_escalation_days` | BR-218 | — |
+| EC-137 | Lương tối thiểu vùng tăng từ 01/01; nhân viên có lương cơ bản dưới mức mới và đã có bản ghi tăng lương từ 01/03 | Danh sách chỉ ghi khoảng từ 01/01 tới hết tháng 2 cho nhân viên đó | BR-219 | — |
+| EC-138 | Nhân viên có ngày làm việc cuối cùng trước ngày hiệu lực của lương tối thiểu vùng mới | Không có trong danh sách | BR-219 | — |
+| EC-139 | Ngày hiệu lực của lương tối thiểu vùng mới thuộc tháng có bảng lương đã chốt | Bảng lương đã chốt không đổi (BR-118). Danh sách vẫn ghi khoảng ngày đó để HR thêm truy lĩnh ở bảng lương chưa chốt, như BR-098 | BR-118, BR-219 | — |
+| EC-140 | Nhân viên vào làm ngày 20; hôm nay là ngày 5 cùng tháng và nhân viên chưa có bản ghi lương | Chưa tính là thiếu; từ ngày 20 mà vẫn chưa có bản ghi lương thì tính là thiếu | BR-221 | — |
+| EC-141 | Quản lý gửi thẻ nhắc phép tồn khi một nhân viên vừa nhận gợi ý dùng phép tồn của AI (BR-170) | Người đó không nhận tin; thẻ ghi số người bị bỏ vì vừa nhận gợi ý | BR-190 | — |
+| EC-142 | Người nhận mở một thông báo về đối tượng mình không còn quyền xem, ví dụ Quản lý vừa thôi làm trưởng phòng ban | Thông báo vẫn hiện nội dung; mở đối tượng thì bị từ chối như khi mở trực tiếp | BR-213 | — |

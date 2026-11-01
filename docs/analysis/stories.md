@@ -16,6 +16,11 @@
   của M6.
 - US-090 tới US-095 là phần rule của M5 mà AI Report Analyst dựa vào; US-096 tới US-100 là AI Report Analyst của M6.
 - US-101 tới US-106 là phần rule mà AI HR Assistant dựa vào, ở M1 và M4; US-107 tới US-113 là AI HR Assistant của M6.
+- US-114 tới US-120 được thêm khi rà rule tự động và chấm INVEST ở #43: cơ chế thông báo chung của M1 (US-114); gửi
+  nhiều đơn, tách từ US-080 (US-115); thông báo và nhắc của M3 (US-116 tới US-118); kiểm lương tối thiểu vùng ở M4
+  (US-119); tín hiệu thiếu dữ liệu tính lương ở M5 (US-120).
+- **Ca trước M3:** ngày làm việc tính theo ca (BR-038). Từ M2 tới khi M3 có quản lý và gán ca (US-036, US-037), mọi
+  nhân viên dùng ca `default_shift`.
 - **Release:** v1.0 gồm mọi story của M1 tới M6.
 
 | ID | Story | Priority | Milestone | Feature |
@@ -45,7 +50,7 @@
 | US-023 | Nhân viên gửi đơn nghỉ | Must | M2 | |
 | US-024 | Nhân viên hủy đơn nghỉ | Must | M2 | |
 | US-025 | Quản lý duyệt hoặc từ chối đơn nghỉ | Must | M2 | |
-| US-026 | HR duyệt thay đơn nghỉ | Should | M2 | |
+| US-026 | HR duyệt thay đơn nghỉ | Must | M2 | |
 | US-027 | Quản lý xem lịch nghỉ của nhóm | Should | M2 | |
 | US-028 | HR quản lý loại nghỉ | Must | M2 | |
 | US-029 | HR quản lý lịch làm việc | Must | M2 | |
@@ -53,7 +58,7 @@
 | US-031 | Chuyển phép tồn sang năm sau | Must | M2 | |
 | US-032 | HR điều chỉnh số dư phép | Must | M2 | |
 | US-033 | HR ghi đơn nghỉ thay nhân viên | Should | M2 | |
-| US-034 | Thông báo về đơn nghỉ | Should | M2 | |
+| US-034 | Thông báo về đơn nghỉ | Must | M2 | |
 | US-035 | HR xem số phép chưa nghỉ khi nhân viên nghỉ việc | Should | M2 | |
 | US-036 | HR quản lý ca làm việc | Must | M3 | |
 | US-037 | HR gán ca cho nhân viên | Must | M3 | |
@@ -99,7 +104,7 @@
 | US-077 | Nhắc người duyệt và báo HR khi đơn chờ lâu | Must | M2 | |
 | US-078 | Người duyệt thay khi người duyệt đang nghỉ | Must | M2 | |
 | US-079 | Người duyệt đề nghị đổi ngày nghỉ | Should | M2 | |
-| US-080 | Nhân viên đổi đơn hoặc gửi nhiều đơn trong một lần | Should | M2 | |
+| US-080 | Nhân viên đổi đơn | Must | M2 | |
 | US-081 | Nhân viên chọn người nhận bàn giao | Could | M2 | |
 | US-082 | Tạo đơn nghỉ bằng câu mô tả | Must | M6 | |
 | US-083 | AI kiểm mô tả của đơn khớp lý do nghỉ | Must | M6 | |
@@ -133,6 +138,13 @@
 | US-111 | Mở đúng màn hình nghiệp vụ từ chat | Should | M6 | |
 | US-112 | Chuyển câu hỏi cho HR kèm tóm tắt hội thoại | Must | M6 | |
 | US-113 | HR nhận gợi ý mục câu hỏi thường gặp | Could | M6 | |
+| US-114 | Nhận và đọc thông báo trong hệ thống | Must | M1 | |
+| US-115 | Nhân viên gửi nhiều đơn trong một lần | Must | M2 | |
+| US-116 | Thông báo và nhắc về đơn làm thêm và giải trình | Must | M3 | |
+| US-117 | Nhân viên được báo ngày chấm công chưa xử lý | Must | M3 | |
+| US-118 | HR đặt hạn chốt công dự kiến | Should | M3 | |
+| US-119 | HR rà bản ghi lương khi lương tối thiểu vùng thay đổi | Must | M4 | |
+| US-120 | HR được cảnh báo hồ sơ thiếu dữ liệu tính lương | Should | M5 | |
 
 ## Details
 
@@ -560,7 +572,7 @@ ty.
 ### US-029: HR quản lý lịch làm việc
 
 **Story:** Là HR, tôi muốn khai báo ngày nghỉ lễ và ngày làm bù của từng năm, để số ngày nghỉ và bảng công được tính
-đúng. Ngày làm việc trong tuần được khai báo ở từng ca (US-036).
+đúng. Ngày làm việc trong tuần lấy theo ca của nhân viên; trước khi có M3, đó là ca `default_shift`.
 
 **Links:** BR-038, BR-039, BR-064, BR-090 · EC-031, EC-032, EC-054 · SCR-024
 
@@ -635,13 +647,13 @@ hệ thống và để sửa sai.
 **Story:** Là nhân viên hoặc người duyệt, tôi muốn nhận thông báo trong hệ thống khi đơn nghỉ thay đổi, để không phải hỏi
 lại nhau.
 
-**Links:** BR-066 · SCR-003
+**Links:** BR-066, BR-213 · SCR-003, SCR-021
 
 **Acceptance criteria**
 
-- AC1: Given nhân viên gửi đơn, then người duyệt thấy thông báo và số đơn chờ duyệt trên trang chủ.
-- AC2: Given đơn được duyệt, bị từ chối, bị hủy hoặc được tính lại, then người gửi thấy thông báo kèm lý do nếu có.
-- AC3: Given một thông báo đã được mở, then thông báo đó không còn tính vào số thông báo chưa đọc.
+- AC1: Given nhân viên gửi đơn, then người duyệt nhận thông báo và thấy số đơn chờ mình duyệt trên trang chủ; bấm thông
+  báo thì mở đơn ở SCR-021.
+- AC2: Given đơn được duyệt, bị từ chối, bị hủy hoặc được tính lại, then người gửi nhận thông báo kèm lý do nếu có.
 
 ### US-035: HR xem số phép chưa nghỉ khi nhân viên nghỉ việc
 
@@ -797,11 +809,11 @@ xác nhận.
 
 **Story:** Là quản lý, tôi muốn duyệt đơn làm thêm giờ của nhân viên mình, để chỉ làm thêm khi công việc cần.
 
-**Links:** UC-008 · BR-056 tới BR-059, BR-084, BR-085 · EC-047 tới EC-049 · SCR-021
+**Links:** UC-008 · BR-056 tới BR-059, BR-084, BR-085, BR-214 · EC-047 tới EC-049 · SCR-021
 
 **Acceptance criteria**
 
-- AC1: Given đơn đang chờ mình duyệt, when duyệt, then đơn ở trạng thái Đã duyệt và nhân viên được thông báo.
+- AC1: Given đơn đang chờ mình duyệt, when duyệt, then đơn ở trạng thái Đã duyệt và nhân viên được thông báo (BR-214).
 - AC2: Given tại lúc duyệt, đơn làm vượt giới hạn giờ làm thêm vì đơn khác vừa được duyệt, when duyệt, then thao tác bị
   từ chối (BR-084).
 - AC3: Given đơn đã duyệt 18:00–21:00 và chấm công ra 20:00, then giờ làm thêm thực tế là 2 giờ (BR-085, EC-047).
@@ -1329,24 +1341,23 @@ từ chối đơn.
   người đề nghị là người duyệt (BR-151).
 - AC4: Given nhân viên không đồng ý và ghi phản hồi, then đơn quay lại Chờ duyệt với ngày cũ, kèm phản hồi đó.
 
-### US-080: Nhân viên đổi đơn hoặc gửi nhiều đơn trong một lần
+### US-080: Nhân viên đổi đơn
 
-**Story:** Là nhân viên, tôi muốn đổi ngày của đơn hoặc gửi nhiều đơn liền nhau trong một lần xác nhận, để không phải hủy
-rồi gửi lại từng đơn.
+**Story:** Là nhân viên, tôi muốn đổi ngày hoặc loại nghỉ của một đơn trong một lần xác nhận, để không phải hủy rồi gửi
+lại.
 
-**Links:** BR-152, BR-153, BR-061, BR-207 · EC-036, EC-105, EC-127 · SCR-019, SCR-020
+**Links:** BR-152, BR-061, BR-207 · EC-036, EC-127 · SCR-019, SCR-020
 
 **Acceptance criteria**
 
 - AC1: Given đơn đang chờ, when đổi ngày và xác nhận, then đơn cũ ở trạng thái Đã hủy và đơn mới ở trạng thái Chờ duyệt,
   trong một thao tác.
 - AC2: Given đơn mới không qua luật, then đơn cũ giữ nguyên trạng thái (BR-152).
-- AC3: Given gửi 3 ngày Kết hôn và 2 ngày Phép năm liền nhau trong một lần, then có hai đơn; một đơn không qua luật thì
-  không đơn nào được tạo (BR-153, EC-105).
-- AC4: Given đơn đã tới ngày bắt đầu, then không đổi được (BR-061).
-- AC5: Given bấm Đổi đơn ở SCR-019, hoặc chọn phương án đổi do AI Leave Coordinator đề xuất, then SCR-020 mở ở chế độ Đổi
-  đơn: đơn gốc hiện cạnh giá trị mới, kèm câu "Đơn cũ sẽ bị hủy và đơn mới chờ duyệt lại". Đơn chỉ đổi khi nhân viên bấm
-  Xác nhận đổi đơn (BR-207, EC-127).
+- AC3: Given đơn đã tới ngày bắt đầu, then không đổi được (BR-061).
+- AC4: Given bấm Đổi đơn ở SCR-019, then SCR-020 mở ở chế độ Đổi đơn: đơn gốc hiện cạnh giá trị mới, kèm câu "Đơn cũ sẽ
+  bị hủy và đơn mới chờ duyệt lại". Đơn chỉ đổi khi nhân viên bấm Xác nhận đổi đơn (BR-207).
+- AC5: Given đơn đã duyệt và chưa tới ngày bắt đầu, when đổi, then màn hình ghi rõ đơn mới phải được duyệt lại; đơn mới
+  bị từ chối thì các ngày của đơn cũ không còn được duyệt (EC-127).
 
 ### US-081: Nhân viên chọn người nhận bàn giao
 
@@ -1420,8 +1431,8 @@ lương sai.
 **Story:** Là nhân viên hoặc HR, tôi muốn được giải thích và có cách xử lý đề xuất khi đơn gặp tình huống phát sinh, để
 không phải hỏi nhau qua tin nhắn.
 
-**Links:** UC-014 · BR-156, BR-157, BR-158, BR-160, BR-163, BR-169 · EC-030, EC-031, EC-032, EC-098, EC-104 · SCR-003,
-SCR-019
+**Links:** UC-014 · BR-142, BR-152, BR-153, BR-156, BR-157, BR-158, BR-160, BR-163, BR-169 · EC-030, EC-031, EC-032,
+EC-098, EC-104 · SCR-003, SCR-019
 
 **Acceptance criteria**
 
@@ -1630,19 +1641,23 @@ từng báo cáo.
 
 ### US-098: AI soạn thẻ nhắc nhóm từ insight
 
-**Story:** Là HR, tôi muốn có sẵn tin nhắc cho đúng nhóm người từ một insight, để xử lý việc tồn đọng trước khi chốt công
-mà không phải tự lọc danh sách và soạn tin.
+**Story:** Là quản lý, tôi muốn có sẵn tin nhắc cho đúng nhóm người từ một insight, như nhắc người còn phép tồn sắp hết
+hạn, để nhóm dùng phép kịp mà tôi không phải tự lọc danh sách và soạn tin.
 
-**Links:** UC-017 · BR-157, BR-160, BR-185, BR-190 · EC-115 · SCR-048
+**Links:** UC-017 · BR-157, BR-160, BR-170, BR-185, BR-190 · EC-115, EC-141 · SCR-019, SCR-048
 
 **Acceptance criteria**
 
-- AC1: Given insight có tín hiệu Ngày chưa xử lý của 6 người, then SCR-048 có thẻ nhắc với nội dung do AI soạn; người
-  nhận do core chọn.
-- AC2: Given thẻ nhắc, then không có tin nào được gửi khi HR chưa bấm Gửi; HR sửa được nội dung (BR-157).
-- AC3: Given nội dung, then là lời nhắc chung, không chứa số liệu của từng người hay tên đồng nghiệp (BR-160, BR-190).
-- AC4: Given một người vừa gửi giải trình trước lúc HR bấm Gửi, then người đó không nhận tin (EC-115).
-- AC5: Given Quản lý gửi thẻ nhắc người còn phép tồn, then chỉ người trong phạm vi của Quản lý nhận tin.
+- AC1: Given insight có tín hiệu Phép tồn sắp hết hạn của phòng Kinh doanh, then SCR-048 có thẻ nhắc với nội dung do AI
+  soạn và số người nhận do core chọn.
+- AC2: Given Quản lý bấm Gửi, then chỉ người còn phép tồn trong phạm vi của Quản lý tại lúc bấm nhận tin; HR bấm Gửi thì
+  người nhận là mọi người còn phép tồn trong tín hiệu (BR-190).
+- AC3: Given thẻ nhắc, then không có tin nào được gửi khi người xem chưa bấm Gửi; người xem sửa được nội dung (BR-157).
+- AC4: Given nội dung, then là lời nhắc chung dẫn tới SCR-019 của người nhận; không chứa số liệu của từng người, tên
+  đồng nghiệp hay khoảng ngày gợi ý (BR-160, BR-190).
+- AC5: Given một người vừa gửi đơn dùng hết phép tồn trước lúc bấm Gửi, then người đó không nhận tin (EC-115).
+- AC6: Given một người đã nhận gợi ý dùng phép tồn của AI (BR-170) hoặc tin nhắc cùng loại trong `reminder_quiet_days`
+  ngày gần nhất, then người đó không nhận tin; thẻ ghi số người bị bỏ và lý do (EC-141).
 
 ### US-099: AI viết cập nhật cho tín hiệu đang theo dõi
 
@@ -1881,3 +1896,126 @@ quy chế.
 - AC2: Given một gợi ý, then mục chỉ được đăng khi HR sửa và bấm Đăng (BR-157).
 - AC3: Given dữ liệu gửi tới dịch vụ AI, then chỉ có nội dung câu hỏi, không có tên người hỏi; hội thoại chưa gửi cho HR
   không được đọc (BR-212).
+
+### US-114: Nhận và đọc thông báo trong hệ thống
+
+**Story:** Là nhân viên, tôi muốn mọi thông báo của hệ thống nằm ở một nơi và biết thông báo nào chưa đọc, để không bỏ
+sót việc cần làm.
+
+**Links:** BR-213 · EC-142 · SCR-003
+
+**Acceptance criteria**
+
+- AC1: Given có thông báo mới, then SCR-003 hiện số thông báo chưa đọc; thông báo mới nhất ở đầu danh sách.
+- AC2: Given bấm một thông báo, then màn hình của đối tượng liên quan mở ra, và thông báo không còn tính vào số chưa
+  đọc.
+- AC3: Given thông báo về đối tượng người nhận không còn quyền xem, when bấm, then vẫn thấy nội dung thông báo nhưng đối
+  tượng không mở được (EC-142).
+- AC4: Given một người dùng khác, then người đó không thấy thông báo này.
+
+### US-115: Nhân viên gửi nhiều đơn trong một lần
+
+**Story:** Là nhân viên, tôi muốn gửi nhiều đơn liền nhau trong một lần xác nhận, để một kỳ nghỉ gồm nhiều loại nghỉ
+không phải gửi từng đơn và không bị tạo dở dang.
+
+**Links:** BR-045, BR-152, BR-153 · EC-105 · SCR-020
+
+**Acceptance criteria**
+
+- AC1: Given gửi 3 ngày Kết hôn và 2 ngày Phép năm liền nhau trong một lần, then có hai đơn ở trạng thái Chờ duyệt.
+- AC2: Given một đơn trong lần gửi không qua luật, then không đơn nào được tạo; nhân viên thấy đơn nào lỗi và vì sao
+  (BR-153, EC-105).
+- AC3: Given đổi một đơn Phép năm 5 ngày thành 3 ngày Phép năm và 2 ngày Việc riêng không lương, when xác nhận, then đơn
+  cũ ở trạng thái Đã hủy và hai đơn mới ở trạng thái Chờ duyệt; một đơn mới không qua luật thì đơn cũ giữ nguyên
+  (BR-152, BR-153).
+- AC4: Given hai đơn trong cùng lần gửi chồng buổi nhau, when gửi, then bị từ chối (BR-045).
+
+### US-116: Thông báo và nhắc về đơn làm thêm và giải trình
+
+**Story:** Là nhân viên, tôi muốn người duyệt biết ngay khi tôi gửi đơn làm thêm hay giải trình, được nhắc khi để lâu,
+và tôi biết kết quả, để công của tôi được tính đúng trước khi bảng công bị chốt.
+
+**Links:** UC-008, UC-009 · BR-058, BR-214, BR-215 · SCR-003, SCR-021, SCR-028
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên gửi giải trình, then người duyệt nhận thông báo; bấm vào thì mở giải trình đó ở SCR-021.
+- AC2: Given đơn làm thêm bị từ chối, then người gửi nhận thông báo kèm lý do; bấm vào thì mở SCR-028 tại tháng đó.
+- AC3: Given giải trình chờ `approval_reminder_days` ngày làm việc, then người duyệt nhận nhắc mỗi ngày làm việc tới khi
+  giải trình được xử lý.
+- AC4: Given đơn làm thêm chờ `approval_escalation_days` ngày làm việc, then HR nhận thông báo và duyệt thay được
+  (BR-058).
+- AC5: Given HR chưa đặt hạn chốt công, then các thông báo và nhắc trên vẫn chạy theo số ngày làm việc (BR-215).
+
+### US-117: Nhân viên được báo ngày chấm công chưa xử lý
+
+**Story:** Là HR, tôi muốn nhân viên tự được báo khi có ngày thiếu chấm công hoặc vắng chưa xử lý, để không phải đi hỏi
+từng người trước khi chốt công.
+
+**Links:** UC-007, UC-009 · BR-077, BR-216, BR-217 · EC-132 tới EC-135 · SCR-003, SCR-027, SCR-028, SCR-031
+
+**Acceptance criteria**
+
+- AC1: Given HR xác nhận nhập file và nhân viên A có ngày 12/5 Thiếu chấm công, then A nhận một thông báo liệt kê ngày
+  12/5; bấm vào thì mở SCR-028 tại tháng 5, ngày đó có nút Giải trình.
+- AC2: Given HR nhập lại file đó, hoặc nhập file chồng khoảng ngày, then A không được báo lại ngày 12/5; chỉ ngày chưa
+  xử lý mới được báo (EC-132).
+- AC3: Given A đã gửi giải trình cho ngày 12/5 trước khi HR nhập file, then ngày đó không có trong thông báo (EC-133).
+- AC4: Given sau khi xác nhận nhập file, then SCR-027 hiện số nhân viên vừa được báo.
+- AC5: Given HR chọn nhân viên ở SCR-031 và bấm Nhắc lại, then người còn ngày chưa xử lý nhận một thông báo liệt kê các
+  ngày đó; người đã xử lý xong không nhận (BR-217).
+- AC6: Given hai HR cùng bấm Nhắc lại cho A trong một ngày, then A nhận một lần (EC-135).
+
+### US-118: HR đặt hạn chốt công dự kiến
+
+**Story:** Là HR, tôi muốn đặt hạn chốt công hằng tháng và để các thông báo về chấm công ghi hạn đó, để nhân viên và
+người duyệt xử lý trước hạn thay vì dồn tới ngày cuối.
+
+**Links:** UC-009 · BR-218 · EC-136 · SCR-028, SCR-032
+
+**Acceptance criteria**
+
+- AC1: Given HR đặt `attendance_close_day` là 5, then thông báo về ngày chưa xử lý của tháng 11 ghi "Hạn xử lý: 5/12",
+  và SCR-028 của tháng 11 hiện hạn đó.
+- AC2: Given ngày 4/12 còn giải trình của tháng 11 chờ duyệt, then HR nhận thông báo ngay, không chờ đủ
+  `approval_escalation_days` (EC-136).
+- AC3: Given HR xóa giá trị, then thông báo không ghi hạn và nhắc chạy như US-116, US-117.
+- AC4: Given đã qua hạn mà bảng công chưa chốt, then không thao tác nào bị chặn.
+- AC5: Given HR nhập 30, when lưu, then bị từ chối vì hạn chỉ từ 1 tới 28 (BR-218).
+
+### US-119: HR rà bản ghi lương khi lương tối thiểu vùng thay đổi
+
+**Story:** Là HR, tôi muốn biết ngay bản ghi lương nào sẽ thấp hơn lương tối thiểu vùng mới, để điều chỉnh lương đúng
+luật từ ngày hiệu lực.
+
+**Links:** BR-094, BR-096, BR-219, BR-220 · EC-137 tới EC-139 · SCR-034, SCR-035, SCR-037
+
+**Acceptance criteria**
+
+- AC1: Given công ty ở vùng I, nhân viên A có lương cơ bản 5.400.000 đồng, when HR lưu lương tối thiểu vùng I 5.600.000
+  đồng từ 01/01/2027, then danh sách ghi A từ 01/01/2027, lương cơ bản thấp hơn 200.000 đồng (BR-094, BR-219).
+- AC2: Given nhân viên B có lương cơ bản 6.000.000 đồng và lương đóng bảo hiểm 5.310.000 đồng, then B có trong danh sách
+  với lương đóng bảo hiểm thấp hơn 290.000 đồng (BR-096).
+- AC3: Given A đã có bản ghi tăng lương từ 01/03/2027, then danh sách chỉ ghi khoảng 01/01/2027 tới 28/02/2027 (EC-137).
+- AC4: Given danh sách, then không bản ghi lương nào tự đổi; bấm một dòng thì mở SCR-035 của nhân viên đó. Khi bản ghi
+  mới đạt mức sàn, dòng đó không còn trong danh sách.
+- AC5: Given bảng lương tháng 1/2027 được tính khi lương của A chưa điều chỉnh, then phiếu của A có cảnh báo dưới mức
+  sàn; cảnh báo không chặn việc chốt (BR-220).
+- AC6: Given nhân viên C có ngày làm việc cuối cùng là 31/12/2026, then C không có trong danh sách (EC-138).
+
+### US-120: HR được cảnh báo hồ sơ thiếu dữ liệu tính lương
+
+**Story:** Là HR, tôi muốn biết sớm nhân viên nào còn thiếu dữ liệu để tính và trả lương, để bổ sung trong tháng thay vì
+phát hiện lúc tính hoặc chốt lương.
+
+**Links:** UC-016 · BR-172, BR-174, BR-179, BR-221 · EC-140 · SCR-007, SCR-040, SCR-048
+
+**Acceptance criteria**
+
+- AC1: Given nhân viên A làm từ đầu tháng mà chưa có bản ghi lương, when tính tín hiệu, then HR thấy thẻ Hồ sơ thiếu dữ
+  liệu tính lương mức Cao, phân rã theo loại dữ liệu thiếu.
+- AC2: Given nhân viên B vào làm ngày 20, hôm nay ngày 5 cùng tháng và B chưa có bản ghi lương, then B chưa được tính là
+  thiếu (EC-140).
+- AC3: Given nhân viên C đã làm trong tháng mà chưa có số tài khoản ngân hàng, then C được tính là thiếu.
+- AC4: Given người xem là Quản lý, then không thấy tín hiệu này (BR-174).
+- AC5: Given HR bổ sung đủ dữ liệu, then ở lần tính sau tín hiệu sang Đã hết (BR-179).

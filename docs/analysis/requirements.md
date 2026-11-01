@@ -53,8 +53,9 @@ Các story do Thời gian thực hiện (US-030, US-031, US-040) không có dòn
 | Xem nhật ký thao tác (US-004) | ❌ | ❌ | ✅ |
 | Tuyển lại nhân viên đã nghỉ việc (US-071) | ❌ | ❌ | ✅ |
 | Xóa và ẩn danh dữ liệu hết hạn lưu (US-072) | ❌ | ❌ | ✅ |
+| Xem và đọc thông báo của mình (US-114) | ✅ | ✅ | ✅ |
 | Xem số dư phép và biến động phép của mình (US-022) | ✅ | ✅ | ✅ |
-| Nhận thông báo về đơn của mình và đơn mình là người duyệt (US-034) | ✅ | ✅ | ✅ |
+| Nhận thông báo về đơn nghỉ, đơn làm thêm và giải trình của mình hoặc mình là người duyệt (US-034, US-116) | ✅ | ✅ | ✅ |
 | Gửi đơn nghỉ, hủy đơn nghỉ của mình (US-023, US-024) | ✅ | ✅ | ✅ |
 | Duyệt, từ chối đơn nghỉ (US-025, US-026) | ❌ | ✅ chỉ đơn mình là người duyệt | ✅ mọi đơn, duyệt thay |
 | Xem đơn, số dư phép và lịch nghỉ của người khác (US-027) | ❌ | ✅ phạm vi; lý do nghỉ chỉ khi là người duyệt | ✅ mọi người |
@@ -65,25 +66,25 @@ Các story do Thời gian thực hiện (US-030, US-031, US-040) không có dòn
 | Duyệt, từ chối giải trình chấm công và đơn làm thêm giờ (US-043, US-045) | ❌ | ✅ chỉ đơn mình là người duyệt | ✅ mọi đơn, duyệt thay |
 | Xem bảng công của người khác (US-046) | ❌ | ✅ phạm vi | ✅ mọi người |
 | Quản lý ca, gán ca, khai báo mã chấm công (US-036 tới US-038) | ❌ | ❌ | ✅ |
-| Nhập file chấm công; xử lý ngày thiếu chấm công (US-039, US-047) | ❌ | ❌ | ✅ |
-| Chốt, mở lại và xuất bảng công (US-048, US-049) | ❌ | ❌ | ✅ |
+| Nhập file chấm công; xử lý và nhắc lại ngày chưa xử lý (US-039, US-047, US-117) | ❌ | ❌ | ✅ |
+| Chốt, mở lại và xuất bảng công; đặt hạn chốt công (US-048, US-049, US-118) | ❌ | ❌ | ✅ |
 | Xem phiếu lương đã chốt của mình (US-061) | ✅ | ✅ | ✅ |
 | Xem lương, phụ cấp, thông tin thuế, bảo hiểm và người phụ thuộc của người khác (US-051 tới US-053) | ❌ | ❌ kể cả trong phạm vi (BR-122) | ✅ |
 | Ghi lương, thông tin thuế, bảo hiểm và người phụ thuộc (US-051 tới US-053) | ❌ | ❌ | ✅ |
-| Quản lý loại phụ cấp và tham số lương (US-050, US-054) | ❌ | ❌ | ✅ |
+| Quản lý loại phụ cấp và tham số lương; xem bản ghi lương dưới lương tối thiểu vùng mới (US-050, US-054, US-119) | ❌ | ❌ | ✅ |
 | Tính, điều chỉnh, chốt và xuất bảng lương (US-055 tới US-060, US-062, US-063) | ❌ | ❌ | ✅ |
 | Xem trang tổng quan và báo cáo nhân sự, nghỉ phép, chấm công; xuất báo cáo (US-064 tới US-068, US-070) | ❌ | ✅ phạm vi (BR-127) | ✅ mọi người |
 | Xem báo cáo chi phí lương (US-069) | ❌ | ✅ phạm vi, chỉ số tổng hợp từ bảng lương đã chốt (BR-128, BR-129) | ✅ mọi người, kể cả bảng lương Nháp |
 | Quản lý danh mục lý do nghỉ, giai đoạn hạn chế nghỉ, ngưỡng nhân sự của phòng ban (US-073, US-075, US-076) | ❌ | ❌ | ✅ |
 | Thấy cảnh báo phòng ban thiếu người khi gửi đơn (US-075) | ✅ không kèm tên hay số người (BR-146) | ✅ phạm vi, kèm tên | ✅ mọi người, kèm tên |
 | Đề nghị đổi ngày cho đơn đang chờ (US-079) | ❌ | ✅ đơn mình là người duyệt hoặc người duyệt thay | ✅ mọi đơn |
-| Phản hồi đề nghị đổi ngày, đổi đơn, gửi nhiều đơn một lần, chọn người nhận bàn giao (US-079 tới US-081) | ✅ đơn của mình | ✅ đơn của mình | ✅ đơn của mình |
+| Phản hồi đề nghị đổi ngày, đổi đơn, gửi nhiều đơn một lần, chọn người nhận bàn giao (US-079 tới US-081, US-115) | ✅ đơn của mình | ✅ đơn của mình | ✅ đơn của mình |
 | Duyệt khi là người duyệt thay (US-078) | ❌ | ✅ đơn được giao thêm (BR-149) | ✅ |
 | Dùng AI tạo đơn; nhận phương án, giải thích và gợi ý của AI cho đơn của mình (US-082 tới US-086) | ✅ | ✅ | ✅ |
 | Xem tóm tắt tác động của AI; nhờ AI soạn lý do từ chối hay lời đề nghị (US-088, US-089) | ❌ | ✅ đơn mình là người duyệt hoặc người duyệt thay | ✅ mọi đơn |
 | Nhận tổng hợp đơn trong giai đoạn hạn chế (US-087) | ❌ | ✅ phạm vi | ✅ mọi người |
 | Nhận đề xuất xử lý đơn làm số phép âm (US-085) | ❌ | ❌ | ✅ |
-| Xem thẻ cảnh báo và chi tiết tín hiệu; nhận thông báo và tóm tắt tuần; đánh giá, đóng, tắt và theo dõi thẻ (US-090 tới US-095) | ❌ | ✅ phạm vi, theo cột Viewers của loại tín hiệu (BR-174) | ✅ mọi người |
+| Xem thẻ cảnh báo và chi tiết tín hiệu; nhận thông báo và tóm tắt tuần; đánh giá, đóng, tắt và theo dõi thẻ (US-090 tới US-095, US-120) | ❌ | ✅ phạm vi, theo cột Viewers của loại tín hiệu (BR-174) | ✅ mọi người |
 | Xem tỷ lệ đánh giá hữu ích theo loại tín hiệu (US-093) | ❌ | ❌ | ✅ không thấy đánh giá của từng người (BR-178) |
 | Xem insight, cập nhật và tóm tắt tuần do AI viết (US-096, US-097, US-099, US-100) | ❌ | ✅ phạm vi; chỉ chỉ số và chiều thấy được trong báo cáo (BR-183) | ✅ mọi người |
 | Gửi thẻ nhắc nhóm từ insight (US-098) | ❌ | ✅ người nhận trong phạm vi (BR-190) | ✅ mọi người |
@@ -275,7 +276,7 @@ flowchart LR
 
 ### UC-007: Nhập file chấm công và tính công
 
-- **Actor:** HR; Máy chấm công, Thời gian · **Stories:** US-039, US-040
+- **Actor:** HR; Máy chấm công, Thời gian · **Stories:** US-039, US-040, US-117
 - **Trigger:** HR xuất file từ máy chấm công, thường mỗi tuần một lần.
 - **Preconditions:** Nhân viên đã có mã chấm công và ca làm việc.
 - **Main flow:**
@@ -285,29 +286,32 @@ flowchart LR
   4. HR xác nhận. Hệ thống lưu lượt chấm.
   5. Hệ thống tính lại công cho các ngày có lượt chấm mới: giờ vào, giờ ra, đi muộn, về sớm, giờ làm thêm (BR-074 tới
      BR-080, BR-085).
+  6. Nhân viên có ngày chưa xử lý chưa từng được báo nhận thông báo kèm đường dẫn gửi giải trình (BR-216).
 - **Alternative flows:**
   - `3a`. HR hủy sau khi xem kết quả: không lượt chấm nào được lưu.
 - **Exceptions:**
   - `2a`. File sai định dạng: từ chối cả file và chỉ ra cột thiếu (EC-088).
   - `2b`. Dòng thuộc tháng đã chốt: bỏ qua và liệt kê (BR-090).
-- **Postconditions:** Nhập lại cùng một file không tạo lượt chấm trùng (EC-041). Nhật ký ghi người nhập, file và số dòng.
+- **Postconditions:** Nhập lại cùng một file không tạo lượt chấm trùng (EC-041) và không báo lại ngày đã báo (EC-132).
+  Nhật ký ghi người nhập, file và số dòng.
 
 ### UC-008: Đăng ký và duyệt làm thêm giờ
 
-- **Actor:** Nhân viên; Quản lý, HR · **Stories:** US-044, US-045
+- **Actor:** Nhân viên; Quản lý, HR · **Stories:** US-044, US-045, US-116
 - **Trigger:** Nhân viên cần làm thêm ngoài giờ ca.
 - **Preconditions:** Nhân viên đang làm việc; tháng của ngày làm thêm chưa chốt.
 - **Main flow:**
   1. Nhân viên nhập ngày, giờ bắt đầu, giờ kết thúc và lý do, trước giờ bắt đầu (BR-083).
   2. Hệ thống kiểm khoảng làm thêm nằm ngoài giờ ca và không chồng đơn khác (BR-086), rồi kiểm giới hạn giờ làm thêm theo
      ngày, tháng và năm (BR-084).
-  3. Hệ thống gửi đơn cho người duyệt theo cùng luật với đơn nghỉ (BR-056) và thông báo.
+  3. Hệ thống gửi đơn cho người duyệt theo cùng luật với đơn nghỉ (BR-056) và thông báo (BR-214).
   4. Người duyệt duyệt đơn.
   5. Sau khi có chấm công, hệ thống tính giờ làm thêm thực tế bằng phần giao giữa khoảng đã duyệt và khoảng có mặt, rồi
      phân loại theo ngày và ban đêm (BR-085).
 - **Alternative flows:**
   - `4a`. Người duyệt từ chối kèm lý do (BR-059).
   - `4b`. HR duyệt thay (BR-058).
+  - `4c`. Đơn chờ lâu: người duyệt được nhắc, rồi HR được thông báo (BR-215).
 - **Exceptions:**
   - `1a`. Gửi sau giờ bắt đầu: từ chối (EC-051).
   - `2a`. Vượt giới hạn giờ làm thêm: từ chối và hiện số giờ còn được làm (BR-084, EC-050).
@@ -317,14 +321,15 @@ flowchart LR
 
 ### UC-009: Chốt bảng công tháng
 
-- **Actor:** HR · **Stories:** US-047, US-048
-- **Trigger:** Hết tháng, trước khi tính lương.
+- **Actor:** HR · **Stories:** US-047, US-048, US-116, US-117, US-118
+- **Trigger:** Hết tháng, trước khi tính lương; trước hạn chốt công nếu HR đã đặt (BR-218).
 - **Preconditions:** Đã nhập đủ file chấm công của tháng.
 - **Main flow:**
   1. HR chọn tháng cần chốt.
   2. Hệ thống liệt kê việc còn chặn: đơn nghỉ, đơn làm thêm, giải trình đang chờ duyệt; ngày thiếu chấm công hoặc vắng
      chưa xử lý (BR-089).
-  3. HR xử lý từng việc: nhắc người duyệt, duyệt thay, hoặc ghi công trực tiếp cho ngày thiếu chấm công (BR-082).
+  3. HR xử lý từng việc: duyệt thay đơn chờ lâu mà người duyệt đã được nhắc (BR-058, BR-215), nhắc lại người còn ngày
+     chưa xử lý (BR-217), hoặc ghi công trực tiếp cho ngày đó (BR-082).
   4. Khi không còn việc chặn, HR chốt. Hệ thống chụp lại bảng công tháng của mọi nhân viên (BR-092).
 - **Alternative flows:**
   - `4a`. Cần sửa sau khi chốt: HR mở lại kèm lý do nếu bảng lương tháng đó chưa chốt (BR-091), sửa, rồi chốt lại.
@@ -335,7 +340,7 @@ flowchart LR
 
 ### UC-010: Tính và chốt bảng lương tháng
 
-- **Actor:** HR · **Stories:** US-055 tới US-060, US-062
+- **Actor:** HR · **Stories:** US-055 tới US-060, US-062, US-119
 - **Trigger:** Bảng công tháng đã chốt, tới ngày tính lương.
 - **Preconditions:** Bảng công của tháng đã chốt (BR-102); tham số lương có giá trị hiệu lực cho tháng đó (BR-123).
 - **Main flow:**
@@ -350,6 +355,8 @@ flowchart LR
   6. Hệ thống chốt bảng lương, công bố phiếu lương và thông báo cho nhân viên (BR-117, BR-125).
 - **Alternative flows:**
   - `2a`. Nhân viên có ngày làm việc cuối cùng trong tháng: phiếu có thêm tiền phép chưa nghỉ (BR-120, BR-121).
+  - `3a`. Phiếu có ngày mà lương cơ bản hoặc lương đóng bảo hiểm dưới lương tối thiểu vùng: cảnh báo, không chặn chốt;
+    HR ghi bản ghi lương mới rồi tính lại (BR-220).
   - `4a`. Dữ liệu nguồn đổi sau khi tính, như HR sửa lương hay mở lại bảng công: bảng lương được đánh dấu Cần tính lại;
     HR tính lại, khoản điều chỉnh được giữ (BR-116, BR-119).
 - **Exceptions:**
@@ -480,7 +487,7 @@ Giai đoạn 4 của AI Leave Coordinator. AI giúp người duyệt hiểu tác
 
 Giai đoạn 1 và 2 của AI Report Analyst, chạy nền. Bước 1 tới 3 là lớp rule của M5; bước 4 tới 6 có từ M6.
 
-- **Actor:** Thời gian · **Stories:** US-090, US-091, US-092, US-096, US-097
+- **Actor:** Thời gian · **Stories:** US-090, US-091, US-092, US-096, US-097, US-120
 - **Trigger:** Lịch hằng đêm; HR chốt bảng công, chốt lại bảng công hoặc chốt bảng lương (BR-172).
 - **Preconditions:** Có dữ liệu của M1 tới M4 cho kỳ cần tính.
 - **Main flow:**

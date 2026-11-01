@@ -188,11 +188,12 @@ flowchart LR
 ```
 
 - **Nhập chấm công:** HR mở SCR-027, tải file, xem kết quả kiểm từng dòng rồi xác nhận. Công được tính lại và hiện ở
-  SCR-028 và SCR-031.
+  SCR-028 và SCR-031. Nhân viên có ngày chưa xử lý mới nhận thông báo ở SCR-003; bấm vào thì mở SCR-028 tại tháng đó
+  (BR-216).
 - **Giải trình và làm thêm:** từ SCR-028, nhân viên bấm Giải trình trên một ngày để mở SCR-029, hoặc bấm Đăng ký làm thêm
   để mở SCR-030. Đơn gửi đi vào SCR-021 của người duyệt.
 - **Chốt bảng công:** cuối tháng, HR mở SCR-032. Nếu còn việc chặn, mỗi việc có đường dẫn tới SCR-021 hoặc tới ngày cần
-  xử lý trên SCR-031. Xử lý xong thì quay lại SCR-032 để chốt.
+  xử lý trên SCR-031, nơi HR ghi công trực tiếp hoặc bấm Nhắc lại (BR-217). Xử lý xong thì quay lại SCR-032 để chốt.
 
 ```mermaid
 flowchart LR
@@ -208,7 +209,10 @@ flowchart LR
 ```
 
 - **Tính lương:** sau khi chốt bảng công, HR mở SCR-037, chọn tháng và bấm Tính lương. Bảng lương hiện ở trạng thái Nháp
-  kèm danh sách lỗi và cảnh báo. Lỗi thiếu bản ghi lương có đường dẫn tới tab Lương của SCR-008.
+  kèm danh sách lỗi và cảnh báo. Lỗi thiếu bản ghi lương và cảnh báo dưới mức sàn có đường dẫn tới tab Lương của
+  SCR-008.
+- **Lương tối thiểu vùng đổi:** HR thêm giá trị mới ở SCR-034; khối Bản ghi lương dưới mức sàn liệt kê người cần điều
+  chỉnh, mỗi dòng mở SCR-035 (BR-219).
 - **Điều chỉnh:** HR bấm một dòng của SCR-037 để mở SCR-038, thêm khoản điều chỉnh, rồi quay lại. Phiếu được tính lại
   ngay.
 - **Chốt lương:** khi không còn lỗi, HR bấm Chốt ở SCR-037. Nhân viên nhận thông báo và thấy phiếu ở SCR-039.
@@ -278,12 +282,16 @@ flowchart LR
 ### SCR-003: Trang chủ
 
 - **Purpose:** điểm bắt đầu sau khi đăng nhập · **Stories:** US-001, US-016, US-034, US-092, US-094, US-095, US-104,
-  US-105
+  US-105, US-114, US-116, US-117
 - **Content and actions:** lối tắt tới các mục trong menu theo vai trò; số dư phép của mình; danh sách thông báo kèm số
   thông báo chưa đọc. Quản lý và HR thấy số đơn đang chờ mình duyệt. HR thấy thêm số hợp đồng sắp hết hạn và số hồ sơ
   chưa có hợp đồng. Bấm vào mỗi con số để mở danh sách tương ứng. Với Quản lý và HR, danh sách thông báo gồm cả thông báo
   tín hiệu mức Cao, nhắc theo dõi và tóm tắt tuần; bấm một dòng để mở SCR-048 (BR-177, BR-180, BR-181). Người hỏi nhận
   thông báo khi HR trả lời câu hỏi; HR nhận nhắc câu hỏi chờ lâu; bấm vào thì mở SCR-051 (BR-195, BR-196).
+- **Thông báo:** mới nhất ở đầu danh sách. Bấm một thông báo thì mở đối tượng liên quan và thông báo được tính là đã đọc
+  (BR-213). Thông báo về đơn nghỉ, đơn làm thêm và giải trình mở SCR-021 với người duyệt, SCR-019 hoặc SCR-028 với người
+  gửi (BR-066, BR-214, BR-215). Thông báo ngày chưa xử lý mở SCR-028 tại tháng đó (BR-216, BR-217); khi HR đã đặt hạn
+  chốt công, thông báo về chấm công ghi kèm hạn (BR-218).
 - **AI (M6):** cập nhật theo dõi và tóm tắt tuần là đoạn ngắn do AI viết, có nhãn AI; AI lỗi thì dùng nội dung mẫu
   (BR-191).
 
@@ -314,10 +322,11 @@ flowchart LR
 
 ### SCR-007: Danh sách nhân viên
 
-- **Purpose:** tìm nhân viên để xem hoặc thao tác · **Stories:** US-018, US-020
+- **Purpose:** tìm nhân viên để xem hoặc thao tác · **Stories:** US-018, US-020, US-120
 - **Content and actions:** bảng gồm mã, họ tên, phòng ban, chức danh, trạng thái. Có ô tìm, bộ lọc phòng ban kèm lựa chọn
   gồm phòng ban con, chức danh, trạng thái, loại hợp đồng, và phân trang kèm tổng số. HR có thêm nút Tiếp nhận và Nhập từ
-  bảng tính. Quản lý chỉ thấy nhân viên trong phạm vi và không có nút thao tác.
+  bảng tính, và bộ lọc Thiếu dữ liệu tính lương theo loại dữ liệu (BR-221). Quản lý chỉ thấy nhân viên trong phạm vi và
+  không có nút thao tác.
 
 ### SCR-008: Chi tiết nhân viên
 
@@ -435,7 +444,7 @@ flowchart LR
 ### SCR-019: Nghỉ phép của tôi
 
 - **Purpose:** biết mình còn bao nhiêu phép và theo dõi đơn của mình · **Stories:** US-022, US-024, US-030, US-031,
-  US-079, US-080, US-085, US-086, US-110
+  US-079, US-080, US-085, US-086, US-098, US-110
 - **Content and actions:** ba khối. Khối số dư: số phép hiện tại, phép tồn kèm hạn dùng, số ngày của các đơn đang chờ.
   Khối đơn của tôi: danh sách đơn với loại, ngày, số ngày, trạng thái; nút Hủy với đơn được hủy theo BR-061; nút Đổi
   đơn mở SCR-020 với dữ liệu của đơn (BR-152). Đơn ở trạng thái Chờ phản hồi hiện khoảng ngày và lời nhắn của người
@@ -448,7 +457,7 @@ flowchart LR
 ### SCR-020: Gửi đơn nghỉ
 
 - **Purpose:** tạo hoặc đổi đơn nghỉ · **Stories:** US-023, US-033, US-074, US-075, US-076, US-080, US-081, US-082,
-  US-083, US-084, US-110 · **Use case:** UC-005, UC-013, UC-019
+  US-083, US-084, US-110, US-115 · **Use case:** UC-005, UC-013, UC-019
 - **Content and actions:** form gồm các trường dưới. Khi nhập, form hiện ngay số ngày nghỉ, người duyệt, và với phép năm
   thì hiện số phép còn lại sau đơn. Form hiện cảnh báo khi đơn làm nhóm thiếu người (BR-146) hoặc thuộc giai đoạn hạn
   chế (BR-147). Nút Thêm đơn liền kề để gửi nhiều đơn trong một lần (BR-153). HR mở form từ hồ sơ của nhân viên thì có
@@ -456,7 +465,8 @@ flowchart LR
 - **Chế độ Đổi đơn:** mở từ nút Đổi đơn của SCR-019, hoặc từ phương án đổi do AI Leave Coordinator đề xuất, kể cả khi
   bắt đầu từ chat. Đầu form hiện đơn gốc gồm ngày, buổi, loại nghỉ, số ngày và trạng thái, cạnh giá trị mới, kèm câu "Đơn
   cũ sẽ bị hủy và đơn mới chờ duyệt lại."; đơn gốc đã duyệt thì ghi thêm "Nếu đơn mới bị từ chối, các ngày của đơn cũ
-  không còn được duyệt.". Nút xác nhận là Xác nhận đổi đơn; đơn chỉ đổi khi nhân viên bấm nút này (BR-152, BR-207).
+  không còn được duyệt.". Nút Thêm đơn liền kề cũng có ở chế độ này, để đổi một đơn thành nhiều đơn (BR-153). Nút xác
+  nhận là Xác nhận đổi đơn; đơn chỉ đổi khi nhân viên bấm nút này (BR-152, BR-207).
 - **AI (M6):** ô "Mô tả nhu cầu nghỉ" ở đầu form; AI điền các trường, mỗi trường AI điền có nhãn AI gợi ý (BR-166).
   Khối Gợi ý của AI hiện câu hỏi làm rõ, cảnh báo mô tả không khớp lý do (BR-167), và tối đa `leave_option_count`
   phương án kèm hệ quả (BR-168). Chọn một phương án thì form điền theo phương án đó. Đơn chỉ được gửi khi nhân viên bấm
@@ -479,17 +489,17 @@ flowchart LR
 
 ### SCR-021: Đơn chờ duyệt
 
-- **Purpose:** duyệt mọi loại đơn · **Stories:** US-025, US-026, US-043, US-045, US-075, US-076, US-077, US-078, US-079,
-  US-088, US-089 · **Use case:** UC-005, UC-008, UC-015
+- **Purpose:** duyệt mọi loại đơn · **Stories:** US-025, US-026, US-034, US-043, US-045, US-075, US-076, US-077, US-078,
+  US-079, US-088, US-089, US-116 · **Use case:** UC-005, UC-008, UC-015
 - **Content and actions:** danh sách đơn đang chờ, có bộ lọc theo loại đơn: đơn nghỉ, đơn làm thêm giờ, giải trình chấm
   công. Mỗi dòng có người gửi, loại đơn, ngày, số ngày hoặc số giờ, ngày gửi; đơn đã qua ngày bắt đầu được đánh dấu quá
-  hạn, đơn chờ quá `approval_reminder_days` ngày làm việc được đánh dấu chờ lâu (BR-148). Quản lý thấy đơn mình là người
-  duyệt, và đơn được giao thêm khi là người duyệt thay, kèm nhãn Người duyệt thay (BR-149); HR thấy mọi đơn và lọc được
-  theo người duyệt. Chi tiết theo loại đơn: đơn nghỉ hiện lý do và mô tả thêm, số phép trước và sau đơn, các đơn đã duyệt
-  khác của nhóm trong cùng khoảng ngày, các buổi dưới ngưỡng kèm mức phủ và tên người nghỉ (BR-146), cờ giai đoạn hạn
-  chế (BR-147); đơn làm thêm hiện số giờ làm thêm đã dùng và còn lại trong tháng và năm; giải trình hiện giờ từ máy và giờ
-  đề nghị. Nút Duyệt, Từ chối và, với đơn nghỉ, Đề nghị đổi ngày. Từ chối mở ô lý do bắt buộc; Đề nghị đổi ngày mở ô
-  khoảng ngày, buổi và lời nhắn (BR-150).
+  hạn, đơn chờ quá `approval_reminder_days` ngày làm việc được đánh dấu chờ lâu (BR-148, BR-215). Quản lý thấy đơn mình
+  là người duyệt, và đơn được giao thêm khi là người duyệt thay, kèm nhãn Người duyệt thay (BR-149); HR thấy mọi đơn và
+  lọc được theo người duyệt. Chi tiết theo loại đơn: đơn nghỉ hiện lý do và mô tả thêm, số phép trước và sau đơn, các
+  đơn đã duyệt khác của nhóm trong cùng khoảng ngày, các buổi dưới ngưỡng kèm mức phủ và tên người nghỉ (BR-146), cờ
+  giai đoạn hạn chế (BR-147); đơn làm thêm hiện số giờ làm thêm đã dùng và còn lại trong tháng và năm; giải trình hiện
+  giờ từ máy và giờ đề nghị. Nút Duyệt, Từ chối và, với đơn nghỉ, Đề nghị đổi ngày. Từ chối mở ô lý do bắt buộc; Đề nghị
+  đổi ngày mở ô khoảng ngày, buổi và lời nhắn (BR-150).
 - **AI (M6):** đơn nghỉ có khối Tóm tắt của AI: tác động của đơn và khoảng ngày thay thế giữ nhóm trên ngưỡng; không có
   gợi ý duyệt hay từ chối (BR-164). Ô lý do từ chối và ô lời nhắn có nút Soạn bằng AI; bản nháp chỉ được gửi khi người
   duyệt bấm (BR-157).
@@ -554,19 +564,21 @@ flowchart LR
 
 ### SCR-027: Nhập file chấm công
 
-- **Purpose:** đưa lượt chấm từ máy vào hệ thống · **Stories:** US-039 · **Use case:** UC-007
+- **Purpose:** đưa lượt chấm từ máy vào hệ thống · **Stories:** US-039, US-117 · **Use case:** UC-007
 - **Content and actions:** ba bước. Bước 1: tải file lên, kèm mô tả các cột bắt buộc. Bước 2: kết quả kiểm gồm số dòng sẽ
-  lưu, số dòng trùng, bảng dòng bị bỏ qua kèm lý do. Bước 3: nút Xác nhận; sau khi lưu, hiện báo cáo nhập. Danh sách các
-  lần nhập trước nằm dưới cùng.
+  lưu, số dòng trùng, bảng dòng bị bỏ qua kèm lý do. Bước 3: nút Xác nhận; sau khi lưu, hiện báo cáo nhập, gồm số nhân
+  viên vừa được báo ngày chưa xử lý (BR-216). Danh sách các lần nhập trước nằm dưới cùng.
 - **States:** file thiếu cột: "File thiếu cột [tên cột]. Kiểm tra lại file xuất từ máy chấm công."
 
 ### SCR-028: Bảng công của tôi
 
-- **Purpose:** xem công từng ngày và tổng hợp tháng · **Stories:** US-040, US-041, US-042, US-044
-- **Content and actions:** ô chọn tháng; trạng thái kỳ công (Đang mở hoặc Đã chốt); bảng mỗi ngày một dòng với ca, giờ
+- **Purpose:** xem công từng ngày và tổng hợp tháng · **Stories:** US-040, US-041, US-042, US-044, US-116, US-117,
+  US-118
+- **Content and actions:** ô chọn tháng; trạng thái kỳ công (Đang mở hoặc Đã chốt), kèm hạn chốt công khi HR đã đặt
+  (BR-218); bảng mỗi ngày một dòng với ca, giờ
   vào, giờ ra, đi muộn, về sớm, trạng thái, giờ làm thêm; phần tổng hợp theo BR-092. Ngày Thiếu chấm công hoặc Vắng chưa
   xử lý có nút Giải trình mở SCR-029. Nút Đăng ký làm thêm mở SCR-030. Danh sách đơn làm thêm và giải trình của tháng kèm
-  trạng thái, có nút Hủy với đơn được hủy.
+  trạng thái, có nút Hủy với đơn được hủy. Mở từ thông báo thì màn hình tới đúng tháng và tô các ngày được nhắc tới.
 
 ### SCR-029: Gửi giải trình chấm công
 
@@ -597,18 +609,25 @@ flowchart LR
 
 ### SCR-031: Bảng công của nhóm
 
-- **Purpose:** xem và xử lý bảng công của nhiều người · **Stories:** US-046, US-047, US-049
+- **Purpose:** xem và xử lý bảng công của nhiều người · **Stories:** US-046, US-047, US-049, US-117
 - **Content and actions:** ô chọn tháng; bộ lọc phòng ban trong phạm vi và bộ lọc chỉ hiện ngày cần xử lý. Bảng mỗi
   nhân viên một dòng, mỗi ngày một cột, ô ghi trạng thái ngắn gọn; ô bất thường hoặc được đánh dấu được tô nổi bật; các
   cột cuối là tổng hợp theo BR-092. Bấm một ô để xem chi tiết ngày. HR có thêm thao tác ghi công cho ngày Thiếu chấm công
-  hoặc Vắng chưa xử lý (BR-082) và nút Xuất bảng tính. Quản lý chỉ xem.
+  hoặc Vắng chưa xử lý (BR-082), nút Nhắc lại cho các nhân viên đã chọn còn ngày chưa xử lý (BR-217), và nút Xuất bảng
+  tính. Quản lý chỉ xem.
 
 ### SCR-032: Chốt bảng công
 
-- **Purpose:** chốt hoặc mở lại kỳ công · **Stories:** US-048 · **Use case:** UC-009
+- **Purpose:** chốt hoặc mở lại kỳ công · **Stories:** US-048, US-118 · **Use case:** UC-009
 - **Content and actions:** ô chọn tháng và trạng thái kỳ công. Khi Đang mở: danh sách việc còn chặn theo BR-089, mỗi
   việc có đường dẫn tới chỗ xử lý; nút Chốt chỉ bật khi danh sách trống. Khi Đã chốt: người chốt, thời điểm chốt, nút Mở
-  lại có ô lý do bắt buộc; nút này tắt nếu bảng lương của tháng đã chốt (BR-091).
+  lại có ô lý do bắt buộc; nút này tắt nếu bảng lương của tháng đã chốt (BR-091). Phần Hạn chốt công hằng tháng là ô
+  ngày của tháng sau, để trống được (BR-218).
+- **Inputs:**
+
+  | Field | Required | Rule | Message when invalid |
+  |---|---|---|---|
+  | Hạn chốt công | Không | Từ 1 tới 28 (BR-218) | Chọn ngày từ 1 tới 28. |
 
 ### SCR-033: Loại phụ cấp
 
@@ -626,10 +645,12 @@ flowchart LR
 
 ### SCR-034: Tham số lương
 
-- **Purpose:** cập nhật giá trị luật định theo ngày hiệu lực · **Stories:** US-054
+- **Purpose:** cập nhật giá trị luật định theo ngày hiệu lực · **Stories:** US-054, US-119
 - **Content and actions:** danh sách tham số lương; mỗi tham số hiện giá trị đang hiệu lực, giá trị sắp tới và lịch sử
   các giá trị cũ. Thao tác Thêm giá trị mới; giá trị chưa dùng ở bảng lương đã chốt thì sửa hoặc xóa được. Biểu thuế
-  nhập thành bảng các bậc.
+  nhập thành bảng các bậc. Sau khi lưu giá trị của lương tối thiểu vùng, khối Bản ghi lương dưới mức sàn liệt kê nhân
+  viên, khoảng ngày, trường bị thấp và mức chênh; bấm một dòng mở SCR-035 của nhân viên đó. Khối này còn hiện tới khi
+  không còn dòng nào (BR-219).
 - **Inputs:**
 
   | Field | Required | Rule | Message when invalid |
@@ -642,7 +663,7 @@ flowchart LR
 
 ### SCR-035: Thay đổi lương
 
-- **Purpose:** ghi bản ghi lương mới · **Stories:** US-051 · **Use case:** UC-011
+- **Purpose:** ghi bản ghi lương mới · **Stories:** US-051, US-119 · **Use case:** UC-011
 - **Content and actions:** hộp thoại mở từ tab Lương của SCR-008. Có bước xem trước bản ghi trước và sau thay đổi. Ngày
   hiệu lực thuộc tháng có bảng lương đã chốt thì bước xem trước hiện chênh lệch của từng tháng (BR-098).
 - **Inputs:**
@@ -672,9 +693,10 @@ flowchart LR
 
 ### SCR-037: Bảng lương
 
-- **Purpose:** tính, kiểm và chốt lương tháng · **Stories:** US-055, US-060, US-063 · **Use case:** UC-010
+- **Purpose:** tính, kiểm và chốt lương tháng · **Stories:** US-055, US-060, US-063, US-119 · **Use case:** UC-010
 - **Content and actions:** ô chọn tháng; trạng thái bảng lương (Chưa tính, Nháp, Cần tính lại, Đã chốt) và trạng thái bảng
-  công của tháng. Khu lỗi và cảnh báo, mỗi mục có đường dẫn tới chỗ xử lý. Bảng mỗi nhân viên một dòng: công chuẩn, công
+  công của tháng. Khu lỗi và cảnh báo, mỗi mục có đường dẫn tới chỗ xử lý; cảnh báo gồm cả phiếu dưới lương tối thiểu
+  vùng (BR-220). Bảng mỗi nhân viên một dòng: công chuẩn, công
   hưởng lương, tổng thu nhập, bảo hiểm nhân viên đóng, thuế, điều chỉnh, thực lĩnh, phần công ty đóng; dòng tổng ở cuối.
   Bấm một dòng mở SCR-038. Nút Tính lương hoặc Tính lại, nút Chốt, nút Xuất bảng lương, nút Xuất danh sách chuyển khoản.
 - **States:**
@@ -722,7 +744,7 @@ tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đ�
 ### SCR-040: Tổng quan báo cáo
 
 - **Purpose:** xem nhanh tình hình nhân sự, điều đáng chú ý và mở các báo cáo · **Stories:** US-064, US-070, US-090,
-  US-093, US-096, US-097 · **Use case:** UC-017
+  US-093, US-096, US-097, US-120 · **Use case:** UC-017
 - **Content and actions:** các thẻ số theo phạm vi: nhân viên đang làm, vào mới và nghỉ việc trong tháng, người đang nghỉ
   hôm nay, đơn chờ mình duyệt. HR thấy thêm hợp đồng sắp hết hạn, ngày chưa xử lý của tháng đang mở, trạng thái bảng công
   và bảng lương tháng trước. Bấm một thẻ số để mở danh sách chi tiết (BR-137).
@@ -800,15 +822,16 @@ tính có nhãn "Tạm tính" ở đầu báo cáo. Mỗi màn hình dưới đ�
 ### SCR-048: Chi tiết tín hiệu
 
 - **Purpose:** hiểu một điều đáng chú ý và làm việc tiếp theo · **Stories:** US-091, US-093, US-094, US-097, US-098,
-  US-099 · **Use case:** UC-017
+  US-099, US-120 · **Use case:** UC-017
 - **Content and actions:** tên tín hiệu, phòng ban, kỳ, mức độ và thời điểm tính. Bảng phân rã theo các thành phần ở mục
   Default signal types của [domain](domain.md#default-signal-types), kèm so với kỳ trước và cùng kỳ năm trước (BR-176).
   Quản lý chỉ thấy chỉ số và chiều có trong báo cáo của mình. Nút Mở báo cáo mở báo cáo tương ứng với kỳ và phòng ban
   đã lọc sẵn. Nút Theo dõi hoặc Bỏ theo dõi, Đóng, Hữu ích, Không hữu ích (BR-178, BR-180). Tín hiệu đang được theo dõi
   hiện số liệu lúc bắt đầu theo dõi và hiện tại.
-- **AI (M6):** với insight, đầu trang là tiêu đề và giải thích của AI, rồi danh sách tín hiệu nguồn, mỗi tín hiệu có bảng
-  phân rã riêng (BR-187). Với loại tín hiệu có việc nhắc, khối Thẻ nhắc nhóm hiện số người nhận do core chọn và nội dung
-  do AI soạn; người xem sửa nội dung rồi bấm Gửi (BR-190). Cập nhật theo dõi do AI viết hiện trên phần theo dõi (BR-191).
+- **AI (M6):** với insight, đầu trang là tiêu đề và giải thích của AI, rồi danh sách tín hiệu nguồn, mỗi tín hiệu có
+  bảng phân rã riêng (BR-187). Với loại tín hiệu có việc nhắc, khối Thẻ nhắc nhóm hiện số người nhận do core chọn, số
+  người bị bỏ vì vừa nhận gợi ý hay tin nhắc cùng loại, và nội dung do AI soạn; người xem sửa nội dung rồi bấm Gửi
+  (BR-190). Cập nhật theo dõi do AI viết hiện trên phần theo dõi (BR-191).
 - **States:**
   - Bảng công của tháng tín hiệu dùng đang mở lại: "Số liệu của tháng này đang được sửa và sẽ được tính lại khi bảng
     công được chốt." (BR-179)
