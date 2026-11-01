@@ -82,7 +82,7 @@ Mọi dữ liệu là giả theo brief: không tên, số CCCD, tài khoản ng�
 |---|---|---|
 | Công ty Mẫu, phòng ban gốc | 1, giám đốc | Phạm vi của Giám đốc |
 | Kinh doanh | 15 | Phạm vi của Lê Văn Hùng; tín hiệu nghỉ việc tăng như US-090 AC1; ngưỡng nhân sự riêng 70% (US-075 AC4) |
-| Kho vận | 10 | Hai tín hiệu cùng kỳ: làm thêm gần giới hạn, vắng không lý do hoặc đi muộn tăng. Không có nghỉ việc tăng, để tỷ lệ nghỉ việc cả công ty giữ khoảng 8% như US-090 AC1 |
+| Kho vận | 10 | Ba tín hiệu cùng kỳ: chi phí lương đổi lớn, làm thêm gần giới hạn, vắng không lý do hoặc đi muộn tăng. Không có nghỉ việc tăng, để tỷ lệ nghỉ việc cả công ty giữ ở 7,1%, gần 8% của US-090 AC1 |
 | Kỹ thuật | 8 | Phòng ban bình thường để so sánh |
 | Kế toán | 4 | |
 | Hành chính – Nhân sự | 3 | Phòng của HR |
@@ -101,9 +101,9 @@ Mọi dữ liệu là giả theo brief: không tên, số CCCD, tài khoản ng�
   `peak_planning_days` ngày tới giai đoạn này (BR-171).
 - **Side point 12/11/2026,** chỉ cho bảng lương: bảng công tháng 10 đã chốt; bảng lương tháng 10 ở trạng thái Nháp, có
   phiếu lỗi và cảnh báo. Sau khi HR sửa một bản ghi lương, bảng lương sang Cần tính lại.
-- **Side point 2/3/2027,** chỉ cho phép tồn: `carryover_expiry` là 31/3 nên gợi ý dùng phép tồn (BR-170) và tín hiệu
-  Phép tồn sắp hết hạn bắt đầu từ 1/3. Ngày 2/3 các gợi ý vừa gửi còn trong `reminder_quiet_days`, nên thẻ nhắc thấy
-  được người bị bỏ qua (EC-141).
+- **Side point 2/3/2027 và 9/3/2027,** chỉ cho phép tồn: `carryover_expiry` là 31/3 nên gợi ý dùng phép tồn
+  (BR-170) và tín hiệu Phép tồn sắp hết hạn bắt đầu từ 1/3. Ngày 2/3 các gợi ý vừa gửi còn trong `reminder_quiet_days`,
+  nên thẻ nhắc thấy được người bị bỏ qua (EC-141). Ngày 9/3 đã qua thời hạn đó, nên thẻ nhắc gửi được.
 
 **Situations** cần dựng sẵn trong dữ liệu. Số liệu khớp ví dụ trong AC khi mốc thời gian cho phép.
 
@@ -125,9 +125,9 @@ Mọi dữ liệu là giả theo brief: không tên, số CCCD, tài khoản ng�
 | 14 | Phiếu lương tháng 9 của Mai có khoản truy lĩnh; so với tháng 8 | US-061, US-106 | SCR-038, SCR-039 |
 | 15 | Lương tối thiểu vùng I tăng từ 01/01/2027; 2 bản ghi lương thấp hơn mức mới | US-119 AC1, AC2 | SCR-034, SCR-035 |
 | 16 | Phòng Kinh doanh có 3 trên 15 người nghỉ việc trong 3 tháng; Hùng theo dõi tín hiệu từ 26/10 và hôm nay nhận cập nhật | US-090 AC1, US-094 AC2, US-099 AC1 | SCR-040, SCR-048, SCR-003 |
-| 17 | Chi phí lương tháng 9 đổi lớn so với tháng 8, có phân rã và so với tháng 9/2025 | US-091 AC1, US-097 AC1 | SCR-048 |
+| 17 | Chi phí lương tháng 9 của phòng Kho vận tăng mạnh so với tháng 8, có phân rã và so với tháng 9/2025 | US-091 AC1, US-097 AC1 | SCR-048 |
 | 18 | Quân xem chi phí lương: phòng Pháp chế 2 người được gộp vào phòng ban gốc | BR-129 | SCR-045 |
-| 19 | Side point 2/3/2027: phòng Kinh doanh còn phép tồn sắp hết hạn; Hùng gửi thẻ nhắc | US-086, US-098, EC-141 | SCR-019, SCR-048 |
+| 19 | Side point 2/3 và 9/3/2027: phòng Kinh doanh còn phép tồn sắp hết hạn; Hùng gửi thẻ nhắc | US-086, US-098, EC-141 | SCR-019, SCR-048 |
 | 20 | Một câu hỏi gửi HR chờ 3 ngày làm việc | US-104, US-105 AC2, BR-196 | SCR-003, SCR-051 |
 | 21 | Hỏi quy chế qua chat: một câu có nguồn; một câu không có nguồn, được chuyển cho HR kèm tóm tắt | US-107, US-112, EC-117 | SCR-052, SCR-049, SCR-051 |
 
