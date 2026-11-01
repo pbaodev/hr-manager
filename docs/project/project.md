@@ -31,7 +31,7 @@
 | Milestone | Target date | Scope |
 |---|---|---|
 | Baseline | — | Phase 1–3: phân tích chi tiết M1–M6, prototype, rồi thiết kế kiến trúc, dữ liệu, API và giao diện |
-| Prototype | — | UI prototype dùng dữ liệu giả, có design system, gồm màn hình của ba tính năng AI; nằm trong Baseline, trước Phase 3 |
+| Prototype | — | UI prototype dùng dữ liệu giả, có design system, gồm màn hình của ba tính năng AI; nằm trong Baseline, trước Phase 3. Kế hoạch ở [prototype](../design/prototype.md) |
 | v1.0 | — | Bản phát hành đầu tiên cho công ty: mọi story của M1–M6 |
 | M1 | — | Walking skeleton: đăng nhập, vai trò, hồ sơ nhân viên, cơ cấu tổ chức; chạy trên staging. Gồm thư viện quy chế và hộp câu hỏi gửi HR mà AI HR Assistant dựa vào (US-101 tới US-105) |
 | M2 | — | Nghỉ phép, gồm phần rule mà AI Leave Coordinator dựa vào (US-073 tới US-081) |
@@ -52,6 +52,7 @@
 | AI phản biện bằng Codex | `/codex:adversarial-review --base main "[câu hỏi phản biện]"`. Chỉ chủ dự án gõ được lệnh; agent không tự gọi Codex để phản biện, kể cả qua `codex:rescue`. Khi nào dùng: mục Deviations from default |
 | Diagrams | Mermaid trong Markdown |
 | Hosting | Chưa chọn; chọn ở Phase 3, sau prototype |
+| Prototype | claude.ai: Artifact loại Design cho canvas và Design System cho design system; link ở mục Design sources của [ui](../design/ui.md) |
 | Secrets | `.env` ở local; nơi lưu ở môi trường deploy chọn cùng hosting |
 
 ## Deviations from default
