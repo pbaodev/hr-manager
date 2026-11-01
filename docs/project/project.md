@@ -1,7 +1,7 @@
 # Project: hr-manager
 
 - **Status:** Accepted
-- **Updated:** 2026-10-31
+- **Updated:** 2026-11-01
 
 > Điền ở Phase 0. Default nằm ở [working-agreement.md](../playbook/working-agreement.md), [hats.md](../playbook/hats.md) và
 > [phases.md](../playbook/phases.md); file này chỉ ghi mục tiêu, nhịp làm việc, công cụ và những chỗ làm khác default.
@@ -48,8 +48,8 @@
 | Tracker and board | GitHub Issues + GitHub Projects ([board](https://github.com/users/pbaodev/projects/6)); label và Issue baseline tạo bằng `scripts/bootstrap-github.sh` |
 | Agent access to tracker | `gh` CLI |
 | AI agent | Claude Code, Codex |
-| AI review | Mọi PR, trước khi merge: agent chạy subagent `code-reviewer` của agent-skills; PR tài liệu kèm Analysis checklist hoặc Design review checklist. Agent sửa hết phát hiện Critical, Required và ghi kết quả ở mục Verification của PR |
-| AI phản biện | Codex qua `/codex:adversarial-review --base main "[câu hỏi phản biện]"`; `/codex:review` cho PR code lớn. Chỉ chủ dự án gõ được lệnh; cách dùng ở Deviations from default |
+| AI review | Mọi PR, trước khi merge: agent chạy subagent `agent-skills:code-reviewer`. PR tài liệu phân tích kèm [Analysis checklist](../playbook/analysis.md#analysis-checklist); PR tài liệu thiết kế kèm [Design review checklist](../playbook/design.md#design-review-checklist). Agent sửa hết phát hiện Critical, Required; phát hiện cần quyết định nghiệp vụ hay thiết kế thì hỏi chủ dự án trước khi sửa. Kết quả ghi ở mục Verification của PR. PR do Codex làm thì Claude Code chạy subagent này |
+| AI phản biện bằng Codex | `/codex:adversarial-review --base main "[câu hỏi phản biện]"`. Chỉ chủ dự án gõ được lệnh; agent không tự gọi Codex để phản biện, kể cả qua `codex:rescue`. Khi nào dùng: mục Deviations from default |
 | Diagrams | Mermaid trong Markdown |
 | Hosting | Chưa chọn; chọn ở Phase 3, sau prototype |
 | Secrets | `.env` ở local; nơi lưu ở môi trường deploy chọn cùng hosting |
@@ -61,7 +61,7 @@
 | Phạm vi baseline | Baseline chỉ phân tích đủ cho các milestone đầu; module sau phân tích ở Feature loop ([phases.md](../playbook/phases.md)) | Baseline phân tích chi tiết M1–M6 và thiết kế cho toàn hệ thống | Muốn luyện phân tích và thiết kế toàn hệ thống trước khi code; AI ở M6 cần dữ liệu của cả năm module | 2026-10-29; đổi 2026-10-31 |
 | Prototype trước Design | Sau Analysis là Design: chọn stack, thiết kế, rồi code ([phases.md](../playbook/phases.md)) | Giữa Analysis và Design có bước Prototype: dựng design system và UI prototype dùng dữ liệu giả, chưa viết code. Stack được chọn ở Phase 3, sau khi prototype được duyệt | Thử luồng nghiệp vụ và điểm người xác nhận của AI trên giao diện trước khi chọn công nghệ | 2026-10-31 |
 | Phát hành | Mỗi milestone kết thúc bằng một bản phát hành ([phases.md](../playbook/phases.md)) | M1–M5 qua release gate trên staging nhưng không phát hành cho công ty; bản phát hành đầu tiên là v1.0 gồm M1–M6 | v1.0 phải có đủ nghiệp vụ và AI; release gate vẫn giữ để nghiệp vụ được kiểm đúng trước khi làm AI | 2026-10-31 |
-| AI phản biện | Bắt buộc cho tài liệu chuyển sang `Accepted`, ADR và PR rủi ro cao ([hats.md](../playbook/hats.md)) | Không bắt buộc. Khi gặp các trường hợp đó, agent nhắn đề xuất kèm lệnh Codex và câu hỏi phản biện soạn sẵn; chủ dự án quyết định có chạy không. Không chạy thì ghi ở mục Not verified của PR và dòng Reviewed của tài liệu | Giữ quy trình nhẹ cho một người làm; Codex là model khác nên dành cho chỗ quan trọng, và tốn quota riêng | 2026-11-01 |
+| AI phản biện | Giao AI vai reviewer với câu hỏi cụ thể cho mọi PR; bắt buộc trước khi tài liệu chuyển sang `Accepted`, với ADR và PR rủi ro cao ([hats.md](../playbook/hats.md)) | Mọi PR, kể cả PR chuyển tài liệu sang `Accepted`, qua AI review ở mục Tools. Phản biện thêm bằng Codex, một model khác, không bắt buộc: trước khi merge PR chuyển tài liệu sang `Accepted`, PR có ADR hay PR rủi ro cao, agent hỏi chủ dự án kèm lệnh và câu hỏi soạn sẵn; câu hỏi nêu các file cần đọc toàn bộ, không chỉ diff. Chạy thì ghi kết quả ở mục Verification của PR và dòng Reviewed của tài liệu; không chạy thì ghi ở Not verified và dòng Reviewed | Giữ quy trình nhẹ cho một người làm; Codex dành cho chỗ quan trọng vì dùng quota riêng | 2026-11-01 |
 | Agent đọc secret | Agent không đọc, không sửa secret ([hats.md](../playbook/hats.md)) | Agent được đọc `.env` ở local; vẫn không sửa secret và không chép giá trị secret vào code, test, log, prompt hay PR | Secret hiện chỉ là giá trị dev ở local; xem lại khi có production | 2026-10-29 |
 
 ## Retro log
