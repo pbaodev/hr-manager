@@ -82,7 +82,7 @@ Mọi dữ liệu là giả theo brief: không tên, số CCCD, tài khoản ng�
 |---|---|---|
 | Công ty Mẫu, phòng ban gốc | 1, giám đốc | Phạm vi của Giám đốc |
 | Kinh doanh | 15 | Phạm vi của Lê Văn Hùng; tín hiệu nghỉ việc tăng như US-090 AC1; ngưỡng nhân sự riêng 70% (US-075 AC4) |
-| Kho vận | 10 | Hai tín hiệu cùng kỳ: làm thêm gần giới hạn, vắng không lý do hoặc đi muộn tăng. Không có nghỉ việc tăng, để tỷ lệ nghỉ việc cả công ty giữ khoảng 8% như US-090 AC1 |
+| Kho vận | 10 | Ba tín hiệu cùng kỳ: chi phí lương đổi lớn, làm thêm gần giới hạn, vắng không lý do hoặc đi muộn tăng. Không có nghỉ việc tăng, để tỷ lệ nghỉ việc cả công ty giữ ở 7,1%, gần 8% của US-090 AC1 |
 | Kỹ thuật | 8 | Phòng ban bình thường để so sánh |
 | Kế toán | 4 | |
 | Hành chính – Nhân sự | 3 | Phòng của HR |
