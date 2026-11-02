@@ -15,8 +15,8 @@
 
 | Kind | Link | Version or date |
 |---|---|---|
-| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-02, phiên bản 5 |
-| Canvas prototype, Artifact loại Design trên claude.ai, riêng tư | [HR Manager Prototype](https://claude.ai/artifact/Dab3WjsfCMeWuE65pHN93S) | 2026-11-02, phiên bản 14: 5 màn AI của #68 |
+| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-02, phiên bản 9: thêm component chat và cỡ điện thoại ở #68 |
+| Canvas prototype, Artifact loại Design trên claude.ai, riêng tư | [HR Manager Prototype](https://claude.ai/artifact/Dab3WjsfCMeWuE65pHN93S) | 2026-11-02, phiên bản 17: 5 màn AI của #68 |
 | *Mockup* | *[link]* | *[YYYY-MM-DD]* |
 | *Component library* | *[tên thư viện, dẫn ADR nếu ảnh hưởng tới kiến trúc]* | *[version]* |
 
