@@ -15,7 +15,7 @@
 
 | Kind | Link | Version or date |
 |---|---|---|
-| *Wireframe* | *[link]* | *[YYYY-MM-DD]* |
+| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-02, phiên bản 5 |
 | *Mockup* | *[link]* | *[YYYY-MM-DD]* |
 | *Component library* | *[tên thư viện, dẫn ADR nếu ảnh hưởng tới kiến trúc]* | *[version]* |
 
