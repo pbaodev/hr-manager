@@ -1,127 +1,137 @@
 # HR Manager
 
-Phần mềm quản lý nhân sự trên web cho doanh nghiệp nhỏ và vừa ở Việt Nam: hồ sơ, nghỉ phép, chấm công, lương và báo
-cáo ở cùng một chỗ.
+Web-based HR software for small and medium-sized businesses in Vietnam. Employee records, leave, attendance, payroll
+and reports in one place.
 
-> **Trạng thái:** đã xong phân tích yêu cầu, đang làm prototype ([#52](https://github.com/pbaodev/hr-manager/issues/52)),
-> chưa có code. Cập nhật 2026-11-03.
+> **Status:** requirements analysis is done and the prototype is in progress
+> ([#52](https://github.com/pbaodev/hr-manager/issues/52)). There is no code yet. Updated 2026-11-03.
+>
+> The detailed documentation in [docs/](docs/README.md) is written in Vietnamese.
 
 ## Project Overview
 
 ### Problem
 
-Công tác quản lý nhân sự tại các doanh nghiệp nhỏ còn một số khó khăn:
+HR work in small companies runs into a few recurring problems:
 
-- Đơn nghỉ phép được gửi qua Zalo và duyệt bằng trao đổi trực tiếp, khó theo dõi trạng thái đơn và số ngày phép còn lại.
-- HR tổng hợp công từ tin nhắn và tính lương trên nhiều file Excel, mất thời gian đối chiếu và dễ sai sót.
-- Các câu hỏi về quy chế, ngày phép và phiếu lương lặp lại thường xuyên, HR phải trả lời từng người.
-- Nhân viên chưa rõ cách chọn loại nghỉ phù hợp nên đơn thường phải chỉnh sửa và gửi lại.
-- Quản lý chưa theo dõi báo cáo thường xuyên, dẫn đến chậm phát hiện các vấn đề cần xử lý.
+- Leave requests are sent over Zalo and approved in conversation, so it is hard to track a request's status and how
+  many days of leave are left.
+- HR collects attendance from chat messages and calculates pay across several Excel files, which takes time to
+  reconcile and is error-prone.
+- The same questions about policies, leave and payslips come up again and again, and HR answers each person
+  individually.
+- Employees are not sure which leave type to choose, so requests often have to be corrected and sent again.
+- Managers do not follow reports regularly, so problems are spotted late.
 
 ### Solution
 
-HR Manager tập trung hồ sơ nhân viên, nghỉ phép, chấm công và lương trên một hệ thống. Nhân viên tự gửi đơn và tra cứu
-thông tin; quản lý duyệt đơn; HR tổng hợp công và tính lương theo quy chế công ty và luật lao động.
+HR Manager brings employee records, leave, attendance and payroll into one system. Employees send requests and look
+up their own information; managers approve requests; HR closes timesheets and calculates pay according to company
+policy and labour law.
 
-| Nhóm chức năng | Nội dung |
+| Area | What it covers |
 |---|---|
-| Quản lý nhân sự | Quản lý hồ sơ, nghỉ phép, chấm công và lương; phân quyền xem và thao tác |
-| Tự động hóa | Cộng phép hằng tháng, chuyển phép tồn, nhắc duyệt đơn và cảnh báo phòng ban thiếu người |
-| Hỗ trợ bằng AI | Hỗ trợ tạo đơn nghỉ, phân tích báo cáo và trả lời câu hỏi về quy chế |
+| HR management | Employee records, leave, attendance and payroll; permissions for viewing and actions |
+| Automation | Monthly leave accrual, carried-over leave, approval reminders and alerts when a department is short-staffed |
+| AI support | Help with leave requests, report analysis and answers to policy questions |
 
-| Trợ lý AI | Chức năng |
+| AI assistant | What it does |
 |---|---|
-| AI Leave Coordinator | Soạn đơn từ mô tả của nhân viên, gợi ý loại nghỉ phù hợp và giúp quản lý kiểm tra nhân sự còn lại trước khi duyệt |
-| AI Report Analyst | Chỉ ra các điểm đáng chú ý trong báo cáo và giải thích số liệu |
-| AI HR Assistant | Trả lời câu hỏi về quy chế kèm nguồn tham khảo; chuyển cho HR khi không có nguồn phù hợp |
+| AI Leave Coordinator | Drafts a request from the employee's description, suggests the right leave type and helps the manager check staffing before approving |
+| AI Report Analyst | Points out what stands out in a report and explains the numbers |
+| AI HR Assistant | Answers policy questions with sources; hands the question to HR when no source fits |
 
-AI chỉ đưa ra gợi ý; mọi thay đổi dữ liệu đều cần người dùng xác nhận. Các thông tin như số CCCD, tài khoản ngân hàng,
-mã số thuế và mã số BHXH không được gửi cho AI. Hệ thống vẫn đáp ứng đầy đủ nghiệp vụ khi tắt AI.
+AI only makes suggestions; every change to data needs the user's confirmation. ID card numbers, bank accounts, tax
+codes and social insurance numbers are never sent to the AI. The system still covers every business task with AI
+turned off.
 
-Chi tiết ở [brief](docs/project/brief.md#solution) và BR-155 tới BR-165 trong [domain](docs/analysis/domain.md).
+Details are in the [brief](docs/project/brief.md#solution) and BR-155 to BR-165 in [domain](docs/analysis/domain.md).
 
 ### Target users
 
-| Vai trò | Dùng để |
+| Role | Uses it to |
 |---|---|
-| Nhân viên | Gửi đơn nghỉ, giải trình, đăng ký làm thêm; xem số phép, bảng công, phiếu lương; hỏi quy chế |
-| Quản lý | Trưởng phòng ban. Duyệt đơn, xem hồ sơ, lịch nghỉ, bảng công và báo cáo của phòng mình và các phòng con |
-| HR | Quản lý hồ sơ, hợp đồng, phòng ban, tài khoản; chốt bảng công; tính lương; trả lời câu hỏi |
+| Employee | Send leave requests, attendance corrections and overtime requests; see their leave balance, timesheet and payslips; ask about policies |
+| Manager | Department heads. Approve requests; see records, team leave calendar, timesheets and reports for their department and its sub-departments |
+| HR | Manage employee records, contracts, departments and accounts; close timesheets; run payroll; answer questions |
 
-Giám đốc dùng vai trò Quản lý với phạm vi toàn công ty. Quyền từng thao tác ở
+The director uses the Manager role with the whole company in scope. Permissions for each action are in the
 [permission matrix](docs/analysis/requirements.md#permission-matrix).
 
 ## Product Mind Map
 
-![Product mind map của HR Manager](docs/design/product-mindmap-vi.png)
+![HR Manager product mind map](docs/design/product-mindmap-en.png)
 
-[Bản tiếng Anh](docs/design/product-mindmap-en.png) · [dàn ý Xmind](docs/design/product-mindmap.md)
+[Vietnamese version](docs/design/product-mindmap-vi.png) · [Xmind outline](docs/design/product-mindmap.md)
 
 ## Key Features
 
-v1.0 là bản đầu tiên giao cho công ty, gồm cả sáu milestone, làm theo thứ tự. AI làm sau cùng, khi nghiệp vụ đã chạy
-đúng.
+v1.0 is the first release delivered to the company. It includes all six milestones, built in order. AI comes last, once
+the business features work correctly.
 
-| Milestone | Tính năng | Story (Must) |
+| Milestone | Features | Stories (Must) |
 |---|---|---|
-| M1 Tổ chức và nhân sự | Tài khoản và vai trò; phòng ban, chức danh, sơ đồ tổ chức; hồ sơ, hợp đồng, thay đổi công tác, nghỉ việc; quy chế, câu hỏi gửi HR; thông báo | 29 (20) |
-| M2 Nghỉ phép | Gửi, đổi, hủy, duyệt đơn; số dư phép; lịch nghỉ của nhóm; cảnh báo thiếu người; tự cộng phép và nhắc duyệt | 24 (18) |
-| M3 Chấm công | Ca làm việc, nhập file máy chấm công, giải trình, làm thêm giờ, chốt bảng công | 17 (14) |
-| M4 Lương và phúc lợi | Lương, phụ cấp, BHXH, thuế TNCN; bảng lương tháng; phiếu lương; file chuyển khoản | 16 (13) |
-| M5 Báo cáo | Trang tổng quan; báo cáo nhân sự, nghỉ phép, công, lương; cảnh báo và tóm tắt tuần | 14 (9) |
+| M1 Organization and people | Accounts and roles; departments, job titles, org chart; employee records, contracts, job changes, departures; policies, questions to HR; notifications | 29 (20) |
+| M2 Leave | Send, change, cancel and approve requests; leave balance; team leave calendar; short-staffing alerts; automatic accrual and approval reminders | 24 (18) |
+| M3 Attendance | Shifts, time-clock file import, attendance corrections, overtime, closing the timesheet | 17 (14) |
+| M4 Payroll and benefits | Salary, allowances, social insurance, personal income tax; monthly payroll; payslips; bank transfer file | 16 (13) |
+| M5 Reports | Overview; workforce, leave, attendance and payroll reports; alerts and weekly summary | 14 (9) |
 | M6 AI | AI Leave Coordinator, AI Report Analyst, AI HR Assistant | 20 (11) |
 
-Tổng 120 story, 85 story `Must`. Danh sách ở [stories](docs/analysis/stories.md#summary).
+120 stories in total, 85 of them `Must`. The full list is in [stories](docs/analysis/stories.md#summary).
 
 ## Tech Stack and Architecture
 
-Chưa chọn. Thiết kế ở Phase 3, sau khi duyệt prototype ([#61](https://github.com/pbaodev/hr-manager/issues/61)).
+Not chosen yet. The stack and architecture are designed in Phase 3, after the prototype is approved
+([#61](https://github.com/pbaodev/hr-manager/issues/61)). Known constraints: a web app that also works on phones,
+AI that can be turned off without losing any business feature, and sensitive personal data that is never sent to the
+AI.
 
 ## Project Structure
 
-Chưa có code. Danh mục tài liệu và trạng thái từng file ở [docs/README.md](docs/README.md).
+There is no code yet. The list of documents and the status of each file are in [docs/README.md](docs/README.md).
 
 ```text
-ARCHITECTURE.md        C4 Context và Container, driver, cross-cutting, threat, deployment; mẫu, điền ở Phase 3
-AGENTS.md              Hướng dẫn cho AI agent
+ARCHITECTURE.md        C4 Context and Container, drivers, cross-cutting concerns, threats, deployment; template, filled in Phase 3
+AGENTS.md              Instructions for AI agents
 contracts/
-  openapi.yaml         Contract API; mẫu, điền ở Phase 3
+  openapi.yaml         API contract; template, filled in Phase 3
 docs/
-  README.md            Index: tài liệu nào trả lời câu hỏi nào, trạng thái ra sao
-  project/             Dự án, bài toán, nghiên cứu, câu hỏi chờ công ty xác nhận
-  analysis/            Requirements, user story, INVEST, luật nghiệp vụ, màn hình
-  design/              Prototype, dữ liệu giả, product mindmap; component, data, API, UI, AI điền ở Phase 3
-  decisions/           ADR
+  README.md            Index: which document answers which question, and its status
+  project/             Project, problem, research, questions waiting for the company
+  analysis/            Requirements, user stories, INVEST, business rules, screens
+  design/              Prototype, mock data, screenshots, product mind map; components, data, API, UI, AI filled in Phase 3
+  decisions/           ADRs
   build/               SPEC, setup, testing, conventions
   operations/          Runbook
-  playbook/            Quy trình làm việc của dự án
-scripts/               Script dựng GitHub
-.github/               Mẫu Issue và PR, CI
+  playbook/            How the project is run
+scripts/               GitHub setup scripts
+.github/               Issue and PR templates, CI
 ```
 
 ## Documentation
 
 ### Requirements
 
-- [Requirements](docs/analysis/requirements.md): 3 vai trò, ma trận quyền, 20 use case, 12 quality attribute.
-- [Domain](docs/analysis/domain.md): 221 luật nghiệp vụ (`BR-xxx`) và 142 edge case (`EC-xxx`).
+- [Requirements](docs/analysis/requirements.md): 3 roles, a permission matrix, 20 use cases, 12 quality attributes.
+- [Domain](docs/analysis/domain.md): 221 business rules (`BR-xxx`) and 142 edge cases (`EC-xxx`).
 
 **Use case diagram**
 
 ```mermaid
 flowchart TB
   HR["HR"]
-  QL["Quản lý"]
-  NV["Nhân viên"]
-  G1(["<b>Tổ chức và nhân sự</b><br/>UC-001 tới UC-004"])
-  G4(["<b>Lương</b><br/>UC-010 tới UC-012"])
+  QL["Manager"]
+  NV["Employee"]
+  G1(["<b>Organization and people</b><br/>UC-001 to UC-004"])
+  G4(["<b>Payroll</b><br/>UC-010 to UC-012"])
   G6(["<b>AI Report Analyst</b><br/>UC-016, UC-017"])
-  G3(["<b>Chấm công</b><br/>UC-007 tới UC-009"])
-  G2(["<b>Nghỉ phép</b><br/>UC-005, UC-006"])
-  G5(["<b>AI Leave Coordinator</b><br/>UC-013 tới UC-015"])
-  G7(["<b>AI HR Assistant</b><br/>UC-018 tới UC-020"])
-  TG["Thời gian"]
-  MCC["Máy chấm công"]
+  G3(["<b>Attendance</b><br/>UC-007 to UC-009"])
+  G2(["<b>Leave</b><br/>UC-005, UC-006"])
+  G5(["<b>AI Leave Coordinator</b><br/>UC-013 to UC-015"])
+  G7(["<b>AI HR Assistant</b><br/>UC-018 to UC-020"])
+  TG["Time"]
+  MCC["Time clock"]
   HR --- G1
   HR --- G4
   HR --- G6
@@ -147,62 +157,78 @@ flowchart TB
   G3 --- MCC
 ```
 
-| Nhóm | Use case |
+| Group | Use cases |
 |---|---|
-| Tổ chức và nhân sự | UC-001 Tiếp nhận nhân viên mới · UC-002 Ghi nhận thay đổi công tác · UC-003 Ghi nhận nghỉ việc · UC-004 Tái cấu trúc phòng ban |
-| Nghỉ phép | UC-005 Gửi và duyệt đơn nghỉ · UC-006 Cộng phép và chuyển phép tồn |
-| Chấm công | UC-007 Nhập file chấm công và tính công · UC-008 Đăng ký và duyệt làm thêm giờ · UC-009 Chốt bảng công tháng |
-| Lương | UC-010 Tính và chốt bảng lương tháng · UC-011 Thay đổi lương của nhân viên · UC-012 Xem báo cáo chi phí lương |
-| AI Leave Coordinator | UC-013 Tạo đơn nghỉ với AI · UC-014 Điều phối tình huống của đơn nghỉ · UC-015 Hỗ trợ người duyệt đơn nghỉ |
-| AI Report Analyst | UC-016 Phát hiện tín hiệu và tạo insight · UC-017 Xử lý điều đáng chú ý trên trang tổng quan |
-| AI HR Assistant | UC-018 Hỏi đáp với AI HR Assistant · UC-019 Chuyển ý định từ chat sang workflow nghiệp vụ · UC-020 Gửi câu hỏi cho HR |
+| Organization and people | UC-001 Hire a new employee · UC-002 Record a job change · UC-003 Record a departure · UC-004 Restructure departments |
+| Leave | UC-005 Send and approve leave requests · UC-006 Accrue leave and carry it over |
+| Attendance | UC-007 Import the time-clock file and calculate attendance · UC-008 Request and approve overtime · UC-009 Close the monthly timesheet |
+| Payroll | UC-010 Calculate and close monthly payroll · UC-011 Change an employee's salary · UC-012 View the payroll cost report |
+| AI Leave Coordinator | UC-013 Request leave with AI · UC-014 Coordinate a leave request's situation · UC-015 Support the leave approver |
+| AI Report Analyst | UC-016 Detect signals and create insights · UC-017 Act on what stands out on the overview |
+| AI HR Assistant | UC-018 Ask the AI HR Assistant · UC-019 Move from chat to a business workflow · UC-020 Send a question to HR |
 
-Thời gian là các việc chạy theo lịch, như cộng phép hằng tháng. Actor của từng use case ở
+Time stands for scheduled jobs, such as the monthly leave accrual. The actors of each use case are in
 [requirements](docs/analysis/requirements.md#use-cases).
 
 **User stories INVEST**
 
-85 story `Must` được chấm theo INVEST:
+The 85 `Must` stories were checked against INVEST:
 
-| Criterion | Pass khi | Pass |
+| Criterion | Passes when | Pass |
 |---|---|---|
-| Independent | Không cần story của milestone sau | 85 / 85 |
-| Negotiable | Nói cần gì, không áp cách làm | 85 / 85 |
-| Valuable | Rõ ai được lợi và lợi gì | 85 / 85 |
-| Estimable | Không còn câu hỏi mở chặn story | 82 / 85 |
-| Small | Làm xong trong khoảng 3 ngày công | 74 / 85 |
-| Testable | Mọi acceptance criteria kiểm được | 85 / 85 |
+| Independent | Needs no story from a later milestone | 85 / 85 |
+| Negotiable | Says what is needed, not how to build it | 85 / 85 |
+| Valuable | Says clearly who benefits and how | 85 / 85 |
+| Estimable | No open question blocks the story | 82 / 85 |
+| Small | Can be done in about 3 working days | 74 / 85 |
+| Testable | Every acceptance criterion can be checked | 85 / 85 |
 
-72 story đạt cả sáu tiêu chí; 13 story còn lại đã có Issue xử lý. Kết quả ở [INVEST review](docs/analysis/invest.md),
-đang Draft.
+72 stories pass all six criteria; the other 13 already have Issues to fix them. Results are in the
+[INVEST review](docs/analysis/invest.md), which is still Draft.
 
 ### Information Architecture
 
-52 màn hình, nhóm theo menu. Mỗi người chỉ thấy mục mình có quyền. Sơ đồ đủ 52 màn ở
-[UI flow](docs/analysis/ui-flow.md#information-architecture).
+52 screens, grouped by menu. Each user sees only the items they have permission for. The full map of all 52 screens is
+in [UI flow](docs/analysis/ui-flow.md#information-architecture).
 
 ```mermaid
 flowchart LR
-  HOME["Trang chủ"]
-  HOME --> ME["Hồ sơ của tôi"]
-  HOME --> DIR["Danh bạ, Sơ đồ tổ chức"]
-  HOME --> EMP["Nhân viên<br/>hồ sơ, hợp đồng, tiếp nhận, nghỉ việc"]
-  HOME --> APR["Đơn chờ duyệt"]
-  HOME --> LV["Nghỉ phép<br/>của tôi, gửi đơn, lịch nghỉ nhóm"]
-  HOME --> AT["Chấm công<br/>bảng công, giải trình, làm thêm, chốt công"]
-  HOME --> PY["Lương<br/>phiếu lương, bảng lương"]
-  HOME --> RP["Báo cáo<br/>tổng quan, báo cáo, chi tiết tín hiệu"]
-  HOME --> POL["Quy chế"]
-  HOME --> HQ["Câu hỏi gửi HR"]
-  HOME --> ADM["Quản trị<br/>phòng ban, tài khoản, loại nghỉ, ca, tham số lương"]
-  CHAT["Khung chat AI HR Assistant<br/>mở được từ mọi màn hình"] -.- HOME
+  HOME["Home"]
+  HOME --> ME["My profile"]
+  HOME --> DIR["Directory, Org chart"]
+  HOME --> EMP["Employees<br/>records, contracts, new hire, departure"]
+  HOME --> APR["Approvals"]
+  HOME --> LV["Leave<br/>my leave, request leave, team leave calendar"]
+  HOME --> AT["Attendance<br/>timesheet, corrections, overtime, close timesheet"]
+  HOME --> PY["Pay<br/>payslips, payroll"]
+  HOME --> RP["Reports<br/>overview, reports, signal details"]
+  HOME --> POL["Policies"]
+  HOME --> HQ["Questions to HR"]
+  HOME --> ADM["Admin<br/>departments, accounts, leave types, shifts, payroll settings"]
+  CHAT["AI HR Assistant chat<br/>opens from any screen"] -.- HOME
 ```
 
 ### UI/UX Prototype
 
-<!-- Ảnh prototype: bổ sung sau khi design system và prototype hoàn tất (#52) -->
+The prototype uses mock data from [prototype-data](docs/design/prototype-data.md). Employee screens are drawn for a
+phone; Manager and HR screens for a 1440 px web layout.
 
-Quy trình làm việc ở [playbook](docs/playbook/README.md); hướng dẫn cho AI agent ở [AGENTS.md](AGENTS.md).
+<table>
+<tr>
+<td width="50%"><img src="docs/design/screenshots/scr-003-hr.png" alt="Home for HR: pending approvals, contracts ending soon and notifications"><br><b>Home · HR</b></td>
+<td width="50%"><img src="docs/design/screenshots/scr-021-quan-ly.png" alt="Approvals for a manager, with the AI summary of a leave request"><br><b>Approvals · Manager, with the AI summary</b></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/design/screenshots/scr-040-giam-doc.png" alt="Reports overview for the director, with AI insights"><br><b>Reports overview · Director, with AI insights</b></td>
+<td width="50%" align="center"><img src="docs/design/screenshots/scr-020-nv.png" alt="Request leave on an employee's phone, filled in by the AI Leave Coordinator" width="220"><br><b>Request leave · Employee phone, with AI</b></td>
+</tr>
+</table>
+
+Every screen drawn so far is in [docs/design/screenshots/](docs/design/screenshots/). The plan for which screens are
+drawn and how they are reviewed is in [prototype.md](docs/design/prototype.md).
+
+The workflow is described in the [playbook](docs/playbook/README.md); instructions for AI agents are in
+[AGENTS.md](AGENTS.md).
 
 ## License
 
