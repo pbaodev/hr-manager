@@ -18,9 +18,12 @@ này.
 | Canvas prototype | claude.ai, Artifact loại Design | #55, các Task màn hình bổ sung dần |
 | Design system | claude.ai, Artifact loại Design System | #54 |
 | Dữ liệu giả | `docs/design/prototype-data.md` | #53 |
+| Ảnh chụp màn hình | `docs/design/screenshots/` | #74, các Task màn hình bổ sung dần |
 
 - Link của canvas và design system để riêng tư. Link được ghi ở mục Design sources của [ui](ui.md) khi Artifact được
-  tạo. Nguồn của canvas nằm trên claude.ai, có lịch sử phiên bản; repo không giữ bản sao.
+  tạo. Nguồn của canvas nằm trên claude.ai, có lịch sử phiên bản; repo không giữ file `.dc.html`.
+- Mỗi artboard có một ảnh PNG trong `docs/design/screenshots/`, cùng tên với file `.dc.html`, chụp ở tỉ lệ 2x. Task
+  vẽ hoặc sửa artboard thì chụp lại ảnh trong cùng PR.
 - Chữ trên canvas là tiếng Anh, theo mục Formats và Language and terms của [ui](ui.md). Tên người giữ tiếng Việt.
 - Canvas có trang Read first, ghi người dùng mẫu, mốc thời gian và cách đi các luồng. Sau đó là sáu trang M1 tới M6.
 - Mỗi màn hình là một artboard. Màn của vai trò Nhân viên vẽ trong khung điện thoại 402×856 px; màn của Quản lý, HR
