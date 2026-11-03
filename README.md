@@ -10,36 +10,35 @@ cáo ở cùng một chỗ.
 
 ### Problem
 
-Ở công ty mục tiêu:
+Công tác quản lý nhân sự tại các doanh nghiệp nhỏ còn một số khó khăn:
 
-- Nhân viên xin nghỉ qua Zalo, quản lý duyệt miệng. Không ai biết chính xác mỗi người còn bao nhiêu ngày phép.
-- Cuối tháng HR đọc lại tin nhắn để tính công, rồi tính lương trên nhiều file Excel. Công và lương dễ sai.
-- HR trả lời đi trả lời lại cùng một câu hỏi về quy chế, ngày phép và phiếu lương.
-- Nhân viên hay chọn sai loại nghỉ, đơn bị trả lại.
-- Quản lý ít đọc báo cáo nên thấy vấn đề muộn.
-
-Đây là nhận định của chủ dự án, công ty chưa xác nhận. Câu hỏi để kiểm chứng ở [questions](docs/project/questions.md).
+- Đơn nghỉ phép được gửi qua Zalo và duyệt bằng trao đổi trực tiếp, khó theo dõi trạng thái đơn và số ngày phép còn lại.
+- HR tổng hợp công từ tin nhắn và tính lương trên nhiều file Excel, mất thời gian đối chiếu và dễ sai sót.
+- Các câu hỏi về quy chế, ngày phép và phiếu lương lặp lại thường xuyên, HR phải trả lời từng người.
+- Nhân viên chưa rõ cách chọn loại nghỉ phù hợp nên đơn thường phải chỉnh sửa và gửi lại.
+- Quản lý chưa theo dõi báo cáo thường xuyên, dẫn đến chậm phát hiện các vấn đề cần xử lý.
 
 ### Solution
 
-Nhân viên tự gửi đơn nghỉ và xem số phép, bảng công, phiếu lương. Quản lý duyệt đơn trên hệ thống. HR tính công và lương
-từ dữ liệu đã có, theo quy chế công ty và luật lao động.
+HR Manager tập trung hồ sơ nhân viên, nghỉ phép, chấm công và lương trên một hệ thống. Nhân viên tự gửi đơn và tra cứu
+thông tin; quản lý duyệt đơn; HR tổng hợp công và tính lương theo quy chế công ty và luật lao động.
 
-| Phần | Làm gì |
+| Nhóm chức năng | Nội dung |
 |---|---|
-| Nghiệp vụ | Lưu hồ sơ, tính phép, công, lương; kiểm ai được xem và làm gì |
-| Tự động | Cộng phép hằng tháng, chuyển phép tồn, nhắc đơn chờ duyệt, cảnh báo phòng thiếu người |
-| AI | Ba trợ lý ở bảng dưới |
+| Quản lý nhân sự | Quản lý hồ sơ, nghỉ phép, chấm công và lương; phân quyền xem và thao tác |
+| Tự động hóa | Cộng phép hằng tháng, chuyển phép tồn, nhắc duyệt đơn và cảnh báo phòng ban thiếu người |
+| Hỗ trợ bằng AI | Hỗ trợ tạo đơn nghỉ, phân tích báo cáo và trả lời câu hỏi về quy chế |
 
-| Trợ lý AI | Giúp gì |
+| Trợ lý AI | Chức năng |
 |---|---|
-| AI Leave Coordinator | Nhân viên gõ một câu, AI soạn đơn và gợi ý loại nghỉ hợp lệ. Người duyệt thấy nếu duyệt thì phòng còn đủ người không |
-| AI Report Analyst | Chọn ra vài điều đáng chú ý trong báo cáo và giải thích con số |
-| AI HR Assistant | Trả lời câu hỏi về quy chế kèm nguồn; không có nguồn thì chuyển cho HR |
+| AI Leave Coordinator | Soạn đơn từ mô tả của nhân viên, gợi ý loại nghỉ phù hợp và giúp quản lý kiểm tra nhân sự còn lại trước khi duyệt |
+| AI Report Analyst | Chỉ ra các điểm đáng chú ý trong báo cáo và giải thích số liệu |
+| AI HR Assistant | Trả lời câu hỏi về quy chế kèm nguồn tham khảo; chuyển cho HR khi không có nguồn phù hợp |
 
-AI chỉ gợi ý, người bấm xác nhận mới thay đổi dữ liệu. AI không nhận số CCCD, tài khoản ngân hàng, mã số thuế, mã số
-BHXH. Tắt AI thì hệ thống vẫn chạy đủ nghiệp vụ. Chi tiết ở [brief](docs/project/brief.md#solution) và BR-155 tới
-BR-165 trong [domain](docs/analysis/domain.md).
+AI chỉ đưa ra gợi ý; mọi thay đổi dữ liệu đều cần người dùng xác nhận. Các thông tin như số CCCD, tài khoản ngân hàng,
+mã số thuế và mã số BHXH không được gửi cho AI. Hệ thống vẫn đáp ứng đầy đủ nghiệp vụ khi tắt AI.
+
+Chi tiết ở [brief](docs/project/brief.md#solution) và BR-155 tới BR-165 trong [domain](docs/analysis/domain.md).
 
 ### Target users
 
