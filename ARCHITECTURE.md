@@ -1,14 +1,18 @@
-# Architecture: [tên dự án]
+# Architecture: hr-manager
 
-- **Status:** [Draft | Accepted | Superseded]
-- **Updated:** [YYYY-MM-DD]
+- **Status:** Draft
+- **Updated:** 2026-11-03
 - **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
 - **Related:** [requirements](docs/analysis/requirements.md) · [SPEC](docs/build/SPEC.md) · [decisions](docs/decisions/README.md) ·
   [design guide](docs/playbook/design.md)
 
-> Điền ở Phase 3. Trang này giúp người mới và agent nắm hệ thống ở hai mức đầu của C4, Context và Container, cùng các
-> quyết định chi phối toàn hệ thống. Chi tiết từng phần nằm ở `docs/design/`, lý do nằm ở ADR, module nằm ở SPEC. Cách
-> làm từng mục nằm ở design guide. Dòng in nghiêng và sơ đồ mẫu là ví dụ, xóa khi điền.
+> Trang này giúp người mới và agent nắm hệ thống ở hai mức đầu của C4, Context và Container, cùng các quyết định chi
+> phối toàn hệ thống. Chi tiết từng phần nằm ở `docs/design/`, lý do nằm ở ADR, module nằm ở SPEC. Cách làm từng mục
+> nằm ở design guide.
+>
+> Đang làm ở #8, trước khi duyệt prototype (#61) theo lựa chọn của chủ dự án ngày 2026-11-03. Đã điền Context,
+> Architecture drivers, Containers và Constraints. Cross-cutting concerns, Data and trust boundaries, Threats và
+> Deployment điền sau; dòng in nghiêng ở các mục đó vẫn là ví dụ của mẫu.
 
 ## Context
 
@@ -16,46 +20,72 @@ C4 Level 1: hệ thống là một hộp, xung quanh là actor và hệ thống 
 
 ```mermaid
 flowchart LR
-  member["Thành viên<br/>[Person]"] -->|"đặt, hủy lịch"| system["Room Booking<br/>[Software system]"]
-  admin["Quản trị<br/>[Person]"] -->|"quản lý phòng"| system
-  system -->|"đồng bộ lịch đặt"| gcal["Google Calendar<br/>[External system]"]
-  system -->|"gửi thông báo"| mail["Email provider<br/>[External system]"]
+  nv["Nhân viên<br/>[Person]"] -->|"gửi đơn, giải trình, làm thêm; xem phép, công, phiếu lương; hỏi quy chế"| system["HR Manager<br/>[Software system]"]
+  ql["Quản lý<br/>[Person]"] -->|"duyệt đơn; xem hồ sơ, lịch nghỉ, bảng công, báo cáo trong phạm vi"| system
+  hr["HR<br/>[Person]"] -->|"hồ sơ, hợp đồng, cơ cấu, tài khoản, cấu hình; chốt công, tính lương; trả lời câu hỏi"| system
+  clock["Máy chấm công<br/>[External system]"] -.->|"file lượt chấm, HR xuất ra và tải lên"| system
+  system -.->|"file danh sách chuyển khoản, HR tải về"| bank["Ngân hàng<br/>[External system]"]
+  system -->|"dữ kiện đã lọc theo BR-161; nhận gợi ý, câu trả lời"| ai["Dịch vụ AI<br/>[External system]"]
+  timer["Thời gian<br/>[Schedule]"] -->|"cộng phép, nhắc, tính tín hiệu, ngày hiệu lực"| system
 ```
+
+Nét đứt là đường đi qua tay HR: hệ thống không kết nối trực tiếp với máy chấm công hay ngân hàng. Hệ thống không gửi
+email hay tin ngoài; mọi thông báo nằm trong hệ thống (BR-213).
 
 | External system | Used for | Direction | When unavailable |
 |---|---|---|---|
-| *Google Calendar* | *Đưa lịch đặt sang lịch cá nhân* | *Ra* | *Giữ trong hàng đợi, đồng bộ lại sau; đặt phòng vẫn chạy* |
+| Máy chấm công | Lượt chấm công của nhân viên, qua file HR xuất từ máy (UC-007) | Vào, qua HR | HR nhập file khi có; công tính lại sau mỗi lần nhập (BR-216) |
+| Ngân hàng | Trả lương, qua file danh sách chuyển khoản sau khi chốt bảng lương (BR-126) | Ra, qua HR | Không ảnh hưởng hệ thống; HR tải file lên ngân hàng khi được |
+| Dịch vụ AI | Ba tính năng AI của M6: diễn giải câu mô tả nghỉ, viết insight, trả lời câu hỏi | Ra và vào | Nghiệp vụ chạy như khi không có AI: form, rule và nội dung mẫu (BR-162, QA-008) |
+
+Thời gian là actor trong requirements: các việc chạy theo lịch, như cộng phép cuối tháng (BR-049), nhắc duyệt
+(BR-148), tính tín hiệu lúc 0:00 và tóm tắt tuần (BR-181).
 
 ## Architecture drivers
 
-Quality attribute đứng đầu (`H/H`, `H/M` trong requirements) và các ràng buộc quyết định hình dạng kiến trúc. Mỗi driver
-có ít nhất một tactic; tactic khó đảo ngược có ADR.
+Quality attribute `H/H`, `H/M` trong requirements và các ràng buộc trong brief. Mỗi driver có ít nhất một tactic;
+tactic khó đảo ngược có ADR. ADR-0007 tới ADR-0010 đã `Accepted`; ADR-0011 về hosting còn `Proposed`.
 
 | Driver | Tactic | Where | ADR |
 |---|---|---|---|
-| *QA-002 Data integrity: không đặt trùng* | *Exclusion constraint trong DB, không kiểm trùng ở tầng app* | *[data](docs/design/data.md)* | *ADR-0004* |
-| *QA-001 Performance: lịch tuần p95 < 500 ms* | *Index theo phòng và khoảng thời gian; chỉ tải một tuần mỗi lần* | *[data](docs/design/data.md)* | *—* |
-| *Constraint: chi phí < $10 mỗi tháng* | *Một ứng dụng scale-to-zero; DB managed ở gói miễn phí* | *Deployment* | *ADR-0002* |
+| QA-001 Data integrity: hai thao tác đồng thời không làm số dư phép âm, không vượt giới hạn làm thêm, không chốt bảng lương hai lần | Giữ luật trong một transaction cùng DB; khóa dòng số dư hoặc bảng lương khi ghi; constraint trong DB cho invariant đơn giản như số dư không âm | [data](docs/design/data.md) | ADR-0007, ADR-0009 |
+| QA-007 Security (AI): 0 đầu ra ngoài quyền người nhận, 0 thao tác ghi do AI tự làm | AI chỉ đọc qua công cụ chạy với quyền của người dùng; chỉ gửi trường cần cho tác vụ (BR-161, BR-199); AI không có đường ghi, ghi chỉ qua nút của màn hình nghiệp vụ (BR-157, BR-204); kiểm đầu ra trước khi hiện (BR-163) | [ai](docs/design/ai.md) | ADR-0007 |
+| QA-002 Correctness: bảng lương khớp tính tay tới từng đồng | Tính tiền bằng kiểu số thập phân chính xác, làm tròn theo BR-114; logic lương thuần, không phụ thuộc framework, chạy bộ phiếu mẫu ở mọi PR | [components](docs/design/components.md) | ADR-0008 |
+| QA-003 Security: thao tác ngoài quyền bị từ chối ở backend | Kiểm quyền ở backend cho mọi operation theo vai trò và phạm vi phòng ban; test sinh từ ma trận phân quyền | [api](docs/design/api.md) | ADR-0010 |
+| QA-006, QA-010, QA-011 Correctness (AI) | AI là component riêng sau một interface; prompt, model và pipeline có eval chạy khi đổi; core cung cấp dữ kiện và kiểm con số | [ai](docs/design/ai.md) | ADR-0008 |
+| Ràng buộc: nghiệp vụ chạy đủ khi tắt AI (BR-162) | Core không gọi AI trên đường bắt buộc; mỗi chỗ có AI có nội dung mẫu và timeout (QA-008) | [ai](docs/design/ai.md) | — |
+| Ràng buộc: một người làm cùng coding agent, khoảng 6 giờ mỗi ngày | Một codebase, một lần deploy, ít dịch vụ phải vận hành | Containers | ADR-0007, ADR-0011 |
+| Ràng buộc: hạ tầng khoảng $10–25 mỗi tháng (Q-009) | Ít container chạy thường trực; DB managed gói nhỏ có backup | Deployment | ADR-0011 |
+| Ràng buộc: luật Việt Nam về lao động, BHXH, thuế TNCN và bảo vệ dữ liệu cá nhân | Tham số luật nằm trong config có ngày hiệu lực; dữ liệu nhạy cảm theo mục Data and trust boundaries; nơi đặt máy chủ và dịch vụ AI xét theo Q-035 | Data and trust boundaries | ADR-0011 |
+
+QA-004 và QA-012 về performance ở mức `M/M`, không phải driver. Quy mô thiết kế là 300 nhân viên (A-011): một DB và
+một backend là đủ, tính lương và nhập file có thể chạy trong request.
 
 ## Containers
 
-C4 Level 2: những thứ chạy hoặc lưu dữ liệu riêng, và cách chúng giao tiếp.
+C4 Level 2: những thứ chạy hoặc lưu dữ liệu riêng, và cách chúng giao tiếp. Kiểu kiến trúc, stack, DB và cách đăng
+nhập theo ADR-0007 tới ADR-0010; nơi chạy chờ ADR-0011.
 
 ```mermaid
 flowchart LR
-  member["Thành viên"] --> web["web<br/>[SPA]"]
-  web -->|"JSON / HTTPS"| api["api<br/>[HTTP service]"]
-  api --> db[("db<br/>[Postgres]")]
-  api -->|"enqueue"| queue[("queue<br/>[bảng jobs trong db]")]
-  worker["worker<br/>[background jobs]"] --> queue
-  worker --> gcal["Google Calendar"]
-  worker --> mail["Email provider"]
+  user["Nhân viên, Quản lý, HR<br/>[Person]"] -->|"HTTPS"| web["web<br/>[React, TypeScript SPA]"]
+  web -->|"JSON / HTTPS, cookie phiên"| api["api<br/>[Python, FastAPI]"]
+  api -->|"SQL"| db[("db<br/>[PostgreSQL]")]
+  worker["worker<br/>[Python, cùng codebase với api]"] -->|"SQL; đọc hàng đợi job"| db
+  api -->|"HTTPS, dữ kiện đã lọc"| ai["Dịch vụ AI<br/>[External system]"]
+  worker -->|"HTTPS, dữ kiện đã lọc"| ai
 ```
 
 | Container | Responsibility | Tech | Talks to | Detail |
 |---|---|---|---|---|
-| *api* | *Nhận request, giữ luật nghiệp vụ, ghi DB, xếp job* | *[framework] (ADR-0002)* | *db* | *components, api, data* |
-| *worker* | *Chạy job đồng bộ lịch và gửi email* | *Cùng codebase với api* | *db, Google Calendar, Email provider* | *flows* |
+| web | Giao diện cho cả ba vai trò; màn của Nhân viên thiết kế cho điện thoại. Không giữ luật nghiệp vụ | React, TypeScript (ADR-0008) | api | [ui](docs/design/ui.md), [components](docs/design/components.md) |
+| api | Nhận request, đăng nhập và kiểm quyền, giữ luật nghiệp vụ của sáu module, ghi DB trong transaction, xếp job, gọi dịch vụ AI cho tính năng AI trên màn hình | Python, FastAPI (ADR-0008); phiên lưu trong DB (ADR-0010) | db, Dịch vụ AI | [api](docs/design/api.md), [components](docs/design/components.md), [ai](docs/design/ai.md) |
+| worker | Chạy việc theo lịch và việc nền: cộng phép, ngày hiệu lực, nhắc, tính tín hiệu lúc 0:00, tóm tắt tuần, insight của AI | Cùng codebase và module với api (ADR-0007) | db, Dịch vụ AI | [flows](docs/design/flows.md) |
+| db | Mọi dữ liệu nghiệp vụ, phiên đăng nhập, hàng đợi job, chỉ mục tìm kiếm quy chế | PostgreSQL managed (ADR-0009) | — | [data](docs/design/data.md) |
+
+- File chấm công HR tải lên và file chuyển khoản HR tải về đi qua api trong request; không có kho file riêng.
+- Chọn dịch vụ AI và cách gọi ở [ai](docs/design/ai.md), sau spike #48, #49 và Q-031. Mọi lời gọi có timeout và nội
+  dung mẫu khi lỗi (BR-162).
 
 ## Cross-cutting concerns
 
@@ -98,8 +128,12 @@ trên. Biện pháp nằm trong code hoặc cấu hình, không chỉ trong tài
 
 ## Constraints
 
-- [Ràng buộc kỹ thuật ảnh hưởng tới thiết kế, kèm nguồn trong brief hoặc ADR. Ví dụ: chạy được trên gói miễn phí của
-  hosting.]
+- Hệ thống chạy trên web, dùng được trên điện thoại; màn của Nhân viên thiết kế cho điện thoại ([brief](docs/project/brief.md#scope), [prototype](docs/design/prototype.md)).
+- Một công ty dùng; không làm nhiều công ty trên một hệ thống ([brief](docs/project/brief.md#scope)).
+- Một người làm cùng coding agent, khoảng 6 giờ mỗi ngày ([brief](docs/project/brief.md#scope)).
+- Hạ tầng khoảng $10–25 mỗi tháng (Q-009); ngân sách dịch vụ AI chưa có (Q-031).
+- Dữ liệu nhạy cảm ở BR-161 không bao giờ gửi tới dịch vụ AI.
+- Không kết nối trực tiếp máy chấm công hay ngân hàng; không gửi email hay tin ngoài hệ thống ([requirements](docs/analysis/requirements.md#non-goals)).
 
 ## Design details
 
