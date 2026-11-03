@@ -15,7 +15,7 @@
 
 | Kind | Link | Version or date |
 |---|---|---|
-| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-02, phiên bản 9: thêm component chat và cỡ điện thoại ở #68 |
+| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-03, phiên bản 11: quy tắc Không có số và không vẽ control chưa có hành vi ở #72 |
 | Canvas prototype, Artifact loại Design trên claude.ai, riêng tư | [HR Manager Prototype](https://claude.ai/artifact/Dab3WjsfCMeWuE65pHN93S) | 2026-11-02, phiên bản 17: 5 màn AI của #68 |
 | *Mockup* | *[link]* | *[YYYY-MM-DD]* |
 | *Component library* | *[tên thư viện, dẫn ADR nếu ảnh hưởng tới kiến trúc]* | *[version]* |
@@ -45,6 +45,7 @@ Giá trị dùng chung, đặt trong code hoặc config của frontend thay vì 
 | Forbidden | Báo không có quyền, kèm đường quay lại |
 | Saving | Khóa nút gửi để tránh gửi hai lần |
 | Success | Xác nhận kết quả; tải lại dữ liệu bị ảnh hưởng |
+| No value | Số không tính được thì hiện "—" kèm lý do ngắn, như nhóm dưới `report_min_group_size` người (BR-129) hay tháng chưa tính lương; không hiện 0 hay 0% thay cho số thiếu |
 | AI output | Đánh dấu là gợi ý; người dùng xác nhận trước khi kết quả được dùng; bỏ dòng này khi không có tính năng AI |
 
 ## Formats
