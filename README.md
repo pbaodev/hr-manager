@@ -246,7 +246,7 @@ flowchart LR
 | Architecture decisions: [ADR index](docs/decisions/README.md) | ADR-0007 to ADR-0010 Accepted; ADR-0011 Proposed |
 | C4 Component and module rules: [components](docs/design/components.md) | Not started ([#11](https://github.com/pbaodev/hr-manager/issues/11)) |
 | Data model: [data](docs/design/data.md), [schema.dbml](docs/design/schema.dbml) | Draft ([#9](https://github.com/pbaodev/hr-manager/issues/9)) |
-| API (OpenAPI): [api](docs/design/api.md), `contracts/openapi.yaml` | Not started ([#10](https://github.com/pbaodev/hr-manager/issues/10)) |
+| API (OpenAPI): [api](docs/design/api.md), [openapi.yaml](contracts/openapi.yaml) | Draft ([#10](https://github.com/pbaodev/hr-manager/issues/10)): operation map for every Must story; contract written for M1 |
 
 ### Data Model
 
@@ -272,6 +272,23 @@ erDiagram
 Rules that must hold even when two people act at the same time are kept in the database: effective-dated records
 (job history, contracts, salary) cannot overlap, leave requests cannot overlap by half-day, and the leave ledger is
 append-only. Leave and overtime actions for one employee run one at a time under a row lock.
+
+### API
+
+REST over HTTPS with JSON, under `/api/v1`. The contract in [openapi.yaml](contracts/openapi.yaml) is written before
+the code and linted in CI; once the backend exists, CI compares the schema FastAPI generates with the contract.
+
+| Topic | Convention |
+|---|---|
+| Sign-in | Session cookie (`HttpOnly`); every write sends an `X-CSRF-Token` header |
+| Permissions | Checked on the backend for every operation, by role and department scope; objects outside the caller's scope return `404` |
+| Errors | RFC 9457 Problem Details with a stable `code` that points to a business rule, such as `contract_overlap` (BR-025) |
+| Concurrency | Editable records return an `ETag`; updates send `If-Match` |
+| Retries | Creating requests, importing files and running payroll accept an `Idempotency-Key` |
+| AI | AI operations return `503 ai_unavailable` when the AI service fails; the screen falls back to forms and templates |
+
+The contract covers M1 (46 operations: sign-in, accounts, departments, employees, contracts, policies, questions to
+HR, notifications). M2 to M6 follow the operation map in [api.md](docs/design/api.md).
 
 ### UI/UX Prototype
 
