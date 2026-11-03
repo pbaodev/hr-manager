@@ -3,8 +3,9 @@
 Web-based HR software for small and medium-sized businesses in Vietnam. Employee records, leave, attendance, payroll
 and reports in one place.
 
-> **Status:** requirements analysis is done and the prototype is in progress
-> ([#52](https://github.com/pbaodev/hr-manager/issues/52)). There is no code yet. Updated 2026-11-03.
+> **Status:** requirements analysis is done; the prototype ([#52](https://github.com/pbaodev/hr-manager/issues/52)) and
+> the architecture design ([#8](https://github.com/pbaodev/hr-manager/issues/8)) are in progress. There is no code yet.
+> Updated 2026-11-03.
 >
 > The detailed documentation in [docs/](docs/README.md) is written in Vietnamese.
 
@@ -82,10 +83,39 @@ the business features work correctly.
 
 ## Tech Stack and Architecture
 
-Not chosen yet. The stack and architecture are designed in Phase 3, after the prototype is approved
-([#61](https://github.com/pbaodev/hr-manager/issues/61)). Known constraints: a web app that also works on phones,
-AI that can be turned off without losing any business feature, and sensitive personal data that is never sent to the
-AI.
+| Part | Choice | Decision |
+|---|---|---|
+| Architecture | Modular monolith: one backend split into business modules, one web client, deployed together | [ADR-0007](docs/decisions/0007-architecture-style.md) |
+| Web client | React, TypeScript | [ADR-0008](docs/decisions/0008-stack.md) |
+| Backend | Python, FastAPI; scheduled jobs run in a worker from the same codebase | [ADR-0008](docs/decisions/0008-stack.md) |
+| Database | PostgreSQL, also used for the job queue and policy search | [ADR-0009](docs/decisions/0009-data-storage.md) |
+| Authentication | Employee ID and password; server-side sessions in an `HttpOnly` cookie | [ADR-0010](docs/decisions/0010-authentication.md) |
+| Hosting | Not chosen yet; waiting on whether employee data may be stored outside Vietnam (Q-035) | [ADR-0011](docs/decisions/0011-hosting.md), Proposed |
+| AI service | Not chosen yet; chosen after the AI spikes ([#48](https://github.com/pbaodev/hr-manager/issues/48), [#49](https://github.com/pbaodev/hr-manager/issues/49)) | [AI component](docs/design/ai.md) |
+
+### System Architecture
+
+The C4 Container view. The context view, architecture drivers and constraints are in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+```mermaid
+flowchart LR
+  user["Employee, Manager, HR<br/>[Person]"] -->|"HTTPS"| web["web<br/>[React, TypeScript SPA]"]
+  web -->|"JSON / HTTPS, session cookie"| api["api<br/>[Python, FastAPI]"]
+  api -->|"SQL"| db[("db<br/>[PostgreSQL]")]
+  worker["worker<br/>[Python, same codebase as api]"] -->|"SQL; job queue"| db
+  api -->|"HTTPS, filtered data"| ai["AI service<br/>[External system]"]
+  worker -->|"HTTPS, filtered data"| ai
+```
+
+- **web** shows the screens for all three roles; employee screens are designed for phones. It holds no business rules.
+- **api** signs users in, checks permissions on every operation and enforces the business rules of all six modules
+  inside database transactions.
+- **worker** runs scheduled jobs: leave accrual, effective dates, reminders, the nightly signal calculation and the
+  weekly summary.
+- **AI service** only receives the fields a task needs; ID card numbers, bank accounts, tax codes and social insurance
+  numbers are never sent. Every call has a timeout and a template fallback, so the business features keep working.
+
+The time clock and the bank are not connected: HR uploads the time-clock file and downloads the bank transfer file.
 
 ## Project Structure
 
@@ -207,6 +237,16 @@ flowchart LR
   HOME --> ADM["Admin<br/>departments, accounts, leave types, shifts, payroll settings"]
   CHAT["AI HR Assistant chat<br/>opens from any screen"] -.- HOME
 ```
+
+### Architecture documents
+
+| Document | Status |
+|---|---|
+| C4 Context and Container, drivers, constraints: [ARCHITECTURE.md](ARCHITECTURE.md) | Draft ([#8](https://github.com/pbaodev/hr-manager/issues/8)) |
+| Architecture decisions: [ADR index](docs/decisions/README.md) | ADR-0007 to ADR-0010 Accepted; ADR-0011 Proposed |
+| C4 Component and module rules: [components](docs/design/components.md) | Not started ([#11](https://github.com/pbaodev/hr-manager/issues/11)) |
+| Data model (DBML): [data](docs/design/data.md) | Not started ([#9](https://github.com/pbaodev/hr-manager/issues/9)) |
+| API (OpenAPI): [api](docs/design/api.md), `contracts/openapi.yaml` | Not started ([#10](https://github.com/pbaodev/hr-manager/issues/10)) |
 
 ### UI/UX Prototype
 

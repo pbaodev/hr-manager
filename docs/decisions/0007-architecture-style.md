@@ -1,8 +1,8 @@
 # ADR-0007: Modular monolith gồm một backend và một web client
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-03
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-11-03: chủ dự án chọn phương án ở #8; chưa review nguội, chưa AI review
 - **Drivers:** QA-001, QA-003, QA-007; ràng buộc một người làm, hạ tầng $10–25 mỗi tháng
 - **Related:** [ARCHITECTURE](../../ARCHITECTURE.md#architecture-drivers), #8, ADR-0008, ADR-0011
 
@@ -16,9 +16,10 @@ Một người làm cùng coding agent, nên số thứ phải deploy và theo d
 
 ## Decision
 
-Đề xuất, chờ chủ dự án chọn: một backend chia module theo nghiệp vụ (tổ chức và nhân sự, nghỉ phép, chấm công, lương,
-báo cáo, AI) cùng một web client, deploy như một ứng dụng. Việc chạy theo lịch là một tiến trình của cùng codebase, đọc
-và ghi cùng DB. Module chỉ gọi nhau qua interface public; dependency rule ghi ở [components](../design/components.md).
+Chủ dự án chọn ngày 2026-11-03: một backend chia module theo nghiệp vụ (tổ chức và nhân sự, nghỉ phép, chấm công,
+lương, báo cáo, AI) cùng một web client, deploy như một ứng dụng. Việc chạy theo lịch là một tiến trình của cùng
+codebase, đọc và ghi cùng DB. Module chỉ gọi nhau qua interface public; dependency rule ghi ở
+[components](../design/components.md).
 
 ## Options considered
 

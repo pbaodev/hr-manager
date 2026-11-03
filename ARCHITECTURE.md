@@ -11,8 +11,8 @@
 > nằm ở design guide.
 >
 > Đang làm ở #8, trước khi duyệt prototype (#61) theo lựa chọn của chủ dự án ngày 2026-11-03. Đã điền Context,
-> Architecture drivers và Constraints. Các mục từ Containers trở đi điền sau khi ADR-0007 tới ADR-0011 được chọn; dòng
-> in nghiêng ở các mục đó vẫn là ví dụ của mẫu.
+> Architecture drivers, Containers và Constraints. Cross-cutting concerns, Data and trust boundaries, Threats và
+> Deployment điền sau; dòng in nghiêng ở các mục đó vẫn là ví dụ của mẫu.
 
 ## Context
 
@@ -44,7 +44,7 @@ Thời gian là actor trong requirements: các việc chạy theo lịch, như c
 ## Architecture drivers
 
 Quality attribute `H/H`, `H/M` trong requirements và các ràng buộc trong brief. Mỗi driver có ít nhất một tactic;
-tactic khó đảo ngược có ADR. ADR-0007 tới ADR-0011 đang `Proposed`.
+tactic khó đảo ngược có ADR. ADR-0007 tới ADR-0010 đã `Accepted`; ADR-0011 về hosting còn `Proposed`.
 
 | Driver | Tactic | Where | ADR |
 |---|---|---|---|
@@ -63,23 +63,29 @@ một backend là đủ, tính lương và nhập file có thể chạy trong re
 
 ## Containers
 
-C4 Level 2: những thứ chạy hoặc lưu dữ liệu riêng, và cách chúng giao tiếp.
+C4 Level 2: những thứ chạy hoặc lưu dữ liệu riêng, và cách chúng giao tiếp. Kiểu kiến trúc, stack, DB và cách đăng
+nhập theo ADR-0007 tới ADR-0010; nơi chạy chờ ADR-0011.
 
 ```mermaid
 flowchart LR
-  member["Thành viên"] --> web["web<br/>[SPA]"]
-  web -->|"JSON / HTTPS"| api["api<br/>[HTTP service]"]
-  api --> db[("db<br/>[Postgres]")]
-  api -->|"enqueue"| queue[("queue<br/>[bảng jobs trong db]")]
-  worker["worker<br/>[background jobs]"] --> queue
-  worker --> gcal["Google Calendar"]
-  worker --> mail["Email provider"]
+  user["Nhân viên, Quản lý, HR<br/>[Person]"] -->|"HTTPS"| web["web<br/>[React, TypeScript SPA]"]
+  web -->|"JSON / HTTPS, cookie phiên"| api["api<br/>[Python, FastAPI]"]
+  api -->|"SQL"| db[("db<br/>[PostgreSQL]")]
+  worker["worker<br/>[Python, cùng codebase với api]"] -->|"SQL; đọc hàng đợi job"| db
+  api -->|"HTTPS, dữ kiện đã lọc"| ai["Dịch vụ AI<br/>[External system]"]
+  worker -->|"HTTPS, dữ kiện đã lọc"| ai
 ```
 
 | Container | Responsibility | Tech | Talks to | Detail |
 |---|---|---|---|---|
-| *api* | *Nhận request, giữ luật nghiệp vụ, ghi DB, xếp job* | *[framework] (ADR-0002)* | *db* | *components, api, data* |
-| *worker* | *Chạy job đồng bộ lịch và gửi email* | *Cùng codebase với api* | *db, Google Calendar, Email provider* | *flows* |
+| web | Giao diện cho cả ba vai trò; màn của Nhân viên thiết kế cho điện thoại. Không giữ luật nghiệp vụ | React, TypeScript (ADR-0008) | api | [ui](docs/design/ui.md), [components](docs/design/components.md) |
+| api | Nhận request, đăng nhập và kiểm quyền, giữ luật nghiệp vụ của sáu module, ghi DB trong transaction, xếp job, gọi dịch vụ AI cho tính năng AI trên màn hình | Python, FastAPI (ADR-0008); phiên lưu trong DB (ADR-0010) | db, Dịch vụ AI | [api](docs/design/api.md), [components](docs/design/components.md), [ai](docs/design/ai.md) |
+| worker | Chạy việc theo lịch và việc nền: cộng phép, ngày hiệu lực, nhắc, tính tín hiệu lúc 0:00, tóm tắt tuần, insight của AI | Cùng codebase và module với api (ADR-0007) | db, Dịch vụ AI | [flows](docs/design/flows.md) |
+| db | Mọi dữ liệu nghiệp vụ, phiên đăng nhập, hàng đợi job, chỉ mục tìm kiếm quy chế | PostgreSQL managed (ADR-0009) | — | [data](docs/design/data.md) |
+
+- File chấm công HR tải lên và file chuyển khoản HR tải về đi qua api trong request; không có kho file riêng.
+- Chọn dịch vụ AI và cách gọi ở [ai](docs/design/ai.md), sau spike #48, #49 và Q-031. Mọi lời gọi có timeout và nội
+  dung mẫu khi lỗi (BR-162).
 
 ## Cross-cutting concerns
 

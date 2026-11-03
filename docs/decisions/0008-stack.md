@@ -1,8 +1,8 @@
-# ADR-0008: Ngôn ngữ và framework cho backend và web client
+# ADR-0008: Python FastAPI cho backend, React TypeScript cho web client
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-03
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-11-03: chủ dự án chọn phương án ở #8; chưa review nguội, chưa AI review
 - **Drivers:** QA-002, QA-006, QA-010, QA-011; ràng buộc một người làm cùng coding agent
 - **Related:** [ARCHITECTURE](../../ARCHITECTURE.md#architecture-drivers), #8, ADR-0007, [ui](../design/ui.md#design-sources)
 
@@ -18,8 +18,8 @@
 
 ## Decision
 
-Đề xuất, chờ chủ dự án chọn: backend Python với FastAPI; web client React và TypeScript. Client gọi backend qua
-contract OpenAPI, type của client sinh từ contract.
+Chủ dự án chọn ngày 2026-11-03: backend Python với FastAPI; web client React và TypeScript. Client gọi backend qua
+contract OpenAPI, type của client sinh từ contract. Phiên bản cụ thể chốt khi cấu hình dự án ở #14.
 
 ## Options considered
 

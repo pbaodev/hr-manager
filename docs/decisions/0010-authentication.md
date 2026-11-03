@@ -1,8 +1,8 @@
 # ADR-0010: Đăng nhập bằng mã nhân viên, phiên lưu ở server
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-03
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-11-03: chủ dự án chọn phương án ở #8; chưa review nguội, chưa AI review
 - **Drivers:** QA-003, QA-007; BR-003, BR-036, BR-198
 - **Related:** [ARCHITECTURE](../../ARCHITECTURE.md#architecture-drivers), [requirements](../analysis/requirements.md#non-goals), #8, ADR-0007
 
@@ -19,9 +19,9 @@
 
 ## Decision
 
-Đề xuất, chờ chủ dự án chọn: backend tự làm đăng nhập. Mật khẩu băm bằng Argon2id. Sau khi đăng nhập, backend tạo phiên
-lưu trong DB và gửi cookie `HttpOnly`, `Secure`, `SameSite=Lax`; thao tác ghi có kiểm CSRF. Khóa tài khoản hay đổi
-vai trò thì xóa các phiên của người đó.
+Chủ dự án chọn ngày 2026-11-03: backend tự làm đăng nhập. Mật khẩu băm bằng Argon2id. Sau khi đăng nhập, backend tạo
+phiên lưu trong DB và gửi cookie `HttpOnly`, `Secure`, `SameSite=Lax`; thao tác ghi có kiểm CSRF. Khóa tài khoản hay
+đổi vai trò thì xóa các phiên của người đó.
 
 ## Options considered
 

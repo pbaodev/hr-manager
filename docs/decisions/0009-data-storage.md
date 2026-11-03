@@ -1,8 +1,8 @@
 # ADR-0009: PostgreSQL là nơi lưu dữ liệu duy nhất
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-03
-- **Reviewed:** [YYYY-MM-DD: review nguội; AI review; người ngoài nếu có]
+- **Reviewed:** 2026-11-03: chủ dự án chọn phương án ở #8; chưa review nguội, chưa AI review
 - **Drivers:** QA-001, QA-005; BR-016, BR-025; ràng buộc hạ tầng $10–25 mỗi tháng
 - **Related:** [ARCHITECTURE](../../ARCHITECTURE.md#architecture-drivers), [data](../design/data.md), #8, #9, ADR-0011
 
@@ -17,8 +17,8 @@
 
 ## Decision
 
-Đề xuất, chờ chủ dự án chọn: một DB PostgreSQL managed cho mọi dữ liệu, gồm cả hàng đợi job và chỉ mục tìm kiếm quy
-chế. Khoảng ngày hiệu lực lưu bằng kiểu range; luật không chồng giữ bằng exclusion constraint.
+Chủ dự án chọn ngày 2026-11-03: một DB PostgreSQL managed cho mọi dữ liệu, gồm cả hàng đợi job và chỉ mục tìm kiếm
+quy chế. Khoảng ngày hiệu lực lưu bằng kiểu range; luật không chồng giữ bằng exclusion constraint.
 
 ## Options considered
 
