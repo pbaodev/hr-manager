@@ -15,8 +15,8 @@
 
 | Kind | Link | Version or date |
 |---|---|---|
-| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-03, phiên bản 11: quy tắc Không có số và không vẽ control chưa có hành vi ở #72 |
-| Canvas prototype, Artifact loại Design trên claude.ai, riêng tư | [HR Manager Prototype](https://claude.ai/artifact/Dab3WjsfCMeWuE65pHN93S) | 2026-11-02, phiên bản 17: 5 màn AI của #68 |
+| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-03, phiên bản 12: giao diện tiếng Anh ở #74 |
+| Canvas prototype, Artifact loại Design trên claude.ai, riêng tư | [HR Manager Prototype](https://claude.ai/artifact/Dab3WjsfCMeWuE65pHN93S) | 2026-11-03, phiên bản 18: 5 màn AI của #68, chuyển sang tiếng Anh ở #74 |
 | *Mockup* | *[link]* | *[YYYY-MM-DD]* |
 | *Component library* | *[tên thư viện, dẫn ADR nếu ảnh hưởng tới kiến trúc]* | *[version]* |
 
@@ -70,6 +70,7 @@ Cột Vietnamese là tên trong tài liệu phân tích.
 |---|---|
 | Nhân viên, Quản lý, HR | Employee, Manager, HR |
 | Giám đốc (nhãn dưới tên ở sidebar) | Director |
+| Nhóm mục ở sidebar: Của tôi, Quản lý, Công ty | Me, Manage, Company |
 | Công ty Mẫu | Sample Co. |
 | Kinh doanh, Kho vận, Kỹ thuật, Kế toán, Hành chính – Nhân sự, Pháp chế | Sales, Logistics, Engineering, Accounting, Admin & HR, Legal |
 
@@ -80,7 +81,7 @@ Cột Vietnamese là tên trong tài liệu phân tích.
 | Trang chủ, Hồ sơ của tôi, Danh bạ, Sơ đồ tổ chức | Home, My profile, Directory, Org chart |
 | Nhân viên, Đơn chờ duyệt, Nghỉ phép, Chấm công, Lương | Employees, Approvals, Leave, Attendance, Pay |
 | Báo cáo, Quy chế, Câu hỏi gửi HR, Quản trị | Reports, Policies, Questions to HR, Admin |
-| Tab bar điện thoại: Trang chủ, Đơn nghỉ, Bảng công, Phiếu lương, Thêm | Home, Leave, Timesheet, Payslips, More |
+| Tab bar điện thoại: Trang chủ, Nghỉ phép, Chấm công, Lương, Thêm | Home, Leave, Attendance, Pay, More |
 
 **Screens**
 
