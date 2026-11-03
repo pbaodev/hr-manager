@@ -1,13 +1,15 @@
 # Product mindmap: hr-manager
 
 - **Status:** Draft
-- **Updated:** 2026-11-02
+- **Updated:** 2026-11-03
 - **Reviewed:** Chưa review
 - **Related:** [research](../project/research.md#decomposition) · [brief](../project/brief.md#scope) · [prototype](prototype.md)
 
 Dàn ý để dựng product mindmap bằng Xmind cho slide báo cáo dự án ở #68. Phân rã chức năng chính thức nằm ở mục
 Decomposition của [research](../project/research.md#decomposition); file này chỉ là bản rút gọn để trình bày. Hai bên
 khác nhau thì research đúng.
+
+Ảnh đã dựng từ hai dàn ý: [tiếng Việt](product-mindmap-vi.png) · [tiếng Anh](product-mindmap-en.png).
 
 ## How to use
 
