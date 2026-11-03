@@ -245,8 +245,33 @@ flowchart LR
 | C4 Context and Container, drivers, constraints: [ARCHITECTURE.md](ARCHITECTURE.md) | Draft ([#8](https://github.com/pbaodev/hr-manager/issues/8)) |
 | Architecture decisions: [ADR index](docs/decisions/README.md) | ADR-0007 to ADR-0010 Accepted; ADR-0011 Proposed |
 | C4 Component and module rules: [components](docs/design/components.md) | Not started ([#11](https://github.com/pbaodev/hr-manager/issues/11)) |
-| Data model (DBML): [data](docs/design/data.md) | Not started ([#9](https://github.com/pbaodev/hr-manager/issues/9)) |
+| Data model: [data](docs/design/data.md), [schema.dbml](docs/design/schema.dbml) | Draft ([#9](https://github.com/pbaodev/hr-manager/issues/9)) |
 | API (OpenAPI): [api](docs/design/api.md), `contracts/openapi.yaml` | Not started ([#10](https://github.com/pbaodev/hr-manager/issues/10)) |
+
+### Data Model
+
+54 PostgreSQL tables, designed from the entities and business rules in [domain](docs/analysis/domain.md). Every
+column is in [schema.dbml](docs/design/schema.dbml); conventions, constraints and transactions are in
+[data](docs/design/data.md). The diagram shows the core tables only.
+
+```mermaid
+erDiagram
+  employees ||--|{ assignments : "job history"
+  assignments }o--|| org_units : "in"
+  employees ||--o{ employment_contracts : "signs"
+  employees ||--o| user_accounts : "signs in with"
+  employees ||--o{ leave_requests : "sends"
+  employees ||--o{ leave_ledger_entries : "leave ledger"
+  employees ||--o{ attendance_days : "attendance"
+  employees ||--|{ salary_records : "salary history"
+  payroll_runs ||--o{ payslips : "contains"
+  payslips }o--|| employees : "for"
+  signals ||--o{ signal_reactions : "reactions"
+```
+
+Rules that must hold even when two people act at the same time are kept in the database: effective-dated records
+(job history, contracts, salary) cannot overlap, leave requests cannot overlap by half-day, and the leave ledger is
+append-only. Leave and overtime actions for one employee run one at a time under a row lock.
 
 ### UI/UX Prototype
 

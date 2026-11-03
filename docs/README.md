@@ -40,7 +40,7 @@ docs/
 |---|---|---|---|---|
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | C4 Context và Container, driver, cross-cutting, threat, deployment | Architect | 3 | Draft; đã có Context, drivers, Containers và Constraints |
 | [components.md](design/components.md) | C4 Component: module, dependency rule, frontend, cấu hình | Architect | 3 | Mẫu, điền ở Phase 3 |
-| [data.md](design/data.md) | Dữ liệu lưu thế nào, luật nào giữ ở tầng dữ liệu, transaction, migration | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [data.md](design/data.md), [schema.dbml](design/schema.dbml) | Dữ liệu lưu thế nào, luật nào giữ ở tầng dữ liệu, transaction, migration; bảng và cột | Architect | 3 | Draft |
 | [api.md](design/api.md) | Quy ước API, lỗi, xác thực, danh sách operation | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [openapi.yaml](../contracts/openapi.yaml) | Contract chính xác của API | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [flows.md](design/flows.md) | Sequence diagram của luồng chính và job | Architect | 3 | Mẫu, điền ở Phase 3 |
