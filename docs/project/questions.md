@@ -1,6 +1,6 @@
 # Questions and assumptions
 
-- **Updated:** 2026-10-31
+- **Updated:** 2026-11-03
 
 > Ghi mọi điều chưa biết ở đây, kể cả câu tự hỏi mình. Câu trả lời từ người dùng, tài liệu hay thử nghiệm được chép vào
 > đây, kèm nguồn và ngày. Nhiều người cần hỏi cùng một câu thì gửi kèm mã `Q-xxx` để dễ đối chiếu.
@@ -47,6 +47,7 @@
 | Q-032 | Ngoài các lý do theo Điều 115, danh mục lý do nghỉ của công ty gồm những mục nào? | Danh mục mặc định ở mục Default leave reasons của domain (BR-143) | blocks-build | HR công ty mục tiêu | Open | |
 | Q-033 | Với từng loại tín hiệu ở mục Default signal types của domain, con số đổi bao nhiêu thì quản lý và ban giám đốc muốn được báo? Có loại nào họ không cần? | Ngưỡng và danh mục tín hiệu (BR-172, BR-173) | blocks-build | Quản lý và ban giám đốc công ty mục tiêu | Assumed | Xem A-020 |
 | Q-034 | Công ty đang có những văn bản quy chế nào, như nội quy lao động, quy chế lương thưởng hay sổ tay nhân viên? Văn bản ở dạng gì và ai cập nhật? | Nội dung ban đầu của thư viện quy chế (BR-192) và nguồn trả lời của AI HR Assistant | blocks-build | HR công ty mục tiêu | Open | |
+| Q-035 | Lưu dữ liệu nhân viên trên máy chủ ngoài Việt Nam, ví dụ Singapore, và gửi dữ kiện đã lọc tới dịch vụ AI ở nước ngoài thì cần thủ tục gì theo Luật Bảo vệ dữ liệu cá nhân 91/2025 và Nghị định 356/2025? Doanh nghiệp nhỏ có được hoãn phần này không? | Chọn hosting (ADR-0011) và dịch vụ AI; mục Data and trust boundaries của ARCHITECTURE | blocks-design | Văn bản luật trên Cơ sở dữ liệu quốc gia về văn bản pháp luật; tư vấn pháp lý nếu cần | Open | |
 
 ## Assumptions
 

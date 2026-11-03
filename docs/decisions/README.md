@@ -29,3 +29,8 @@ prototype. Nội dung đầy đủ nằm ở tag `design-v0`. Các dòng dưới
 | 0004 | Xác thực tự làm bằng JWT ngắn hạn và refresh token lưu DB | (removed, #41) | 2026-10-30 | QA-003 | Session lưu DB; dịch vụ auth ngoài |
 | 0005 | Render cho production, gói miễn phí cho staging | (removed, #41) | 2026-10-30 | QA-004, QA-005 | Railway; app trên Render với DB trên Neon |
 | 0006 | Mantine, TanStack Query, openapi-fetch và React Router cho frontend | (removed, #41) | 2026-10-30 | QA-003 | shadcn/ui; Ant Design; SWR; Orval; TanStack Router |
+| [0007](0007-architecture-style.md) | Modular monolith gồm một backend và một web client | Proposed | 2026-11-03 | QA-001, QA-003, QA-007 | Client và BaaS; serverless functions |
+| [0008](0008-stack.md) | Ngôn ngữ và framework cho backend và web client | Proposed | 2026-11-03 | QA-002, QA-006, QA-010, QA-011 | TypeScript cả hai phía; Next.js full-stack; Spring Boot và React |
+| [0009](0009-data-storage.md) | PostgreSQL là nơi lưu dữ liệu duy nhất | Proposed | 2026-11-03 | QA-001, QA-005 | MySQL; SQLite |
+| [0010](0010-authentication.md) | Đăng nhập bằng mã nhân viên, phiên lưu ở server | Proposed | 2026-11-03 | QA-003, QA-007 | JWT và refresh token; dịch vụ auth ngoài |
+| [0011](0011-hosting.md) | Nơi chạy staging và production | Proposed | 2026-11-03 | QA-005 | Chưa chọn: PaaS cố định giá; PaaS theo mức dùng; VPS tự quản; cloud trong nước |

@@ -38,7 +38,7 @@ docs/
 
 | Document | Answers | Hat | Phase | Status |
 |---|---|---|---|---|
-| [ARCHITECTURE.md](../ARCHITECTURE.md) | C4 Context và Container, driver, cross-cutting, threat, deployment | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [ARCHITECTURE.md](../ARCHITECTURE.md) | C4 Context và Container, driver, cross-cutting, threat, deployment | Architect | 3 | Draft; đã có Context, drivers và Constraints |
 | [components.md](design/components.md) | C4 Component: module, dependency rule, frontend, cấu hình | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [data.md](design/data.md) | Dữ liệu lưu thế nào, luật nào giữ ở tầng dữ liệu, transaction, migration | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [api.md](design/api.md) | Quy ước API, lỗi, xác thực, danh sách operation | Architect | 3 | Mẫu, điền ở Phase 3 |
@@ -49,7 +49,7 @@ docs/
 | [prototype-data.md](design/prototype-data.md) | Dữ liệu giả của prototype: nhân viên, đơn, chấm công, lương, tín hiệu | Architect | Prototype | Draft |
 | [product-mindmap.md](design/product-mindmap.md) | Dàn ý product mindmap tiếng Việt và tiếng Anh để dựng bằng Xmind | Architect | Prototype | Draft |
 | [ai.md](design/ai.md) | Component AI của ba tính năng ở M6 | Architect | 3 | Mẫu, điền ở Phase 3 |
-| [decisions/](decisions/README.md) | Vì sao chọn phương án này, đã cân nhắc phương án nào | Architect | 1 trở đi | Chưa có ADR; ADR-0001 tới 0006 đã bỏ |
+| [decisions/](decisions/README.md) | Vì sao chọn phương án này, đã cân nhắc phương án nào | Architect | 1 trở đi | ADR-0007 tới 0011 Proposed; ADR-0001 tới 0006 đã bỏ |
 
 ## Build
 
