@@ -1,7 +1,7 @@
 # Prototype data: hr-manager
 
 - **Status:** Draft
-- **Updated:** 2026-11-01
+- **Updated:** 2026-11-03
 - **Reviewed:** [YYYY-MM-DD: AI review ở PR; chủ dự án duyệt]
 - **Related:** [prototype](prototype.md) · [domain](../analysis/domain.md) · [stories](../analysis/stories.md)
 
@@ -23,6 +23,8 @@ Domain chưa nói rõ các điểm dưới đây. Dữ liệu dùng cách hiểu
 - **Phạm vi tín hiệu:** loại tính theo tỷ lệ hay bình quân (nghỉ việc, đi muộn, chi phí lương) xét từng phòng ban và cả
   công ty (BR-172). Loại tính theo người hay theo đơn (làm thêm, đơn chờ, hợp đồng, ngày chưa xử lý, hồ sơ thiếu dữ
   liệu) có một tín hiệu cấp công ty, phân rã theo phòng ban; mỗi người xem thấy phần trong phạm vi của mình.
+- **Phần lẻ khi cộng phép:** phép năm cơ bản 13 ngày cộng 13/12 ngày mỗi tháng (BR-049). Số dư giữ đủ phần lẻ; giao
+  diện hiện một chữ số thập phân, như 7,83 hiện là 7,8.
 
 ## Company
 
@@ -134,6 +136,15 @@ ngày, tháng 11 có 21 ngày.
 
 Số dư ngày 9/11 là 9,0 ngày và không còn phép tồn. Đơn 20/11 đã duyệt, 1,0 ngày, chưa trừ vào số dư. Khi Mai gửi đơn
 1,5 ngày ở tình huống 1, form hiện số phép còn lại sau đơn là 9,0 − 1,0 − 1,5 = 6,5 ngày (BR-053).
+
+**Số dư phép năm của Hùng và Hà ngày 9/11/2026,** cho Trang chủ:
+
+| Persona | Phép năm cơ bản 2026 | Phép tồn từ 2025 | Cộng phép 31/1 tới 31/10 | Sử dụng | Số dư |
+|---|---|---|---|---|---|
+| Lê Văn Hùng | 13, đủ 5 năm từ 1/6/2022 | 2,0, dùng hết 19/3 tới 20/3 | 10 × 13/12 = 10,83 | 2,0 phép tồn; 3,0 từ 3/8 tới 5/8 | 7,83 |
+| Phạm Thu Hà | 12 tới tháng 8, 13 từ tháng 9 vì đủ 5 năm ngày 2/8/2026 (BR-048) | 1,0, dùng 2/3 | 8 × 1 + 2 × 13/12 = 10,17 | 1,0 phép tồn; 2,0 từ 20/7 tới 21/7 | 8,17 |
+
+Hai người không có đơn nghỉ đang chờ hay đã duyệt mà chưa tới ngày.
 
 **Bảng công của Mai:**
 
@@ -396,6 +407,40 @@ phạm vi ở mục Assumptions.
     dùng tới hết 31/3. Nguồn là Quy chế nghỉ phép mục 4 và cấu hình `carryover_max_days`, `carryover_expiry`.
   - Mai hỏi "Công ty có hỗ trợ học phí tiếng Anh không?". Assistant nói không có nguồn, rồi đề nghị gửi câu hỏi cho HR.
     SCR-051 mở với câu hỏi và tóm tắt hội thoại soạn sẵn.
+
+## Home on 9/11/2026
+
+Trang chủ (SCR-003) lúc 9:41. Thông báo xếp mới nhất ở đầu (BR-213). Thông báo lúc 7:00 là của lần tính đêm 9/11 và các
+nhắc theo lịch; 9/11 là thứ Hai nên Quản lý và HR nhận tóm tắt tuần (BR-181). Tóm tắt tuần và cập nhật theo dõi dùng
+nội dung mẫu của rule; bản do AI viết vẽ ở M6.
+
+**Con số:**
+
+| Persona | Đơn chờ mình duyệt | Khác |
+|---|---|---|
+| Trần Thị Mai | — | Số dư phép năm 9,0; đơn 20/11 đã duyệt, 1,0 ngày |
+| Lê Văn Hùng | 8: 7 đơn nghỉ của phòng Kinh doanh ở mục Leave, 1 giải trình của Lý Văn Phúc | Số dư phép năm 7,8 |
+| Phạm Thu Hà | 11 trong cả công ty: 8 đơn nghỉ, 2 giải trình, 1 đơn làm thêm của Châu Văn Lực; 2 đơn quá hạn | Số dư phép năm 8,2; 3 hợp đồng sắp hết hạn; 0 hồ sơ chưa có hợp đồng |
+
+**Thông báo:**
+
+| Persona | Time | Notification | Opens | Read |
+|---|---|---|---|---|
+| Mai | 8:30, 9/11 | Ngày 3/11 có giờ vào 7:58, không có giờ ra; gửi giải trình trước hạn chốt công 5/12 (BR-216, BR-218) | SCR-028 tháng 11 | Chưa |
+| Mai | 30/10 | Hùng đã duyệt đơn nghỉ ngày 20/11 | SCR-019 | Rồi |
+| Mai | 13/10 | Hà đã trả lời câu hỏi về phiếu lương tháng 9 | SCR-051 | Rồi |
+| Hùng | 8:45, 9/11 | Ngô Thị Thảo gửi đơn nghỉ sáng 12/11 | SCR-021 | Chưa |
+| Hùng | 7:00, 9/11 | Tóm tắt tuần: 2 tín hiệu, Nghỉ việc tăng ở Kinh doanh mức Cao và Đơn chờ quá hạn mức Thường | SCR-040 | Chưa |
+| Hùng | 7:00, 9/11 | Cập nhật tín hiệu Nghỉ việc tăng đang theo dõi từ 26/10: vẫn 3 trên 15 người, 20% (BR-180) | SCR-048 | Chưa |
+| Hùng | 7:00, 9/11 | Nhắc duyệt đơn của Vũ Đức Long và Trịnh Văn Khoa, chờ quá 2 ngày làm việc (BR-148) | SCR-021 | Chưa |
+| Hùng | 6/11 | Bùi Thị Hoa không đồng ý đổi ngày, giữ 26/11 tới 27/11 | SCR-021 | Rồi |
+| Hà | 7:00, 9/11 | Đơn của Trịnh Văn Khoa chờ Lê Văn Hùng 4 ngày làm việc; HR duyệt thay được (BR-148, tình huống 7) | SCR-021 | Chưa |
+| Hà | 7:00, 9/11 | Câu hỏi của Lâm Thị Nga chờ trả lời 3 ngày làm việc (BR-196, tình huống 20) | SCR-051 | Chưa |
+| Hà | 7:00, 9/11 | Tóm tắt tuần: 8 tín hiệu, 5 mức Cao | SCR-040 | Chưa |
+| Hà | 6/11 | Đơn của Vũ Đức Long chờ Lê Văn Hùng 4 ngày làm việc; HR duyệt thay được | SCR-021 | Rồi |
+| Hà | 4/11 | 2 giải trình tháng 10 còn chờ duyệt, một ngày làm việc trước hạn chốt công 5/11 (BR-218) | SCR-031 | Rồi |
+
+Các tín hiệu mức Cao coi như đã xuất hiện và đã được báo trước 9/11 (BR-177), nên không có thông báo riêng ở đây.
 
 ## Situations
 
