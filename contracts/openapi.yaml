@@ -1,150 +1,1429 @@
-# Contract HTTP API, nguồn chính cho client và server (contract-first).
-# Quy ước chung và bản đồ story → operation nằm ở docs/design/api.md.
-# VÍ DỤ: các operation dưới dùng chung ví dụ đặt phòng họp của template. Thay bằng operation thật ở Phase 3;
-# bỏ cả thư mục contracts/ khi hệ thống không có API qua mạng. Endpoint vận hành như health check ghi ở runbook.
-# CI (job "contract") lint file này bằng Redocly, cấu hình ở redocly.yaml.
-openapi: 3.0.3
+# Contract HTTP API của hr-manager, nguồn chính cho client và server (contract-first, chủ dự án chọn 2026-11-03).
+# Quy ước chung, bảng lỗi và bản đồ story → operation nằm ở docs/design/api.md.
+# Hiện có đủ M1. M2 tới M6 thêm ở các PR sau của #10, theo bảng Operations trong api.md.
+# CI (job "contract") lint file này bằng Redocly, cấu hình ở redocly.yaml. Endpoint vận hành như health check ghi ở runbook.
+openapi: "3.0.3"
 info:
-  title: "[tên dự án] API"
-  version: 0.1.0
-  description: |
-    Lỗi trả về theo RFC 9457 (Problem Details), thêm field `code` theo nghĩa nghiệp vụ.
-    Mỗi `code` dẫn tới một luật trong docs/analysis/domain.md, xem bảng Errors trong docs/design/api.md.
+  title: HR Manager API
+  version: "0.1.0"
+  description: "API của web client HR Manager. Lỗi theo RFC 9457 kèm `code`; mỗi `code` dẫn tới một luật trong docs/analysis/domain.md, xem docs/design/api.md. Hiện có M1."
   license:
-    name: "[license]"
+    name: MIT
+    url: "https://opensource.org/licenses/MIT"
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: "http://localhost:8000/api/v1"
     description: Local
 security:
-  - bearerAuth: []
+  - cookieAuth: []
 tags:
-  - name: Rooms
-    description: "VÍ DỤ: phòng họp"
-  - name: Bookings
-    description: "VÍ DỤ: lịch đặt phòng"
-
+  - name: Auth
+    description: "Đăng nhập, phiên, đổi mật khẩu (ADR-0010)"
+  - name: Accounts
+    description: Tài khoản và vai trò HR
+  - name: Organization
+    description: Phòng ban, trưởng phòng ban, chức danh
+  - name: Employees
+    description: Hồ sơ, tiếp nhận, thay đổi công tác, nghỉ việc
+  - name: Contracts
+    description: Hợp đồng lao động
+  - name: Me
+    description: Dữ liệu của người đang đăng nhập
+  - name: Policies
+    description: Thư viện quy chế theo phiên bản
+  - name: Questions
+    description: Câu hỏi gửi HR
+  - name: Notifications
+    description: Thông báo trong hệ thống
 paths:
-  /rooms:
-    get:
-      tags: [Rooms]
-      summary: Danh sách phòng, có phân trang
-      operationId: listRooms
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
-      responses:
-        '200':
-          description: Một trang phòng
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoomPage'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
-  /rooms/{roomId}/bookings:
-    get:
-      tags: [Bookings]
-      summary: Lịch đặt của một phòng trong một khoảng thời gian (US-002)
-      operationId: listRoomBookings
-      parameters:
-        - $ref: '#/components/parameters/RoomId'
-        - name: from
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date-time
-        - name: to
-          in: query
-          required: true
-          description: Tối đa 7 ngày sau `from`
-          schema:
-            type: string
-            format: date-time
-      responses:
-        '200':
-          description: Lịch đặt trong khoảng thời gian, sắp theo giờ bắt đầu
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [items]
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Booking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-
-  /bookings:
+  "/auth/login":
     post:
-      tags: [Bookings]
-      summary: Đặt phòng theo khung giờ (US-001)
-      operationId: createBooking
-      parameters:
-        - $ref: '#/components/parameters/IdempotencyKey'
+      tags:
+        - Auth
+      summary: "Đăng nhập bằng mã nhân viên và mật khẩu (US-001)"
+      operationId: login
+      description: "Sai mã hoặc mật khẩu trả `invalid_credentials`, không nói phần nào sai. Khóa tạm trả `account_throttled` (BR-003); tài khoản bị khóa trả `account_locked` (BR-005)."
+      security: []
       requestBody:
         required: true
         content:
-          application/json:
+          "application/json":
             schema:
-              $ref: '#/components/schemas/BookingCreate'
+              "$ref": "#/components/schemas/LoginRequest"
       responses:
-        '201':
-          description: Lịch đã tạo
+        "200":
+          description: "Đã đăng nhập; cookie phiên được đặt"
           headers:
-            Location:
-              description: URL của lịch vừa tạo
+            Set-Cookie:
+              description: "Cookie phiên `hrm_session`, HttpOnly, Secure, SameSite=Lax"
               schema:
                 type: string
           content:
-            application/json:
+            "application/json":
               schema:
-                $ref: '#/components/schemas/Booking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-
-  /bookings/{bookingId}:
-    delete:
-      tags: [Bookings]
-      summary: Hủy lịch đặt (US-003)
-      operationId: cancelBooking
-      description: Người đặt hoặc quản trị; chỉ trước giờ bắt đầu (BR-004).
+                "$ref": "#/components/schemas/Session"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+        "429":
+          "$ref": "#/components/responses/TooManyRequests"
+  "/auth/logout":
+    post:
+      tags:
+        - Auth
+      summary: "Đăng xuất, xóa phiên hiện tại"
+      operationId: logout
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      responses:
+        "204":
+          description: "Đã đăng xuất"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+  "/auth/session":
+    get:
+      tags:
+        - Auth
+      summary: "Phiên hiện tại: tài khoản, vai trò, phạm vi"
+      operationId: getSession
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Session"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+  "/auth/password":
+    post:
+      tags:
+        - Auth
+      summary: "Đổi mật khẩu của tôi (US-001)"
+      operationId: changePassword
+      description: "Lỗi `current_password_incorrect`, `password_too_short`, `password_reused` (BR-036). Gọi được cả khi phải đổi mật khẩu (BR-002)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PasswordChange"
+      responses:
+        "204":
+          description: "Đã đổi; các phiên khác bị xóa"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/accounts":
+    get:
+      tags:
+        - Accounts
+      summary: Danh sách tài khoản (US-002)
+      operationId: listAccounts
+      description: Chỉ HR.
       parameters:
-        - name: bookingId
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/PageSize"
+        - "$ref": "#/components/parameters/Search"
+        - name: status
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/AccountStatus"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/AccountPage"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+  "/employees/{employeeId}/account":
+    post:
+      tags:
+        - Accounts
+      summary: Tạo tài khoản cho nhân viên (US-002)
+      operationId: createAccount
+      description: "Chỉ HR. Tên đăng nhập là mã nhân viên; người dùng phải đổi mật khẩu ở lần đăng nhập đầu (BR-001, BR-002). Đã có tài khoản thì `account_exists`."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      responses:
+        "201":
+          description: "Đã tạo; mật khẩu tạm chỉ trả trong response này"
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/AccountWithTemporaryPassword"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+  "/accounts/{accountId}/lock":
+    post:
+      tags:
+        - Accounts
+      summary: Khóa tài khoản (US-002)
+      operationId: lockAccount
+      description: "Chỉ HR. Mọi phiên của tài khoản bị xóa. Khóa HR đang hoạt động cuối cùng thì `last_active_hr` (BR-004)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Account"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+  "/accounts/{accountId}/unlock":
+    post:
+      tags:
+        - Accounts
+      summary: Mở khóa tài khoản (US-002)
+      operationId: unlockAccount
+      description: "Chỉ HR. Nhân viên đã nghỉ việc thì `employee_terminated` (BR-005)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Account"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+  "/accounts/{accountId}/reset-password":
+    post:
+      tags:
+        - Accounts
+      summary: "Đặt lại mật khẩu (US-002)"
+      operationId: resetPassword
+      description: Chỉ HR. Người dùng phải đổi mật khẩu ở lần đăng nhập sau (BR-002).
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: "Mật khẩu tạm, chỉ trả một lần; mọi phiên bị xóa"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/TemporaryPassword"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+  "/accounts/{accountId}/hr-role":
+    put:
+      tags:
+        - Accounts
+      summary: Gán hoặc thu hồi vai trò HR (US-003)
+      operationId: setHrRole
+      description: "Chỉ HR. Mọi phiên của tài khoản đó bị xóa để quyền mới có tác dụng ngay. Thu hồi HR đang hoạt động cuối cùng thì `last_active_hr` (BR-004)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/AccountId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              required:
+                - isHr
+              properties:
+                isHr:
+                  type: boolean
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Account"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+  "/positions":
+    get:
+      tags:
+        - Organization
+      summary: Danh mục chức danh (US-005)
+      operationId: listPositions
+      parameters:
+        - name: includeInactive
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PositionList"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+    post:
+      tags:
+        - Organization
+      summary: Thêm chức danh (US-005)
+      operationId: createPosition
+      description: "Chỉ HR. Tên trùng, không phân biệt hoa thường, thì `position_name_taken` (BR-034)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PositionInput"
+      responses:
+        "201":
+          description: "Đã tạo"
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Position"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/positions/{positionId}":
+    patch:
+      tags:
+        - Organization
+      summary: Sửa tên hoặc ngừng dùng chức danh (US-005)
+      operationId: updatePosition
+      description: Chỉ HR.
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/PositionId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PositionPatch"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Position"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+    delete:
+      tags:
+        - Organization
+      summary: Xóa chức danh chưa được dùng (US-005)
+      operationId: deletePosition
+      description: "Chỉ HR. Chức danh đã dùng thì `position_in_use`; chỉ ngừng dùng được (BR-035)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/PositionId"
+      responses:
+        "204":
+          description: "Đã xóa"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+  "/org-units":
+    get:
+      tags:
+        - Organization
+      summary: Cây phòng ban tại một ngày (US-006, US-009)
+      operationId: listOrgUnits
+      description: "Phòng ban chưa thành lập hoặc đã giải thể tại `asOf` không có trong kết quả, trừ khi `includeInactive`. Mỗi phòng ban kèm trưởng và số nhân viên đang làm."
+      parameters:
+        - "$ref": "#/components/parameters/AsOf"
+        - name: includeInactive
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/OrgUnitList"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+    post:
+      tags:
+        - Organization
+      summary: Tạo phòng ban (US-006)
+      operationId: createOrgUnit
+      description: "Chỉ HR. Phòng ban cha không hoạt động tại ngày thành lập thì `org_unit_parent_inactive`."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/OrgUnitCreate"
+      responses:
+        "201":
+          description: "Đã tạo"
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/OrgUnit"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/org-units/{orgUnitId}/changes":
+    post:
+      tags:
+        - Organization
+      summary: "Đổi tên, đổi phòng ban cha hoặc giải thể từ một ngày (US-006)"
+      operationId: changeOrgUnit
+      description: "Chỉ HR. Thay đổi có tác dụng từ `effectiveOn` (BR-009). Tạo vòng thì `org_unit_cycle` (BR-008); giải thể khi còn người hoặc phòng ban con thì `org_unit_not_empty` (BR-010)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/OrgUnitId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/OrgUnitChange"
+      responses:
+        "201":
+          description: "Đã ghi thay đổi"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/OrgUnit"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/org-units/{orgUnitId}/heads":
+    post:
+      tags:
+        - Organization
+      summary: Bổ nhiệm trưởng phòng ban (US-008)
+      operationId: appointHead
+      description: "Chỉ HR. Phòng ban đã có trưởng thì bổ nhiệm cũ kết thúc ngày trước `from` (BR-011). Người được bổ nhiệm không làm việc trong cả khoảng thì `head_not_employed`."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/OrgUnitId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/HeadAppointment"
+      responses:
+        "201":
+          description: "Đã bổ nhiệm"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/HeadAssignment"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/head-assignments/{headAssignmentId}/end":
+    post:
+      tags:
+        - Organization
+      summary: Thôi bổ nhiệm trưởng phòng ban (US-008)
+      operationId: endHeadAssignment
+      description: "Chỉ HR. Người đó mất vai trò Quản lý từ ngày sau `lastDay` nếu không còn là trưởng phòng ban nào."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - name: headAssignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              required:
+                - lastDay
+              properties:
+                lastDay:
+                  type: string
+                  format: date
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/HeadAssignment"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/employees":
+    get:
+      tags:
+        - Employees
+      summary: Tìm và lọc nhân viên (US-018, US-020)
+      operationId: listEmployees
+      description: "Quản lý chỉ thấy nhân viên trong phạm vi; lọc theo phòng ban ngoài phạm vi thì `out_of_scope` (BR-013). `search` không phân biệt dấu và hoa thường (EC-019)."
+      parameters:
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/PageSize"
+        - "$ref": "#/components/parameters/Search"
+        - name: orgUnitId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: includeSubunits
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: status
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/EmployeeStatus"
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - fullName
+              - "-fullName"
+              - employeeCode
+              - "-employeeCode"
+              - hireDate
+              - "-hireDate"
+            default: fullName
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/EmployeeSummaryPage"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+    post:
+      tags:
+        - Employees
+      summary: Tiếp nhận nhân viên mới (US-011)
+      operationId: hireEmployee
+      description: "Chỉ HR. Tạo cả hoặc không gì. Mã nhân viên do hệ thống cấp (BR-015). Ngày vào làm ở tương lai thì hồ sơ ở trạng thái `upcoming` (EC-001). Số CCCD trùng thì `national_id_taken` kèm `existingEmployeeId` (BR-022)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/HireRequest"
+      responses:
+        "201":
+          description: "Đã tạo hồ sơ, quá trình công tác và hợp đồng nếu có"
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Employee"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/employees/{employeeId}":
+    get:
+      tags:
+        - Employees
+      summary: Hồ sơ nhân viên (US-012, US-018)
+      operationId: getEmployee
+      description: "HR thấy đủ. Quản lý trong phạm vi chỉ nhận phần công việc; các trường ở BR-033 không có trong response. Ngoài phạm vi thì `not_found`."
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      responses:
+        "200":
+          description: Thành công
+          headers:
+            ETag:
+              description: "Version hiện tại; gửi lại trong If-Match khi sửa"
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Employee"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+    patch:
+      tags:
+        - Employees
+      summary: Sửa hồ sơ nhân viên (US-012)
+      operationId: updateEmployee
+      description: "Chỉ HR. Phòng ban và chức danh đổi qua `POST /employees/{employeeId}/assignments`; mã nhân viên không sửa được (BR-015). `If-Match` lệch thì `stale_version` (EC-016). Mỗi lần sửa ghi nhật ký (BR-030)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+        - "$ref": "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/EmployeePatch"
+      responses:
+        "200":
+          description: Thành công
+          headers:
+            ETag:
+              description: "Version hiện tại; gửi lại trong If-Match khi sửa"
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Employee"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "412":
+          "$ref": "#/components/responses/PreconditionFailed"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/employees/{employeeId}/assignments":
+    get:
+      tags:
+        - Employees
+      summary: Quá trình công tác, gồm thay đổi sắp tới (US-013, US-018)
+      operationId: listAssignments
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/AssignmentList"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+    post:
+      tags:
+        - Employees
+      summary: Ghi nhận thay đổi công tác (US-013)
+      operationId: recordAssignmentChange
+      description: "Chỉ HR. Quá trình đang chứa `effectiveOn` kết thúc ngày trước đó (BR-017). Ngày hiệu lực trong quá khứ cần lý do (`reason_required`, BR-018). Đã có thay đổi cùng ngày thì `assignment_same_day` (EC-002); phòng ban đích không hoạt động thì `org_unit_inactive` (BR-014)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/AssignmentChange"
+      responses:
+        "201":
+          description: "Đã ghi"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Assignment"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/employees/{employeeId}/termination":
+    post:
+      tags:
+        - Employees
+      summary: Ghi nhận nghỉ việc (US-014)
+      operationId: recordTermination
+      description: "Chỉ HR. Từ ngày sau `lastDay`, nhân viên ở trạng thái `terminated`, tài khoản bị khóa, bổ nhiệm trưởng và hợp đồng đang hiệu lực kết thúc ở `lastDay` (BR-019). Còn thay đổi công tác sau `lastDay` thì `changes_after_last_day` kèm danh sách (EC-009)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/TerminationRequest"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Employee"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+    delete:
+      tags:
+        - Employees
+      summary: Hủy ghi nhận nghỉ việc (US-014)
+      operationId: cancelTermination
+      description: "Chỉ HR, khi ngày làm việc cuối chưa qua; đã qua thì `termination_in_effect` (BR-020)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      responses:
+        "204":
+          description: "Đã hủy"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+  "/employees/{employeeId}/contracts":
+    get:
+      tags:
+        - Contracts
+      summary: Hợp đồng lao động của nhân viên (US-015)
+      operationId: listContracts
+      description: "HR và chính nhân viên (qua `GET /me/profile`). Quản lý không xem được (BR-033)."
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ContractList"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+    post:
+      tags:
+        - Contracts
+      summary: Thêm hợp đồng (US-015)
+      operationId: addContract
+      description: "Chỉ HR. Lỗi `fixed_term_too_long` (BR-024), `contract_overlap` (BR-025), `probation_too_long` (BR-028), `contract_no_taken` (BR-037). Hợp đồng xác định thời hạn thứ ba liên tiếp trả `consecutive_fixed_term`; gửi lại với `confirmConsecutive: true` thì lưu và trả cảnh báo (BR-026)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/EmployeeId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/ContractInput"
+      responses:
+        "201":
+          description: "Đã lưu"
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Contract"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/contracts/{contractId}":
+    patch:
+      tags:
+        - Contracts
+      summary: Sửa hợp đồng (US-015)
+      operationId: updateContract
+      description: Chỉ HR. Cùng các luật như khi thêm.
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/ContractInput"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Contract"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/me/profile":
+    get:
+      tags:
+        - Me
+      summary: Hồ sơ của tôi (US-017)
+      operationId: getMyProfile
+      description: Gồm thông tin cá nhân, quá trình công tác và hợp đồng của tôi.
+      responses:
+        "200":
+          description: Thành công
+          headers:
+            ETag:
+              description: "Version hiện tại; gửi lại trong If-Match khi sửa"
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/MyProfile"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+    patch:
+      tags:
+        - Me
+      summary: Sửa thông tin liên hệ của tôi (US-017)
+      operationId: updateMyProfile
+      description: "Chỉ các trường ở BR-021; trường khác là `validation_failed`. Có hiệu lực ngay và ghi nhật ký."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/MyProfilePatch"
+      responses:
+        "200":
+          description: Thành công
+          headers:
+            ETag:
+              description: "Version hiện tại; gửi lại trong If-Match khi sửa"
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/MyProfile"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "412":
+          "$ref": "#/components/responses/PreconditionFailed"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/policies":
+    get:
+      tags:
+        - Policies
+      summary: Thư viện quy chế (US-102)
+      operationId: listPolicies
+      description: "Quy chế đang dùng, kèm phiên bản hiệu lực tại hôm nay. HR thêm `includeRetired` để thấy quy chế ngừng dùng."
+      parameters:
+        - name: includeRetired
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PolicyList"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+    post:
+      tags:
+        - Policies
+      summary: Tạo quy chế (US-101)
+      operationId: createPolicy
+      description: Chỉ HR.
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+      responses:
+        "201":
+          description: "Đã tạo"
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Policy"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/policies/{policyId}":
+    get:
+      tags:
+        - Policies
+      summary: "Một quy chế: phiên bản hiệu lực và các phiên bản trước (US-102)"
+      operationId: getPolicy
+      description: Nhân viên và Quản lý không thấy bản nháp (US-101 AC4).
+      parameters:
+        - "$ref": "#/components/parameters/PolicyId"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PolicyDetail"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+  "/policies/{policyId}/versions":
+    post:
+      tags:
+        - Policies
+      summary: Tạo bản nháp phiên bản mới (US-101)
+      operationId: createPolicyVersion
+      description: Chỉ HR.
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/PolicyId"
+      responses:
+        "201":
+          description: Bản nháp, chép các mục từ phiên bản mới nhất
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PolicyVersion"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+  "/policy-versions/{versionId}":
+    get:
+      tags:
+        - Policies
+      summary: Một phiên bản quy chế kèm các mục (US-101, US-102)
+      operationId: getPolicyVersion
+      description: Bản nháp chỉ HR xem được.
+      parameters:
+        - "$ref": "#/components/parameters/VersionId"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PolicyVersion"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+    put:
+      tags:
+        - Policies
+      summary: Sửa các mục của bản nháp (US-101)
+      operationId: updatePolicyVersion
+      description: "Chỉ HR. Phiên bản đã đăng thì `policy_version_published` (BR-192)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/VersionId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PolicyVersionInput"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PolicyVersion"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/policy-versions/{versionId}/publish":
+    post:
+      tags:
+        - Policies
+      summary: "Đăng phiên bản với ngày hiệu lực (US-101)"
+      operationId: publishPolicyVersion
+      description: "Chỉ HR. Đã có phiên bản đăng cùng ngày hiệu lực thì `policy_effective_date_taken` (BR-192). Câu hỏi thường gặp gắn với quy chế được đánh cờ cần rà lại (BR-194)."
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/VersionId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              required:
+                - effectiveOn
+              properties:
+                effectiveOn:
+                  type: string
+                  format: date
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PolicyVersion"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "403":
+          "$ref": "#/components/responses/Forbidden"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "409":
+          "$ref": "#/components/responses/Conflict"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/policy-sections":
+    get:
+      tags:
+        - Policies
+      summary: Tìm mục quy chế theo từ khóa (US-102)
+      operationId: searchPolicySections
+      description: Tìm trong tiêu đề và nội dung các mục của phiên bản hiệu lực tại hôm nay (BR-193).
+      parameters:
+        - name: search
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PolicySectionHitList"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/hr-questions":
+    get:
+      tags:
+        - Questions
+      summary: Câu hỏi gửi HR (US-104, US-105)
+      operationId: listHrQuestions
+      description: "Người dùng thấy câu hỏi của mình; HR thấy mọi câu hỏi. `overdue` đánh dấu câu chờ quá `hr_question_reminder_days` ngày làm việc."
+      parameters:
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/PageSize"
+        - name: status
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/HrQuestionStatus"
+        - name: mine
+          in: query
+          required: false
+          description: HR đặt true để chỉ xem câu hỏi của mình
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/HrQuestionPage"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+    post:
+      tags:
+        - Questions
+      summary: Gửi câu hỏi cho HR (US-104)
+      operationId: createHrQuestion
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/HrQuestionCreate"
+      responses:
+        "201":
+          description: "Đã gửi; mọi HR nhận thông báo"
+          headers:
+            Location:
+              description: URL của tài nguyên vừa tạo
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/HrQuestion"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/hr-questions/{questionId}":
+    get:
+      tags:
+        - Questions
+      summary: Một câu hỏi và các lượt trả lời (US-104, US-105)
+      operationId: getHrQuestion
+      description: Chỉ người hỏi và HR.
+      parameters:
+        - "$ref": "#/components/parameters/QuestionId"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/HrQuestion"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+  "/hr-questions/{questionId}/messages":
+    post:
+      tags:
+        - Questions
+      summary: HR trả lời, hoặc người hỏi hỏi thêm (US-104, US-105)
+      operationId: addHrQuestionMessage
+      description: Lượt đã gửi không sửa, không xóa. Người hỏi nhận thông báo khi HR trả lời (BR-195).
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - "$ref": "#/components/parameters/QuestionId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              required:
+                - body
+              properties:
+                body:
+                  type: string
+                  minLength: 1
+                  maxLength: 4000
+      responses:
+        "201":
+          description: "Đã thêm lượt; câu hỏi sang `answered` khi HR viết, về `pending` khi người hỏi viết"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/HrQuestion"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "404":
+          "$ref": "#/components/responses/NotFound"
+        "422":
+          "$ref": "#/components/responses/UnprocessableEntity"
+  "/notifications":
+    get:
+      tags:
+        - Notifications
+      summary: Thông báo của tôi (US-114)
+      operationId: listNotifications
+      description: "Mới nhất ở đầu; `meta.unreadCount` là số chưa đọc."
+      parameters:
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/PageSize"
+        - name: unread
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/NotificationPage"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+  "/notifications/{notificationId}/read":
+    post:
+      tags:
+        - Notifications
+      summary: "Đánh dấu đã đọc (US-114)"
+      operationId: markNotificationRead
+      description: Chỉ người nhận (BR-213). Đối tượng liên quan có thể không mở được nếu người nhận không còn quyền (EC-142).
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - name: notificationId
           in: path
           required: true
           schema:
             type: string
             format: uuid
       responses:
-        '204':
-          description: Đã hủy
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-
+        "200":
+          description: Thành công
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Notification"
+        "401":
+          "$ref": "#/components/responses/Unauthorized"
+        "404":
+          "$ref": "#/components/responses/NotFound"
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: hrm_session
+      description: Phiên lưu ở server (ADR-0010)
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: "Giá trị csrfToken trong Session; bắt buộc ở request ghi"
   parameters:
     Page:
       name: page
@@ -163,56 +1442,150 @@ components:
         minimum: 1
         maximum: 100
         default: 20
-    RoomId:
-      name: roomId
+    Search:
+      name: search
+      in: query
+      required: false
+      description: Không phân biệt dấu và hoa thường (EC-019)
+      schema:
+        type: string
+        maxLength: 100
+    AsOf:
+      name: asOf
+      in: query
+      required: false
+      description: "Xem tại một ngày; mặc định hôm nay"
+      schema:
+        type: string
+        format: date
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: ETag nhận khi đọc (EC-016)
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Gửi lại cùng key trong 24 giờ thì nhận lại kết quả lần đầu
+      schema:
+        type: string
+        maxLength: 64
+    EmployeeId:
+      name: employeeId
       in: path
       required: true
       schema:
         type: string
         format: uuid
-    IdempotencyKey:
-      name: Idempotency-Key
-      in: header
-      required: false
-      description: Gửi lại cùng key thì nhận lại kết quả lần đầu, không tạo lịch thứ hai
+    AccountId:
+      name: accountId
+      in: path
+      required: true
       schema:
         type: string
-        maxLength: 64
-
+        format: uuid
+    PositionId:
+      name: positionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrgUnitId:
+      name: orgUnitId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PolicyId:
+      name: policyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    VersionId:
+      name: versionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    QuestionId:
+      name: questionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
     Problem:
-      description: RFC 9457 Problem Details, thêm `code` theo nghĩa nghiệp vụ.
       type: object
-      required: [type, title, status, code]
+      description: RFC 9457 Problem Details, thêm code theo nghĩa nghiệp vụ.
+      required:
+        - type
+        - title
+        - status
+        - code
       properties:
         type:
           type: string
-          example: about:blank
+          example: "about:blank"
         title:
           type: string
-          example: Booking conflict
         status:
           type: integer
-          example: 409
         detail:
           type: string
         code:
           type: string
-          description: Mã lỗi ổn định cho client, liệt kê ở bảng Errors trong docs/design/api.md
-          example: booking_conflict
+          description: Mã lỗi ổn định, liệt kê ở bảng Errors trong docs/design/api.md
+          example: contract_overlap
         errors:
-          description: Lỗi theo từng field khi `code` là `validation_failed`
           type: object
+          description: Lỗi theo field khi code là validation_failed
           additionalProperties:
             type: array
             items:
               type: string
+        existingEmployeeId:
+          type: string
+          format: uuid
+          description: Khi code là national_id_taken
+        blockers:
+          type: array
+          description: "Khi code là changes_after_last_day: các thay đổi cần hủy"
+          items:
+            type: object
+            additionalProperties: true
+        retryAfter:
+          type: string
+          format: date-time
+          description: Khi code là account_throttled
         traceId:
           type: string
-
+    Warning:
+      type: object
+      required:
+        - code
+        - detail
+      properties:
+        code:
+          type: string
+          example: consecutive_fixed_term
+        detail:
+          type: string
     PageMeta:
       type: object
-      required: [page, pageSize, totalItems, totalPages]
+      required:
+        - page
+        - pageSize
+        - totalItems
+        - totalPages
       properties:
         page:
           type: integer
@@ -222,112 +1595,1026 @@ components:
           type: integer
         totalPages:
           type: integer
-
-    Room:
+    NotificationPageMeta:
+      allOf:
+        - "$ref": "#/components/schemas/PageMeta"
+        - type: object
+          required:
+            - unreadCount
+          properties:
+            unreadCount:
+              type: integer
+    Role:
+      type: string
+      enum:
+        - employee
+        - manager
+        - hr
+    LoginRequest:
       type: object
-      required: [id, name, capacity]
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: Mã nhân viên
+          example: NV00026
+        password:
+          type: string
+          minLength: 1
+          maxLength: 200
+          format: password
+    PasswordChange:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+          maxLength: 200
+          format: password
+        newPassword:
+          type: string
+          minLength: 1
+          maxLength: 200
+          format: password
+          description: Tối thiểu min_password_length ký tự, khác mật khẩu hiện tại (BR-036)
+    Session:
+      type: object
+      required:
+        - accountId
+        - employeeId
+        - employeeCode
+        - fullName
+        - roles
+        - mustChangePassword
+        - csrfToken
+        - expiresAt
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+        employeeCode:
+          type: string
+        fullName:
+          type: string
+        roles:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Role"
+        managedOrgUnitIds:
+          type: array
+          description: "Phòng ban làm trưởng hôm nay; phạm vi gồm cả phòng ban con (BR-013)"
+          items:
+            type: string
+            format: uuid
+        mustChangePassword:
+          type: boolean
+          description: "Đúng thì mọi operation khác trả password_change_required (BR-002)"
+        csrfToken:
+          type: string
+          description: Gửi lại trong header X-CSRF-Token ở mọi request ghi
+        expiresAt:
+          type: string
+          format: date-time
+    AccountStatus:
+      type: string
+      enum:
+        - active
+        - throttled
+        - locked
+    Account:
+      type: object
+      required:
+        - id
+        - employeeId
+        - username
+        - isHr
+        - status
+        - mustChangePassword
+      properties:
+        id:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        isHr:
+          type: boolean
+        status:
+          "$ref": "#/components/schemas/AccountStatus"
+        mustChangePassword:
+          type: boolean
+        throttledUntil:
+          type: string
+          format: date-time
+          nullable: true
+    AccountPage:
+      type: object
+      required:
+        - items
+        - meta
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Account"
+        meta:
+          "$ref": "#/components/schemas/PageMeta"
+    TemporaryPassword:
+      type: object
+      required:
+        - temporaryPassword
+      properties:
+        temporaryPassword:
+          type: string
+          description: "Chỉ trả một lần; không lưu dạng đọc được"
+    AccountWithTemporaryPassword:
+      allOf:
+        - "$ref": "#/components/schemas/Account"
+        - "$ref": "#/components/schemas/TemporaryPassword"
+    Position:
+      type: object
+      required:
+        - id
+        - name
+        - isActive
       properties:
         id:
           type: string
           format: uuid
         name:
           type: string
-        capacity:
-          type: integer
-          minimum: 1
-        equipment:
-          type: array
-          items:
-            type: string
-
-    RoomPage:
+        isActive:
+          type: boolean
+    PositionList:
       type: object
-      required: [items, meta]
+      required:
+        - items
       properties:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/Room'
-        meta:
-          $ref: '#/components/schemas/PageMeta'
-
-    Booking:
+            "$ref": "#/components/schemas/Position"
+    PositionInput:
       type: object
-      required: [id, roomId, memberId, start, end, status]
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+    PositionPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        isActive:
+          type: boolean
+    OrgUnitStatus:
+      type: string
+      enum:
+        - planned
+        - active
+        - dissolved
+    PersonRef:
+      type: object
+      required:
+        - employeeId
+        - fullName
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+    OrgUnit:
+      type: object
+      required:
+        - id
+        - code
+        - name
+        - status
+        - establishedOn
       properties:
         id:
           type: string
           format: uuid
-        roomId:
+        code:
+          type: string
+        name:
+          type: string
+          description: Tên tại asOf
+        parentId:
           type: string
           format: uuid
-        memberId:
+          description: Trống ở phòng ban gốc
+          nullable: true
+        status:
+          "$ref": "#/components/schemas/OrgUnitStatus"
+        establishedOn:
           type: string
-          format: uuid
-        start:
+          format: date
+        dissolvedOn:
           type: string
-          format: date-time
-        end:
-          type: string
-          format: date-time
-        attendees:
+          format: date
+          nullable: true
+        head:
+          type: object
+          allOf:
+            - "$ref": "#/components/schemas/PersonRef"
+          nullable: true
+        activeHeadcount:
           type: integer
-          minimum: 1
-        purpose:
+          description: Số nhân viên đang làm tại asOf
+    OrgUnitList:
+      type: object
+      required:
+        - asOf
+        - items
+      properties:
+        asOf:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/OrgUnit"
+    OrgUnitCreate:
+      type: object
+      required:
+        - code
+        - name
+        - parentId
+        - establishedOn
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 20
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        parentId:
+          type: string
+          format: uuid
+        establishedOn:
+          type: string
+          format: date
+    OrgUnitChange:
+      type: object
+      required:
+        - kind
+        - effectiveOn
+      properties:
+        kind:
+          type: string
+          enum:
+            - rename
+            - move
+            - dissolve
+        effectiveOn:
+          type: string
+          format: date
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Khi kind là rename
+        parentId:
+          type: string
+          format: uuid
+          description: Khi kind là move
+    HeadAssignment:
+      type: object
+      required:
+        - id
+        - orgUnitId
+        - employeeId
+        - from
+      properties:
+        id:
+          type: string
+          format: uuid
+        orgUnitId:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        from:
+          type: string
+          format: date
+        lastDay:
+          type: string
+          format: date
+          nullable: true
+    HeadAppointment:
+      type: object
+      required:
+        - employeeId
+        - from
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        from:
+          type: string
+          format: date
+        lastDay:
+          type: string
+          format: date
+          nullable: true
+    EmployeeStatus:
+      type: string
+      enum:
+        - upcoming
+        - active
+        - terminated
+        - cancelled
+        - anonymized
+    EmployeeSummary:
+      type: object
+      required:
+        - id
+        - employeeCode
+        - fullName
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        employeeCode:
+          type: string
+        fullName:
+          type: string
+        status:
+          "$ref": "#/components/schemas/EmployeeStatus"
+        orgUnitId:
+          type: string
+          format: uuid
+        orgUnitName:
+          type: string
+        positionName:
+          type: string
+        workEmail:
+          type: string
+          nullable: true
+        workPhone:
+          type: string
+          nullable: true
+        hireDate:
+          type: string
+          format: date
+    EmployeeSummaryPage:
+      type: object
+      required:
+        - items
+        - meta
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/EmployeeSummary"
+        meta:
+          "$ref": "#/components/schemas/PageMeta"
+    Employee:
+      allOf:
+        - "$ref": "#/components/schemas/EmployeeSummary"
+        - type: object
+          description: personal chỉ có khi người gọi là HR hoặc chính nhân viên (BR-033)
+          properties:
+            lastDay:
+              type: string
+              format: date
+              nullable: true
+            upcomingAssignment:
+              type: object
+              allOf:
+                - "$ref": "#/components/schemas/Assignment"
+              nullable: true
+            personal:
+              "$ref": "#/components/schemas/PersonalInfo"
+    PersonalInfo:
+      type: object
+      properties:
+        dateOfBirth:
+          type: string
+          format: date
+          nullable: true
+        gender:
+          type: string
+          enum:
+            - female
+            - male
+            - other
+          nullable: true
+        nationalId:
+          type: string
+          nullable: true
+        permanentAddress:
+          type: string
+          nullable: true
+        currentAddress:
+          type: string
+          nullable: true
+        personalPhone:
+          type: string
+          nullable: true
+        personalEmail:
+          type: string
+          format: email
+          nullable: true
+        bankName:
+          type: string
+          nullable: true
+        bankAccountNo:
+          type: string
+          nullable: true
+        emergencyContactName:
+          type: string
+          nullable: true
+        emergencyContactPhone:
+          type: string
+          nullable: true
+    EmployeePatch:
+      type: object
+      description: Phòng ban, chức danh và mã nhân viên không có ở đây (US-012 AC3, AC4)
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        workEmail:
+          type: string
+          format: email
+          nullable: true
+        workPhone:
+          type: string
+          maxLength: 30
+          nullable: true
+        personal:
+          "$ref": "#/components/schemas/PersonalInfo"
+    Assignment:
+      type: object
+      required:
+        - id
+        - from
+        - orgUnitId
+        - positionId
+      properties:
+        id:
+          type: string
+          format: uuid
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+          description: "Ngày cuối; trống là còn hiệu lực"
+          nullable: true
+        orgUnitId:
+          type: string
+          format: uuid
+        orgUnitName:
+          type: string
+        positionId:
+          type: string
+          format: uuid
+        positionName:
+          type: string
+        reason:
+          type: string
+          nullable: true
+    AssignmentList:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Assignment"
+    AssignmentChange:
+      type: object
+      required:
+        - effectiveOn
+        - orgUnitId
+        - positionId
+      properties:
+        effectiveOn:
+          type: string
+          format: date
+        orgUnitId:
+          type: string
+          format: uuid
+        positionId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          maxLength: 500
+          description: Bắt buộc khi effectiveOn trước hôm nay (BR-018)
+    TerminationRequest:
+      type: object
+      required:
+        - lastDay
+        - reason
+      properties:
+        lastDay:
+          type: string
+          format: date
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+    ContractType:
+      type: string
+      enum:
+        - probation
+        - fixed_term
+        - indefinite
+    Contract:
+      type: object
+      required:
+        - id
+        - employeeId
+        - contractNo
+        - type
+        - signedOn
+        - startsOn
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+        contractNo:
+          type: string
+        type:
+          "$ref": "#/components/schemas/ContractType"
+        probationGroup:
+          type: string
+          description: Nhóm công việc khi thử việc (BR-028)
+          nullable: true
+        signedOn:
+          type: string
+          format: date
+        startsOn:
+          type: string
+          format: date
+        endsOn:
+          type: string
+          format: date
+          nullable: true
+        status:
+          type: string
+          enum:
+            - upcoming
+            - active
+            - expired
+            - terminated
+        warnings:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Warning"
+    ContractList:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Contract"
+    ContractInput:
+      type: object
+      required:
+        - contractNo
+        - type
+        - signedOn
+        - startsOn
+      properties:
+        contractNo:
+          type: string
+          minLength: 1
+          maxLength: 50
+        type:
+          "$ref": "#/components/schemas/ContractType"
+        probationGroup:
+          type: string
+        signedOn:
+          type: string
+          format: date
+        startsOn:
+          type: string
+          format: date
+        endsOn:
+          type: string
+          format: date
+          description: Bắt buộc với probation và fixed_term
+        confirmConsecutive:
+          type: boolean
+          default: false
+          description: Xác nhận hợp đồng xác định thời hạn thứ ba liên tiếp (BR-026)
+    HireRequest:
+      type: object
+      description: Bốn bước của SCR-009 gửi trong một request
+      required:
+        - fullName
+        - hireDate
+        - orgUnitId
+        - positionId
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        hireDate:
+          type: string
+          format: date
+        orgUnitId:
+          type: string
+          format: uuid
+        positionId:
+          type: string
+          format: uuid
+        workEmail:
+          type: string
+          format: email
+        workPhone:
+          type: string
+          maxLength: 30
+        personal:
+          "$ref": "#/components/schemas/PersonalInfo"
+        contract:
+          "$ref": "#/components/schemas/ContractInput"
+    MyProfile:
+      type: object
+      required:
+        - employee
+        - assignments
+        - contracts
+      properties:
+        employee:
+          "$ref": "#/components/schemas/Employee"
+        assignments:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Assignment"
+        contracts:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Contract"
+    MyProfilePatch:
+      type: object
+      description: Chỉ các trường ở BR-021
+      properties:
+        personalPhone:
+          type: string
+          maxLength: 30
+          nullable: true
+        personalEmail:
+          type: string
+          format: email
+          nullable: true
+        currentAddress:
+          type: string
+          maxLength: 500
+          nullable: true
+        emergencyContactName:
+          type: string
+          maxLength: 200
+          nullable: true
+        emergencyContactPhone:
+          type: string
+          maxLength: 30
+          nullable: true
+    Policy:
+      type: object
+      required:
+        - id
+        - name
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
           type: string
         status:
           type: string
-          enum: [confirmed, cancelled, completed]
-
-    BookingCreate:
+          enum:
+            - in_use
+            - retired
+        currentVersion:
+          type: object
+          allOf:
+            - "$ref": "#/components/schemas/PolicyVersionSummary"
+          nullable: true
+    PolicyList:
       type: object
-      required: [roomId, start, end]
+      required:
+        - items
       properties:
-        roomId:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Policy"
+    PolicyVersionSummary:
+      type: object
+      required:
+        - id
+        - versionNo
+        - status
+      properties:
+        id:
           type: string
           format: uuid
-        start:
+        versionNo:
+          type: integer
+        status:
+          type: string
+          enum:
+            - draft
+            - published
+        effectiveOn:
+          type: string
+          format: date
+          nullable: true
+        publishedAt:
           type: string
           format: date-time
-        end:
-          type: string
-          format: date-time
-          description: Sau `start`, dài tối đa `max_booking_hours` (BR-002)
-        attendees:
+          nullable: true
+    PolicyDetail:
+      allOf:
+        - "$ref": "#/components/schemas/Policy"
+        - type: object
+          required:
+            - versions
+          properties:
+            versions:
+              type: array
+              description: "Mới nhất ở đầu; bản nháp chỉ có với HR"
+              items:
+                "$ref": "#/components/schemas/PolicyVersionSummary"
+    PolicySection:
+      type: object
+      required:
+        - position
+        - title
+        - body
+      properties:
+        position:
           type: integer
           minimum: 1
-        purpose:
+        title:
           type: string
+          minLength: 1
           maxLength: 200
-
+        body:
+          type: string
+          minLength: 1
+          maxLength: 20000
+    PolicyVersion:
+      allOf:
+        - "$ref": "#/components/schemas/PolicyVersionSummary"
+        - type: object
+          required:
+            - policyId
+            - sections
+          properties:
+            policyId:
+              type: string
+              format: uuid
+            sections:
+              type: array
+              items:
+                "$ref": "#/components/schemas/PolicySection"
+    PolicyVersionInput:
+      type: object
+      required:
+        - sections
+      properties:
+        sections:
+          type: array
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/PolicySection"
+    PolicySectionHit:
+      type: object
+      required:
+        - policyId
+        - policyName
+        - versionId
+        - section
+      properties:
+        policyId:
+          type: string
+          format: uuid
+        policyName:
+          type: string
+        versionId:
+          type: string
+          format: uuid
+        section:
+          "$ref": "#/components/schemas/PolicySection"
+        snippet:
+          type: string
+    PolicySectionHitList:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/PolicySectionHit"
+    HrQuestionStatus:
+      type: string
+      enum:
+        - pending
+        - answered
+    HrQuestionMessage:
+      type: object
+      required:
+        - authorName
+        - body
+        - createdAt
+        - fromHr
+      properties:
+        authorName:
+          type: string
+        fromHr:
+          type: boolean
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    HrQuestion:
+      type: object
+      required:
+        - id
+        - askerName
+        - body
+        - source
+        - status
+        - sentAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        askerName:
+          type: string
+        body:
+          type: string
+        source:
+          type: string
+          enum:
+            - form
+            - chat
+        status:
+          "$ref": "#/components/schemas/HrQuestionStatus"
+        sentAt:
+          type: string
+          format: date-time
+        overdue:
+          type: boolean
+          description: Chờ quá hr_question_reminder_days ngày làm việc (BR-196)
+        messages:
+          type: array
+          items:
+            "$ref": "#/components/schemas/HrQuestionMessage"
+    HrQuestionPage:
+      type: object
+      required:
+        - items
+        - meta
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/HrQuestion"
+        meta:
+          "$ref": "#/components/schemas/PageMeta"
+    HrQuestionCreate:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 4000
+    Notification:
+      type: object
+      required:
+        - id
+        - kind
+        - body
+        - sentAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        body:
+          type: string
+        target:
+          type: object
+          required:
+            - type
+            - id
+          properties:
+            type:
+              type: string
+              example: leave_request
+            id:
+              type: string
+              format: uuid
+          nullable: true
+        sentAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+    NotificationPage:
+      type: object
+      required:
+        - items
+        - meta
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Notification"
+        meta:
+          "$ref": "#/components/schemas/NotificationPageMeta"
   responses:
-    ValidationError:
-      description: "Đầu vào không hợp lệ: `validation_failed`, hoặc vi phạm luật như `slot_too_long` (BR-002)"
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
     Unauthorized:
-      description: Chưa đăng nhập hoặc phiên đã hết hạn
+      description: "`unauthenticated`: chưa đăng nhập hoặc phiên hết hạn; `invalid_credentials` khi đăng nhập sai"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            "$ref": "#/components/schemas/Problem"
     Forbidden:
-      description: Đã đăng nhập nhưng không có quyền
+      description: "`forbidden`, `out_of_scope`, `password_change_required`, `account_throttled`, `account_locked`, hoặc thiếu X-CSRF-Token"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            "$ref": "#/components/schemas/Problem"
     NotFound:
-      description: Không tìm thấy tài nguyên, hoặc người gọi không được xem tài nguyên đó
+      description: "`not_found`: không có, hoặc người gọi không được biết đối tượng tồn tại"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            "$ref": "#/components/schemas/Problem"
     Conflict:
-      description: "Xung đột với trạng thái hiện tại: `booking_conflict` (BR-001), `booking_started` (BR-004)"
+      description: "Xung đột với trạng thái hay dữ liệu hiện có; `code` theo bảng Errors trong api.md"
       content:
-        application/problem+json:
+        "application/problem+json":
           schema:
-            $ref: '#/components/schemas/Problem'
+            "$ref": "#/components/schemas/Problem"
+    PreconditionFailed:
+      description: "`stale_version`: dữ liệu đã đổi từ khi mở"
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/Problem"
+    UnprocessableEntity:
+      description: "`validation_failed` kèm `errors`, hoặc vi phạm luật về giá trị"
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/Problem"
+    TooManyRequests:
+      description: Gọi quá giới hạn
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/Problem"

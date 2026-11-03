@@ -41,8 +41,8 @@ docs/
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | C4 Context và Container, driver, cross-cutting, threat, deployment | Architect | 3 | Draft; đã có Context, drivers, Containers và Constraints |
 | [components.md](design/components.md) | C4 Component: module, dependency rule, frontend, cấu hình | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [data.md](design/data.md), [schema.dbml](design/schema.dbml) | Dữ liệu lưu thế nào, luật nào giữ ở tầng dữ liệu, transaction, migration; bảng và cột | Architect | 3 | Draft |
-| [api.md](design/api.md) | Quy ước API, lỗi, xác thực, danh sách operation | Architect | 3 | Mẫu, điền ở Phase 3 |
-| [openapi.yaml](../contracts/openapi.yaml) | Contract chính xác của API | Architect | 3 | Mẫu, điền ở Phase 3 |
+| [api.md](design/api.md) | Quy ước API, lỗi, xác thực, danh sách operation | Architect | 3 | Draft; operation cho mọi story Must |
+| [openapi.yaml](../contracts/openapi.yaml) | Contract chính xác của API | Architect | 3 | Draft; đã có M1 |
 | [flows.md](design/flows.md) | Sequence diagram của luồng chính và job | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [ui.md](design/ui.md) | Design system, trạng thái màn hình, định dạng, accessibility | Architect | 3 | Mẫu, điền ở Phase 3; đã có Design sources, Formats và bảng thuật ngữ tiếng Anh |
 | [prototype.md](design/prototype.md) | Prototype vẽ màn hình nào, ở đâu, với dữ liệu giả nào; khi nào được duyệt | Architect | Prototype | Draft |
