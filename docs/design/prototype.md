@@ -1,7 +1,7 @@
 # Prototype: hr-manager
 
 - **Status:** Draft
-- **Updated:** 2026-11-01
+- **Updated:** 2026-11-02
 - **Reviewed:** 2026-11-01: AI review bằng subagent `agent-skills:code-reviewer` ở PR #63; chủ dự án chưa duyệt
 - **Related:** [project](../project/project.md) · [brief](../project/brief.md#success-metrics) ·
   [ui-flow](../analysis/ui-flow.md) · [stories](../analysis/stories.md) · [ui](ui.md)
@@ -22,9 +22,11 @@ này.
 - Link của canvas và design system để riêng tư. Link được ghi ở mục Design sources của [ui](ui.md) khi Artifact được
   tạo. Nguồn của canvas nằm trên claude.ai, có lịch sử phiên bản; repo không giữ bản sao.
 - Canvas có trang Đọc trước, ghi người dùng mẫu, mốc thời gian và cách đi các luồng. Sau đó là sáu trang M1 tới M6.
-- Mỗi màn hình là một artboard rộng 1440 px; canvas lưu mỗi artboard thành một file `.dc.html`. File đặt tên theo mã
-  màn hình, thêm vai trò hoặc trạng thái khi có nhiều bản, ví dụ `scr-021-hr.dc.html` hay
-  `scr-037-can-tinh-lai.dc.html`. Tiêu đề artboard ghi mã, tên màn hình và vai trò, ví dụ "SCR-021 Đơn chờ duyệt · HR".
+- Mỗi màn hình là một artboard. Màn của vai trò Nhân viên vẽ trong khung điện thoại 402×856 px; màn của Quản lý, HR
+  và Giám đốc rộng 1440 px. Màn có cả hai loại vai trò thì mỗi vai trò một artboard. Danh sách màn có biến thể Nhân
+  viên ghi ở từng Task màn hình.
+- Canvas lưu mỗi artboard thành một file `.dc.html`. File đặt tên theo mã màn hình, thêm vai trò hoặc trạng thái khi
+  có nhiều bản, ví dụ `scr-021-hr.dc.html` hay `scr-037-can-tinh-lai.dc.html`. Tiêu đề artboard ghi mã, tên màn hình và vai trò, ví dụ "SCR-021 Đơn chờ duyệt · HR".
 - Artboard nối nhau bằng link để đi theo luồng. Thanh trên cùng của mỗi artboard ghi người đang xem: một trong bốn
   người dùng mẫu, hoặc nhân viên khác khi tình huống cần. Menu theo vai trò như bảng Menu trong
   [ui-flow](../analysis/ui-flow.md#information-architecture).
@@ -178,6 +180,6 @@ Dùng ở #61. Prototype đạt khi:
 ## Out of scope
 
 - Code, stack, thư viện component và framework frontend: chọn ở Phase 3.
-- Bản riêng cho màn hình điện thoại: prototype vẽ ở độ rộng 1440 px; cách co giãn ghi ở [ui](ui.md) ở Phase 3.
+- Kích thước khác hai khung ở mục Where, như tablet: cách co giãn ghi ở [ui](ui.md) ở Phase 3.
 - Email và tin ngoài hệ thống: hệ thống không gửi, theo mục Thông báo trong [glossary](../analysis/domain.md#glossary).
 - Gọi model AI thật: thuộc spike #48, #49 và Phase 3.

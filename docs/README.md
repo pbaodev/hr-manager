@@ -47,6 +47,7 @@ docs/
 | [ui.md](design/ui.md) | Design system, trạng thái màn hình, định dạng, accessibility | Architect | 3 | Mẫu, điền ở Phase 3; Design sources đã có design system của prototype |
 | [prototype.md](design/prototype.md) | Prototype vẽ màn hình nào, ở đâu, với dữ liệu giả nào; khi nào được duyệt | Architect | Prototype | Draft |
 | [prototype-data.md](design/prototype-data.md) | Dữ liệu giả của prototype: nhân viên, đơn, chấm công, lương, tín hiệu | Architect | Prototype | Draft |
+| [product-mindmap.md](design/product-mindmap.md) | Dàn ý product mindmap tiếng Việt và tiếng Anh để dựng bằng Xmind | Architect | Prototype | Draft |
 | [ai.md](design/ai.md) | Component AI của ba tính năng ở M6 | Architect | 3 | Mẫu, điền ở Phase 3 |
 | [decisions/](decisions/README.md) | Vì sao chọn phương án này, đã cân nhắc phương án nào | Architect | 1 trở đi | Chưa có ADR; ADR-0001 tới 0006 đã bỏ |
 
