@@ -15,8 +15,8 @@
 
 | Kind | Link | Version or date |
 |---|---|---|
-| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-03, phiên bản 11: quy tắc Không có số và không vẽ control chưa có hành vi ở #72 |
-| Canvas prototype, Artifact loại Design trên claude.ai, riêng tư | [HR Manager Prototype](https://claude.ai/artifact/Dab3WjsfCMeWuE65pHN93S) | 2026-11-02, phiên bản 17: 5 màn AI của #68 |
+| Design system của prototype, Artifact loại Design System trên claude.ai, riêng tư | [HR Manager](https://claude.ai/artifact/9GgVS3B3WtVwGALVifbziA) | 2026-11-03, phiên bản 12: giao diện tiếng Anh ở #74 |
+| Canvas prototype, Artifact loại Design trên claude.ai, riêng tư | [HR Manager Prototype](https://claude.ai/artifact/Dab3WjsfCMeWuE65pHN93S) | 2026-11-03, phiên bản 18: 5 màn AI của #68, chuyển sang tiếng Anh ở #74 |
 | *Mockup* | *[link]* | *[YYYY-MM-DD]* |
 | *Component library* | *[tên thư viện, dẫn ADR nếu ảnh hưởng tới kiến trúc]* | *[version]* |
 
@@ -50,9 +50,113 @@ Giá trị dùng chung, đặt trong code hoặc config của frontend thay vì 
 
 ## Formats
 
-- **Date and time:** [ví dụ `dd/MM/yyyy HH:mm`, hiển thị theo timezone của người dùng; lưu theo cách ghi ở data]
-- **Numbers and currency:** [ví dụ `1.234,56`; đơn vị tiền]
+- **Language:** giao diện, thông báo và nội dung AI viết bằng tiếng Anh (quyết định của chủ dự án, 2026-11-03, #74). Tài
+  liệu phân tích giữ tiếng Việt; tên trên giao diện theo mục Language and terms bên dưới. Tên người giữ nguyên tiếng
+  Việt có dấu.
+- **Date and time:** ngày `09/11/2026` (`dd/MM/yyyy`); trong năm hiện tại bỏ năm: `13/11`; kèm thứ: `Fri 13/11`; khoảng
+  ngày `17/11 – 19/11`; buổi `13/11 AM`, `13/11 PM`. Giờ 24 giờ `08:45`. Hiển thị theo giờ Việt Nam.
+- **Numbers and currency:** dấu phẩy ngăn nghìn, dấu chấm thập phân: tiền `13,717,500 VND`; số ngày `1.5 days`, `1 day`;
+  tỷ lệ `21.6%`; số âm dùng dấu trừ `−1.0`. Trong bảng, đơn vị ghi ở đầu cột: `Gross pay (VND)`.
 - **Responsive:** [breakpoint, ví dụ mobile ≤ 768px, desktop > 1024px; màn hình nào không hỗ trợ mobile]
+
+## Language and terms
+
+Một khái niệm chỉ có một tên trên giao diện. Viết hoa chữ đầu câu và tên riêng: `Request leave`, không `Request Leave`.
+Cột Vietnamese là tên trong tài liệu phân tích.
+
+**Roles and company**
+
+| Vietnamese | English |
+|---|---|
+| Nhân viên, Quản lý, HR | Employee, Manager, HR |
+| Giám đốc (nhãn dưới tên ở sidebar) | Director |
+| Nhóm mục ở sidebar: Của tôi, Quản lý, Công ty | Me, Manage, Company |
+| Công ty Mẫu | Sample Co. |
+| Kinh doanh, Kho vận, Kỹ thuật, Kế toán, Hành chính – Nhân sự, Pháp chế | Sales, Logistics, Engineering, Accounting, Admin & HR, Legal |
+
+**Menu**
+
+| Vietnamese | English |
+|---|---|
+| Trang chủ, Hồ sơ của tôi, Danh bạ, Sơ đồ tổ chức | Home, My profile, Directory, Org chart |
+| Nhân viên, Đơn chờ duyệt, Nghỉ phép, Chấm công, Lương | Employees, Approvals, Leave, Attendance, Pay |
+| Báo cáo, Quy chế, Câu hỏi gửi HR, Quản trị | Reports, Policies, Questions to HR, Admin |
+| Tab bar điện thoại: Trang chủ, Nghỉ phép, Chấm công, Lương, Thêm | Home, Leave, Attendance, Pay, More |
+
+**Screens**
+
+| ID | English | ID | English |
+|---|---|---|---|
+| SCR-001 | Sign in | SCR-027 | Import time-clock file |
+| SCR-002 | Change password | SCR-028 | My timesheet |
+| SCR-003 | Home | SCR-029 | Attendance correction |
+| SCR-004 | My profile | SCR-030 | Overtime request |
+| SCR-005 | Directory | SCR-031 | Team timesheet |
+| SCR-006 | Org chart | SCR-032 | Close timesheet |
+| SCR-007 | Employees | SCR-033 | Allowance types |
+| SCR-008 | Employee details | SCR-034 | Payroll settings |
+| SCR-009 | New hire | SCR-035 | Salary change |
+| SCR-010 | Job change | SCR-036 | Dependants |
+| SCR-011 | Record departure | SCR-037 | Payroll |
+| SCR-012 | Add or edit contract | SCR-038 | Payslip details |
+| SCR-013 | Expiring contracts | SCR-039 | My payslips |
+| SCR-014 | Departments | SCR-040 | Reports overview |
+| SCR-015 | Job titles | SCR-041 | Headcount changes |
+| SCR-016 | User accounts | SCR-042 | Workforce mix |
+| SCR-017 | Audit log | SCR-043 | Leave report |
+| SCR-018 | Import employees | SCR-044 | Attendance report |
+| SCR-019 | My leave | SCR-045 | Payroll cost |
+| SCR-020 | Request leave | SCR-046 | Expired records |
+| SCR-021 | Approvals | SCR-047 | Leave reasons |
+| SCR-022 | Team leave calendar | SCR-048 | Signal details |
+| SCR-023 | Leave types | SCR-049 | Policy library |
+| SCR-024 | Work calendar | SCR-050 | Edit policy version |
+| SCR-025 | Shifts | SCR-051 | Questions to HR |
+| SCR-026 | Shift assignment | SCR-052 | HR Assistant |
+
+**Statuses**
+
+Theo mục Lifecycles của [domain](../analysis/domain.md#lifecycles); mã trạng thái trong domain đặt cạnh tên hiển thị.
+
+| Object | English |
+|---|---|
+| Đơn nghỉ, đơn làm thêm | Pending `pending`, Approved `approved`, Rejected `rejected`, Awaiting reply `awaiting`, Cancelled `cancelled` |
+| Nhân viên | Upcoming `upcoming`, Active `active`, Left `terminated`, Hire cancelled `cancelled`, Anonymized `anonymized` |
+| Tài khoản | Active `active`, Temporarily locked `throttled`, Locked `locked` |
+| Hợp đồng | Upcoming `upcoming`, Active `active`, Expired `expired`, Ended early `terminated` |
+| Phòng ban | Planned `planned`, Active `active`, Dissolved `dissolved` |
+| Bảng công | Open `open`, Closed `closed` |
+| Bảng lương | Draft `draft`, Needs recalculation `stale`, Closed `closed` |
+| Tín hiệu | Active `active`, Resolved `resolved` |
+| Câu hỏi gửi HR | Pending `pending`, Answered `answered` |
+| Nhãn khác: Quá hạn, Dưới ngưỡng, Thiếu phép, Thiếu dữ liệu, Không đồng ý đổi ngày | Overdue, Below threshold, Not enough leave, Missing data, Date change declined |
+
+**Leave types and reasons**
+
+| Vietnamese | English |
+|---|---|
+| Phép năm | Annual leave |
+| Kết hôn, Con kết hôn | Marriage leave, Child's marriage leave |
+| Tang cha, mẹ, vợ hoặc chồng, con… | Bereavement leave |
+| Việc riêng không lương | Unpaid personal leave |
+| Ốm đau, Thai sản | Sick leave, Maternity leave |
+| Lý do: Bản thân kết hôn, Anh chị em ruột kết hôn, Ông bà mất… | Own wedding, Sibling's wedding, Grandparent's death… |
+
+**Business terms**
+
+| Vietnamese | English | Vietnamese | English |
+|---|---|---|---|
+| Số dư phép | Leave balance | Bảng công | Timesheet |
+| Phép tồn | Carried-over leave | Chốt bảng công, chốt bảng lương | Close timesheet, close payroll |
+| Cộng phép | Accrual | Giải trình | Attendance correction |
+| Người duyệt, duyệt thay | Approver, backup approver | Làm thêm giờ | Overtime |
+| Đề nghị đổi ngày | Suggest other dates | Ca làm việc | Shift |
+| Ngưỡng nhân sự, mức phủ | Staffing threshold, coverage | Bảng lương, phiếu lương | Payroll, payslip |
+| Mã nhân viên | Employee ID | Phụ cấp | Allowance |
+| Chức danh, quá trình công tác | Job title, job history | BHXH | Social insurance |
+| Tiếp nhận, nghỉ việc | Hire, departure | Thuế TNCN | Personal income tax |
+| Quy chế, câu hỏi thường gặp | Policy, FAQ | Người phụ thuộc | Dependant |
+| Tín hiệu, điều đáng chú ý | Signal, insight | Lương tối thiểu vùng | Regional minimum wage |
 
 ## Accessibility
 

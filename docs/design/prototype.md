@@ -1,7 +1,7 @@
 # Prototype: hr-manager
 
 - **Status:** Draft
-- **Updated:** 2026-11-02
+- **Updated:** 2026-11-03
 - **Reviewed:** 2026-11-01: AI review bằng subagent `agent-skills:code-reviewer` ở PR #63; chủ dự án chưa duyệt
 - **Related:** [project](../project/project.md) · [brief](../project/brief.md#success-metrics) ·
   [ui-flow](../analysis/ui-flow.md) · [stories](../analysis/stories.md) · [ui](ui.md)
@@ -18,15 +18,19 @@ này.
 | Canvas prototype | claude.ai, Artifact loại Design | #55, các Task màn hình bổ sung dần |
 | Design system | claude.ai, Artifact loại Design System | #54 |
 | Dữ liệu giả | `docs/design/prototype-data.md` | #53 |
+| Ảnh chụp màn hình | `docs/design/screenshots/` | #74, các Task màn hình bổ sung dần |
 
 - Link của canvas và design system để riêng tư. Link được ghi ở mục Design sources của [ui](ui.md) khi Artifact được
-  tạo. Nguồn của canvas nằm trên claude.ai, có lịch sử phiên bản; repo không giữ bản sao.
-- Canvas có trang Đọc trước, ghi người dùng mẫu, mốc thời gian và cách đi các luồng. Sau đó là sáu trang M1 tới M6.
+  tạo. Nguồn của canvas nằm trên claude.ai, có lịch sử phiên bản; repo không giữ file `.dc.html`.
+- Mỗi artboard có một ảnh PNG trong `docs/design/screenshots/`, cùng tên với file `.dc.html`, chụp ở tỉ lệ 2x. Task
+  vẽ hoặc sửa artboard thì chụp lại ảnh trong cùng PR.
+- Chữ trên canvas là tiếng Anh, theo mục Formats và Language and terms của [ui](ui.md). Tên người giữ tiếng Việt.
+- Canvas có trang Read first, ghi người dùng mẫu, mốc thời gian và cách đi các luồng. Sau đó là sáu trang M1 tới M6.
 - Mỗi màn hình là một artboard. Màn của vai trò Nhân viên vẽ trong khung điện thoại 402×856 px; màn của Quản lý, HR
   và Giám đốc rộng 1440 px. Màn có cả hai loại vai trò thì mỗi vai trò một artboard. Danh sách màn có biến thể Nhân
   viên ghi ở từng Task màn hình.
 - Canvas lưu mỗi artboard thành một file `.dc.html`. File đặt tên theo mã màn hình, thêm vai trò hoặc trạng thái khi
-  có nhiều bản, ví dụ `scr-021-hr.dc.html` hay `scr-037-can-tinh-lai.dc.html`. Tiêu đề artboard ghi mã, tên màn hình và vai trò, ví dụ "SCR-021 Đơn chờ duyệt · HR".
+  có nhiều bản, ví dụ `scr-021-hr.dc.html` hay `scr-037-can-tinh-lai.dc.html`. Tiêu đề artboard ghi mã, tên màn hình và vai trò, ví dụ "SCR-021 Approvals · HR".
 - Artboard nối nhau bằng link để đi theo luồng. Thanh trên cùng của mỗi artboard ghi người đang xem: một trong bốn
   người dùng mẫu, hoặc nhân viên khác khi tình huống cần. Menu theo vai trò như bảng Menu trong
   [ui-flow](../analysis/ui-flow.md#information-architecture).
@@ -76,7 +80,8 @@ vai trò Quản lý với phạm vi toàn công ty, theo mục Actors trong [req
 ## Mock data
 
 Mọi dữ liệu là giả theo brief: không tên, số CCCD, tài khoản ngân hàng hay dữ liệu nào của người thật. Chi tiết nằm ở
-`docs/design/prototype-data.md`, tạo ở #53; mọi con số trên canvas lấy từ file đó.
+`docs/design/prototype-data.md`, tạo ở #53; mọi con số trên canvas lấy từ file đó. File này giữ tiếng Việt; canvas hiện
+bản dịch tiếng Anh theo bảng thuật ngữ trong [ui](ui.md#language-and-terms).
 
 **Company:** Công ty Mẫu, khoảng 43 người, vùng lương tối thiểu I.
 
