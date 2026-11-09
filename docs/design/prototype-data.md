@@ -1,7 +1,7 @@
 # Prototype data: hr-manager
 
 - **Status:** Draft
-- **Updated:** 2026-11-03
+- **Updated:** 2026-11-09
 - **Reviewed:** [YYYY-MM-DD: AI review ở PR; chủ dự án duyệt]
 - **Related:** [prototype](prototype.md) · [domain](../analysis/domain.md) · [stories](../analysis/stories.md)
 
@@ -93,7 +93,7 @@ trước ngày làm việc cuối, nên phiếu lương tháng cuối của họ
 | NV00034 | Kiều Văn Tâm | Kho vận | Nhân viên kho | 1/7/2024 | — | Không xác định thời hạn | 5.400.000; 5.800.000 từ 1/3/2027 | 5.400.000; 5.800.000 từ 1/3/2027 | Ăn giữa ca 730.000 | 0 |
 | NV00035 | Phạm Văn Cường | Kinh doanh | Nhân viên kinh doanh | 15/7/2024 | — | Không xác định thời hạn | 10.000.000 | 10.000.000 | Ăn giữa ca 730.000; Điện thoại 300.000 | 0 |
 | NV00036 | Lương Văn Bình | Kho vận | Nhân viên kho | 1/10/2024 | — | Không xác định thời hạn | 6.000.000 | 5.310.000 | Ăn giữa ca 730.000 | 0 |
-| NV00037 | Mạc Văn Toàn | Kỹ thuật | Kỹ sư | 2/12/2024 | — | Xác định thời hạn 2/12/2024–30/11/2026 | 16.000.000 | 16.000.000 | Ăn giữa ca 730.000 | 0 |
+| NV00037 | Mạc Văn Toàn | Kỹ thuật | Kỹ sư | 2/12/2024 | — | Hai hợp đồng xác định thời hạn 12 tháng: 2/12/2024–30/11/2025, 1/12/2025–30/11/2026 | 16.000.000 | 16.000.000 | Ăn giữa ca 730.000 | 0 |
 | NV00038 | Đỗ Thị Hằng | Kinh doanh | Nhân viên kinh doanh | 2/12/2024 | — | Không xác định thời hạn | 9.500.000 | 9.500.000 | Ăn giữa ca 730.000; Điện thoại 300.000 | 0 |
 | NV00039 | Mai Văn Đức | Kinh doanh | Nhân viên kinh doanh | 3/2/2025 | — | Không xác định thời hạn | 10.000.000 | 10.000.000 | Ăn giữa ca 730.000; Điện thoại 300.000 | 0 |
 | NV00040 | Hà Thị Bích | Kỹ thuật | Kỹ thuật viên | 1/4/2025 | — | Không xác định thời hạn | 11.000.000 | 11.000.000 | Ăn giữa ca 730.000 | 0 |
@@ -441,6 +441,40 @@ nội dung mẫu của rule; bản do AI viết vẽ ở M6.
 | Hà | 4/11 | 2 giải trình tháng 10 còn chờ duyệt, một ngày làm việc trước hạn chốt công 5/11 (BR-218) | SCR-031 | Rồi |
 
 Các tín hiệu mức Cao coi như đã xuất hiện và đã được báo trước 9/11 (BR-177), nên không có thông báo riêng ở đây.
+
+## Profiles and M1 dialogs
+
+Dữ liệu cho các màn hồ sơ, tiếp nhận, phòng ban, quy chế và câu hỏi của M1 (#55).
+
+**Hồ sơ.** Chỉ Mai và Toàn có đủ thông tin cá nhân trên canvas; số điện thoại dùng dải `0900 000 xxx` theo mã nhân viên,
+email dùng tên miền `example.com` và `sampleco.example`.
+
+| Field | Trần Thị Mai | Mạc Văn Toàn |
+|---|---|---|
+| Ngày sinh | 14/5/1998 | 21/6/1996 |
+| Số CCCD | •••• 4821 | •••• 5530 |
+| Điện thoại cá nhân | 0900 000 026 | 0900 000 037 |
+| Email cá nhân, email công việc | mai.tran98@example.com, mai.tran@sampleco.example | toan.mac96@example.com, toan.mac@sampleco.example |
+| Địa chỉ hiện tại | Đống Đa, Hà Nội | Cầu Giấy, Hà Nội |
+| Người liên hệ khẩn cấp | Trần Văn Nam, bố | Mạc Thị Hoa, mẹ |
+| Hợp đồng | 026/2023/HĐLĐ, không xác định thời hạn | 041/2024/HĐLĐ, 2/12/2024–30/11/2025; 015/2025/HĐLĐ, 1/12/2025–30/11/2026 |
+
+Phép năm của Toàn: không có phép tồn, cộng 10,0 ngày tới 31/10, dùng 2,0 ngày từ 13/7 tới 14/7, số dư 8,0 ngày ngày
+9/11. Tính tới 30/11 là 9,0 ngày.
+
+**Hộp thoại chưa xác nhận.** Các artboard dưới đây vẽ trạng thái trước khi bấm Xác nhận, nên không đổi dữ liệu ở các mục
+khác. Ba hộp thoại của Toàn là các lựa chọn khác nhau của HR khi hợp đồng sắp hết hạn, không xảy ra cùng lúc.
+
+| Screen | Content |
+|---|---|
+| SCR-009 | Tiếp nhận Tống Thị Hương, sinh 2/9/2003, CCCD •••• 7319; vào làm 1/12/2026, Kinh doanh, Nhân viên kinh doanh; thử việc 033/2026/HĐLĐ từ 1/12/2026 tới 29/1/2027, nhóm cao đẳng trở lên; mã NV00047; mật khẩu tạm `hk7-Tq2m-9xw` |
+| SCR-010 | Toàn đổi chức danh sang Kỹ sư chính từ 1/12/2026, vẫn ở Kỹ thuật, quản lý trực tiếp Lê Quang Minh. Kỹ sư chính là chức danh đang dùng, chưa ai giữ |
+| SCR-011 | Toàn nghỉ việc, ngày làm việc cuối 30/11/2026, lý do hết hạn hợp đồng; 9,0 ngày phép chưa nghỉ |
+| SCR-012 | Toàn ký hợp đồng xác định thời hạn thứ ba, 032/2026/HĐLĐ, 1/12/2026–30/11/2027; hiện cảnh báo BR-026 |
+| SCR-050 | Bản nháp phiên bản 4 của Quy chế nghỉ phép, hiệu lực 1/1/2027. Mục 3 thêm câu: đơn chờ quá 2 ngày làm việc thì HR duyệt thay được (BR-148) |
+
+**Câu hỏi gửi HR.** Hà trả lời câu hỏi của Mai lúc 10:20 ngày 13/10: bản ghi lương từ 1/9/2026 không còn phụ cấp đi lại,
+lương cơ bản tăng lên 12.500.000 từ cùng ngày.
 
 ## Situations
 
