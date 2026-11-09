@@ -1,7 +1,7 @@
 # Prototype data: hr-manager
 
 - **Status:** Draft
-- **Updated:** 2026-11-01
+- **Updated:** 2026-11-09
 - **Reviewed:** [YYYY-MM-DD: AI review ở PR; chủ dự án duyệt]
 - **Related:** [prototype](prototype.md) · [domain](../analysis/domain.md) · [stories](../analysis/stories.md)
 
@@ -23,6 +23,8 @@ Domain chưa nói rõ các điểm dưới đây. Dữ liệu dùng cách hiểu
 - **Phạm vi tín hiệu:** loại tính theo tỷ lệ hay bình quân (nghỉ việc, đi muộn, chi phí lương) xét từng phòng ban và cả
   công ty (BR-172). Loại tính theo người hay theo đơn (làm thêm, đơn chờ, hợp đồng, ngày chưa xử lý, hồ sơ thiếu dữ
   liệu) có một tín hiệu cấp công ty, phân rã theo phòng ban; mỗi người xem thấy phần trong phạm vi của mình.
+- **Phần lẻ khi cộng phép:** phép năm cơ bản 13 ngày cộng 13/12 ngày mỗi tháng (BR-049). Số dư giữ đủ phần lẻ; giao
+  diện hiện một chữ số thập phân, như 7,83 hiện là 7,8.
 
 ## Company
 
@@ -91,7 +93,7 @@ trước ngày làm việc cuối, nên phiếu lương tháng cuối của họ
 | NV00034 | Kiều Văn Tâm | Kho vận | Nhân viên kho | 1/7/2024 | — | Không xác định thời hạn | 5.400.000; 5.800.000 từ 1/3/2027 | 5.400.000; 5.800.000 từ 1/3/2027 | Ăn giữa ca 730.000 | 0 |
 | NV00035 | Phạm Văn Cường | Kinh doanh | Nhân viên kinh doanh | 15/7/2024 | — | Không xác định thời hạn | 10.000.000 | 10.000.000 | Ăn giữa ca 730.000; Điện thoại 300.000 | 0 |
 | NV00036 | Lương Văn Bình | Kho vận | Nhân viên kho | 1/10/2024 | — | Không xác định thời hạn | 6.000.000 | 5.310.000 | Ăn giữa ca 730.000 | 0 |
-| NV00037 | Mạc Văn Toàn | Kỹ thuật | Kỹ sư | 2/12/2024 | — | Xác định thời hạn 2/12/2024–30/11/2026 | 16.000.000 | 16.000.000 | Ăn giữa ca 730.000 | 0 |
+| NV00037 | Mạc Văn Toàn | Kỹ thuật | Kỹ sư | 2/12/2024 | — | Hai hợp đồng xác định thời hạn 12 tháng: 2/12/2024–30/11/2025, 1/12/2025–30/11/2026 | 16.000.000 | 16.000.000 | Ăn giữa ca 730.000 | 0 |
 | NV00038 | Đỗ Thị Hằng | Kinh doanh | Nhân viên kinh doanh | 2/12/2024 | — | Không xác định thời hạn | 9.500.000 | 9.500.000 | Ăn giữa ca 730.000; Điện thoại 300.000 | 0 |
 | NV00039 | Mai Văn Đức | Kinh doanh | Nhân viên kinh doanh | 3/2/2025 | — | Không xác định thời hạn | 10.000.000 | 10.000.000 | Ăn giữa ca 730.000; Điện thoại 300.000 | 0 |
 | NV00040 | Hà Thị Bích | Kỹ thuật | Kỹ thuật viên | 1/4/2025 | — | Không xác định thời hạn | 11.000.000 | 11.000.000 | Ăn giữa ca 730.000 | 0 |
@@ -134,6 +136,15 @@ ngày, tháng 11 có 21 ngày.
 
 Số dư ngày 9/11 là 9,0 ngày và không còn phép tồn. Đơn 20/11 đã duyệt, 1,0 ngày, chưa trừ vào số dư. Khi Mai gửi đơn
 1,5 ngày ở tình huống 1, form hiện số phép còn lại sau đơn là 9,0 − 1,0 − 1,5 = 6,5 ngày (BR-053).
+
+**Số dư phép năm của Hùng và Hà ngày 9/11/2026,** cho Trang chủ:
+
+| Persona | Phép năm cơ bản 2026 | Phép tồn từ 2025 | Cộng phép 31/1 tới 31/10 | Sử dụng | Số dư |
+|---|---|---|---|---|---|
+| Lê Văn Hùng | 13, đủ 5 năm từ 1/6/2022 | 2,0, dùng hết 19/3 tới 20/3 | 10 × 13/12 = 10,83 | 2,0 phép tồn; 3,0 từ 3/8 tới 5/8 | 7,83 |
+| Phạm Thu Hà | 12 tới tháng 8, 13 từ tháng 9 vì đủ 5 năm ngày 2/8/2026 (BR-048) | 1,0, dùng 2/3 | 8 × 1 + 2 × 13/12 = 10,17 | 1,0 phép tồn; 2,0 từ 20/7 tới 21/7 | 8,17 |
+
+Hai người không có đơn nghỉ đang chờ hay đã duyệt mà chưa tới ngày.
 
 **Bảng công của Mai:**
 
@@ -396,6 +407,74 @@ phạm vi ở mục Assumptions.
     dùng tới hết 31/3. Nguồn là Quy chế nghỉ phép mục 4 và cấu hình `carryover_max_days`, `carryover_expiry`.
   - Mai hỏi "Công ty có hỗ trợ học phí tiếng Anh không?". Assistant nói không có nguồn, rồi đề nghị gửi câu hỏi cho HR.
     SCR-051 mở với câu hỏi và tóm tắt hội thoại soạn sẵn.
+
+## Home on 9/11/2026
+
+Trang chủ (SCR-003) lúc 9:41. Thông báo xếp mới nhất ở đầu (BR-213). Thông báo lúc 7:00 là của lần tính đêm 9/11 và các
+nhắc theo lịch; 9/11 là thứ Hai nên Quản lý và HR nhận tóm tắt tuần (BR-181). Tóm tắt tuần và cập nhật theo dõi dùng
+nội dung mẫu của rule; bản do AI viết vẽ ở M6.
+
+**Con số:**
+
+| Persona | Đơn chờ mình duyệt | Khác |
+|---|---|---|
+| Trần Thị Mai | — | Số dư phép năm 9,0; đơn 20/11 đã duyệt, 1,0 ngày |
+| Lê Văn Hùng | 8: 7 đơn nghỉ của phòng Kinh doanh ở mục Leave, 1 giải trình của Lý Văn Phúc | Số dư phép năm 7,8 |
+| Phạm Thu Hà | 11 trong cả công ty: 8 đơn nghỉ, 2 giải trình, 1 đơn làm thêm của Châu Văn Lực; 2 đơn quá hạn | Số dư phép năm 8,2; 3 hợp đồng sắp hết hạn; 0 hồ sơ chưa có hợp đồng |
+
+**Thông báo:**
+
+| Persona | Time | Notification | Opens | Read |
+|---|---|---|---|---|
+| Mai | 8:30, 9/11 | Ngày 3/11 có giờ vào 7:58, không có giờ ra; gửi giải trình trước hạn chốt công 5/12 (BR-216, BR-218) | SCR-028 tháng 11 | Chưa |
+| Mai | 30/10 | Hùng đã duyệt đơn nghỉ ngày 20/11 | SCR-019 | Rồi |
+| Mai | 13/10 | Hà đã trả lời câu hỏi về phiếu lương tháng 9 | SCR-051 | Rồi |
+| Hùng | 8:45, 9/11 | Ngô Thị Thảo gửi đơn nghỉ sáng 12/11 | SCR-021 | Chưa |
+| Hùng | 7:00, 9/11 | Tóm tắt tuần: 2 tín hiệu, Nghỉ việc tăng ở Kinh doanh mức Cao và Đơn chờ quá hạn mức Thường | SCR-040 | Chưa |
+| Hùng | 7:00, 9/11 | Cập nhật tín hiệu Nghỉ việc tăng đang theo dõi từ 26/10: vẫn 3 trên 15 người, 20% (BR-180) | SCR-048 | Chưa |
+| Hùng | 7:00, 9/11 | Nhắc duyệt đơn của Vũ Đức Long và Trịnh Văn Khoa, chờ quá 2 ngày làm việc (BR-148) | SCR-021 | Chưa |
+| Hùng | 6/11 | Bùi Thị Hoa không đồng ý đổi ngày, giữ 26/11 tới 27/11 | SCR-021 | Rồi |
+| Hà | 7:00, 9/11 | Đơn của Trịnh Văn Khoa chờ Lê Văn Hùng 4 ngày làm việc; HR duyệt thay được (BR-148, tình huống 7) | SCR-021 | Chưa |
+| Hà | 7:00, 9/11 | Câu hỏi của Lâm Thị Nga chờ trả lời 3 ngày làm việc (BR-196, tình huống 20) | SCR-051 | Chưa |
+| Hà | 7:00, 9/11 | Tóm tắt tuần: 8 tín hiệu, 5 mức Cao | SCR-040 | Chưa |
+| Hà | 6/11 | Đơn của Vũ Đức Long chờ Lê Văn Hùng 4 ngày làm việc; HR duyệt thay được | SCR-021 | Rồi |
+| Hà | 4/11 | 2 giải trình tháng 10 còn chờ duyệt, một ngày làm việc trước hạn chốt công 5/11 (BR-218) | SCR-031 | Rồi |
+
+Các tín hiệu mức Cao coi như đã xuất hiện và đã được báo trước 9/11 (BR-177), nên không có thông báo riêng ở đây.
+
+## Profiles and M1 dialogs
+
+Dữ liệu cho các màn hồ sơ, tiếp nhận, phòng ban, quy chế và câu hỏi của M1 (#55).
+
+**Hồ sơ.** Chỉ Mai và Toàn có đủ thông tin cá nhân trên canvas; số điện thoại dùng dải `0900 000 xxx` theo mã nhân viên,
+email dùng tên miền `example.com` và `sampleco.example`.
+
+| Field | Trần Thị Mai | Mạc Văn Toàn |
+|---|---|---|
+| Ngày sinh | 14/5/1998 | 21/6/1996 |
+| Số CCCD | •••• 4821 | •••• 5530 |
+| Điện thoại cá nhân | 0900 000 026 | 0900 000 037 |
+| Email cá nhân, email công việc | mai.tran98@example.com, mai.tran@sampleco.example | toan.mac96@example.com, toan.mac@sampleco.example |
+| Địa chỉ hiện tại | Đống Đa, Hà Nội | Cầu Giấy, Hà Nội |
+| Người liên hệ khẩn cấp | Trần Văn Nam, bố | Mạc Thị Hoa, mẹ |
+| Hợp đồng | 026/2023/HĐLĐ, không xác định thời hạn | 041/2024/HĐLĐ, 2/12/2024–30/11/2025; 015/2025/HĐLĐ, 1/12/2025–30/11/2026 |
+
+Phép năm của Toàn: không có phép tồn, cộng 10,0 ngày tới 31/10, dùng 2,0 ngày từ 13/7 tới 14/7, số dư 8,0 ngày ngày
+9/11. Tính tới 30/11 là 9,0 ngày.
+
+**Hộp thoại chưa xác nhận.** Các artboard dưới đây vẽ trạng thái trước khi bấm Xác nhận, nên không đổi dữ liệu ở các mục
+khác. Ba hộp thoại của Toàn là các lựa chọn khác nhau của HR khi hợp đồng sắp hết hạn, không xảy ra cùng lúc.
+
+| Screen | Content |
+|---|---|
+| SCR-009 | Tiếp nhận Tống Thị Hương, sinh 2/9/2003, CCCD •••• 7319; vào làm 1/12/2026, Kinh doanh, Nhân viên kinh doanh; thử việc 033/2026/HĐLĐ từ 1/12/2026 tới 29/1/2027, nhóm cao đẳng trở lên; mã NV00047; mật khẩu tạm `hk7-Tq2m-9xw` |
+| SCR-010 | Toàn đổi chức danh sang Kỹ sư chính từ 1/12/2026, vẫn ở Kỹ thuật, quản lý trực tiếp Lê Quang Minh. Kỹ sư chính là chức danh đang dùng, chưa ai giữ |
+| SCR-011 | Toàn nghỉ việc, ngày làm việc cuối 30/11/2026, lý do hết hạn hợp đồng; 9,0 ngày phép chưa nghỉ |
+| SCR-012 | Toàn ký hợp đồng xác định thời hạn thứ ba, 032/2026/HĐLĐ, 1/12/2026–30/11/2027; hiện cảnh báo BR-026 |
+| SCR-050 | Bản nháp phiên bản 4 của Quy chế nghỉ phép, hiệu lực 1/1/2027. Mục 3 thêm câu: đơn chờ quá 2 ngày làm việc thì HR duyệt thay được (BR-148) |
+
+**Câu hỏi gửi HR.** Hà trả lời câu hỏi của Mai lúc 10:20 ngày 13/10: bản ghi lương từ 1/9/2026 không còn phụ cấp đi lại,
+lương cơ bản tăng lên 12.500.000 từ cùng ngày.
 
 ## Situations
 
